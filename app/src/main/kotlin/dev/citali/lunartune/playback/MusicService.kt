@@ -226,7 +226,7 @@ import dev.citali.lunartune.models.MediaMetadata
 import dev.citali.lunartune.models.PersistPlayerState
 import dev.citali.lunartune.models.PersistQueue
 import dev.citali.lunartune.models.toMediaMetadata
-import moe.rukamori.archivetune.moriextractor.LunarTuneExtractorException
+import moe.rukamori.archivetune.moriextractor.ArchiveTuneExtractorException
 import moe.rukamori.archivetune.moriextractor.InMemoryBearerTokenRepository
 import moe.rukamori.archivetune.moriextractor.StreamingExtractionManager
 import dev.citali.lunartune.playback.queues.EmptyQueue
@@ -7820,7 +7820,7 @@ class MusicService :
                         )
                     }
 
-                    throwable is LunarTuneExtractorException -> {
+                    throwable is ArchiveTuneExtractorException -> {
                         throw PlaybackException(
                             getString(R.string.error_no_stream),
                             throwable,
