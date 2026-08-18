@@ -17,8 +17,8 @@ import dev.citali.lunartune.constants.YtmSyncKey
 import dev.citali.lunartune.db.MusicDatabase
 import dev.citali.lunartune.db.entities.PlaylistEntity
 import dev.citali.lunartune.extensions.isInternetConnected
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.utils.hasYouTubeLoginCookie
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.utils.hasYouTubeLoginCookie
 import dev.citali.lunartune.utils.dataStore
 import java.time.LocalDateTime
 import javax.inject.Inject

@@ -9,12 +9,12 @@ package dev.citali.lunartune.aicontentfilter
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import dev.citali.lunartune.innertube.models.AlbumItem
-import dev.citali.lunartune.innertube.models.Artist
-import dev.citali.lunartune.innertube.models.ArtistItem
-import dev.citali.lunartune.innertube.models.PlaylistItem
-import dev.citali.lunartune.innertube.models.SongItem
-import dev.citali.lunartune.innertube.models.YTItem
+import moe.rukamori.archivetune.innertube.models.AlbumItem
+import moe.rukamori.archivetune.innertube.models.Artist
+import moe.rukamori.archivetune.innertube.models.ArtistItem
+import moe.rukamori.archivetune.innertube.models.PlaylistItem
+import moe.rukamori.archivetune.innertube.models.SongItem
+import moe.rukamori.archivetune.innertube.models.YTItem
 import javax.inject.Inject
 
 class ObserveAiContentFilterUseCase

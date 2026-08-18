@@ -186,7 +186,7 @@ import dev.citali.lunartune.constants.SliderStyleKey
 import dev.citali.lunartune.constants.ThumbnailCornerRadiusKey
 import dev.citali.lunartune.extensions.metadata
 import dev.citali.lunartune.extensions.togglePlayPause
-import dev.citali.lunartune.innertube.utils.hasYouTubeLoginCookie
+import moe.rukamori.archivetune.innertube.utils.hasYouTubeLoginCookie
 import dev.citali.lunartune.models.MediaMetadata
 import dev.citali.lunartune.ui.component.BottomSheet
 import dev.citali.lunartune.ui.component.BottomSheetState

@@ -99,8 +99,8 @@ import dev.citali.lunartune.db.entities.PlaylistSong
 import dev.citali.lunartune.extensions.move
 import dev.citali.lunartune.extensions.toMediaItem
 import dev.citali.lunartune.extensions.togglePlayPause
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.models.WatchEndpoint
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.models.WatchEndpoint
 import dev.citali.lunartune.models.toMediaMetadata
 import dev.citali.lunartune.playback.queues.ListQueue
 import dev.citali.lunartune.playback.queues.LocalMixQueue

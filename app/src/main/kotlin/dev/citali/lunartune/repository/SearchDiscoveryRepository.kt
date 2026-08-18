@@ -17,13 +17,13 @@ import kotlinx.coroutines.withContext
 import dev.citali.lunartune.db.MusicDatabase
 import dev.citali.lunartune.db.entities.Artist
 import dev.citali.lunartune.db.entities.Song
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.models.AlbumItem
-import dev.citali.lunartune.innertube.models.ArtistItem
-import dev.citali.lunartune.innertube.models.SongItem
-import dev.citali.lunartune.innertube.models.WatchEndpoint
-import dev.citali.lunartune.innertube.pages.ChartsPage
-import dev.citali.lunartune.innertube.pages.MoodAndGenres
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.models.AlbumItem
+import moe.rukamori.archivetune.innertube.models.ArtistItem
+import moe.rukamori.archivetune.innertube.models.SongItem
+import moe.rukamori.archivetune.innertube.models.WatchEndpoint
+import moe.rukamori.archivetune.innertube.pages.ChartsPage
+import moe.rukamori.archivetune.innertube.pages.MoodAndGenres
 import javax.inject.Inject
 import javax.inject.Singleton
 

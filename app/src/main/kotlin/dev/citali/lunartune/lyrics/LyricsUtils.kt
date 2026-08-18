@@ -12,8 +12,8 @@ import android.text.format.DateUtils
 import com.atilika.kuromoji.ipadic.Tokenizer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import dev.citali.lunartune.betterlyrics.QRCParser
-import dev.citali.lunartune.betterlyrics.TTMLParser
+import moe.rukamori.archivetune.betterlyrics.QRCParser
+import moe.rukamori.archivetune.betterlyrics.TTMLParser
 import dev.citali.lunartune.db.entities.LyricsEntity
 import java.lang.Character.UnicodeScript
 

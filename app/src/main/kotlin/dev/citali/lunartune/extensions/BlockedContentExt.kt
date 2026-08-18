@@ -7,12 +7,12 @@
 
 package dev.citali.lunartune.extensions
 
-import dev.citali.lunartune.innertube.models.AlbumItem
-import dev.citali.lunartune.innertube.models.ArtistItem
-import dev.citali.lunartune.innertube.models.PlaylistItem
-import dev.citali.lunartune.innertube.models.SongItem
-import dev.citali.lunartune.innertube.models.YTItem
-import dev.citali.lunartune.innertube.pages.BrowseResult
+import moe.rukamori.archivetune.innertube.models.AlbumItem
+import moe.rukamori.archivetune.innertube.models.ArtistItem
+import moe.rukamori.archivetune.innertube.models.PlaylistItem
+import moe.rukamori.archivetune.innertube.models.SongItem
+import moe.rukamori.archivetune.innertube.models.YTItem
+import moe.rukamori.archivetune.innertube.pages.BrowseResult
 
 fun <T : YTItem> List<T>.filterBlockedArtists(blockedArtistIds: Set<String>): List<T> {
     if (blockedArtistIds.isEmpty()) return this

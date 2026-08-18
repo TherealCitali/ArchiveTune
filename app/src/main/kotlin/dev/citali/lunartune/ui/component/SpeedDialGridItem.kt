@@ -43,8 +43,8 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import dev.citali.lunartune.R
-import dev.citali.lunartune.innertube.models.SongItem
-import dev.citali.lunartune.innertube.models.YTItem
+import moe.rukamori.archivetune.innertube.models.SongItem
+import moe.rukamori.archivetune.innertube.models.YTItem
 import dev.citali.lunartune.ui.utils.YtimgResizePolicy
 import dev.citali.lunartune.ui.utils.resize
 

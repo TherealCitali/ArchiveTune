@@ -11,8 +11,8 @@ import androidx.media3.common.MediaItem
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.withContext
 import dev.citali.lunartune.extensions.toMediaItem
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.models.WatchEndpoint
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.models.WatchEndpoint
 import dev.citali.lunartune.models.MediaMetadata
 
 class YouTubeAlbumRadio(

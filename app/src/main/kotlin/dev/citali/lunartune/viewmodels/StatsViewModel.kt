@@ -34,7 +34,7 @@ import dev.citali.lunartune.db.entities.ListeningSummary
 import dev.citali.lunartune.db.entities.ListeningTotals
 import dev.citali.lunartune.db.entities.Song
 import dev.citali.lunartune.db.entities.SongWithStats
-import dev.citali.lunartune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.YouTube
 import dev.citali.lunartune.ui.screens.OptionStats
 import dev.citali.lunartune.utils.reportException
 import java.time.Duration

@@ -12,7 +12,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import dev.citali.lunartune.constants.InnerTubeCookieKey
 import dev.citali.lunartune.constants.YtmSyncKey
-import dev.citali.lunartune.innertube.utils.hasYouTubeLoginCookie
+import moe.rukamori.archivetune.innertube.utils.hasYouTubeLoginCookie
 import dev.citali.lunartune.utils.dataStore
 import dev.citali.lunartune.utils.get
 

@@ -13,8 +13,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.pages.ChartsPage
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.pages.ChartsPage
 import javax.inject.Inject
 
 @HiltViewModel

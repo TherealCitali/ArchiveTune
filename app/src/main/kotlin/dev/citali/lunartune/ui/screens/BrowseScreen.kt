@@ -31,9 +31,9 @@ import dev.citali.lunartune.LocalPlayerAwareWindowInsets
 import dev.citali.lunartune.LocalPlayerConnection
 import dev.citali.lunartune.R
 import dev.citali.lunartune.constants.GridThumbnailHeight
-import dev.citali.lunartune.innertube.models.AlbumItem
-import dev.citali.lunartune.innertube.models.ArtistItem
-import dev.citali.lunartune.innertube.models.PlaylistItem
+import moe.rukamori.archivetune.innertube.models.AlbumItem
+import moe.rukamori.archivetune.innertube.models.ArtistItem
+import moe.rukamori.archivetune.innertube.models.PlaylistItem
 import dev.citali.lunartune.ui.component.IconButton
 import dev.citali.lunartune.ui.component.LocalMenuState
 import dev.citali.lunartune.ui.component.YouTubeGridItem

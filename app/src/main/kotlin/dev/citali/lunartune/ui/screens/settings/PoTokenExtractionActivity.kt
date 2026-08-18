@@ -52,7 +52,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import dev.citali.lunartune.R
-import dev.citali.lunartune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.YouTube
 import dev.citali.lunartune.ui.component.IconButton
 import dev.citali.lunartune.utils.potoken.BotGuardTokenGenerator
 import dev.citali.lunartune.utils.resetAuthWebViewSession

@@ -13,8 +13,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import dev.citali.lunartune.extensions.toMediaItem
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.models.SongItem
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.models.SongItem
 import dev.citali.lunartune.models.MediaMetadata
 import dev.citali.lunartune.models.toMediaMetadata
 import dev.citali.lunartune.spotify.models.SpotifyTrack

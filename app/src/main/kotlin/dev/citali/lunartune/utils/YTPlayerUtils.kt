@@ -16,27 +16,27 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import dev.citali.lunartune.constants.AudioQuality
 import dev.citali.lunartune.constants.PlayerStreamClient
-import dev.citali.lunartune.innertube.NewPipeUtils
-import dev.citali.lunartune.innertube.PlaybackAuthState
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.models.YouTubeClient
-import dev.citali.lunartune.innertube.models.YouTubeClient.Companion.ANDROID_CREATOR
-import dev.citali.lunartune.innertube.models.YouTubeClient.Companion.ANDROID_MUSIC
-import dev.citali.lunartune.innertube.models.YouTubeClient.Companion.ANDROID_TESTSUITE
-import dev.citali.lunartune.innertube.models.YouTubeClient.Companion.ANDROID_UNPLUGGED
-import dev.citali.lunartune.innertube.models.YouTubeClient.Companion.ANDROID_VR_1_65_10
-import dev.citali.lunartune.innertube.models.YouTubeClient.Companion.IOS
-import dev.citali.lunartune.innertube.models.YouTubeClient.Companion.IOS_MUSIC
-import dev.citali.lunartune.innertube.models.YouTubeClient.Companion.IPADOS
-import dev.citali.lunartune.innertube.models.YouTubeClient.Companion.MOBILE
-import dev.citali.lunartune.innertube.models.YouTubeClient.Companion.TVHTML5
-import dev.citali.lunartune.innertube.models.YouTubeClient.Companion.TVHTML5_SIMPLY_EMBEDDED_PLAYER
-import dev.citali.lunartune.innertube.models.YouTubeClient.Companion.VISIONOS
-import dev.citali.lunartune.innertube.models.YouTubeClient.Companion.WEB
-import dev.citali.lunartune.innertube.models.YouTubeClient.Companion.WEB_CREATOR
-import dev.citali.lunartune.innertube.models.YouTubeClient.Companion.WEB_PRIMARY
-import dev.citali.lunartune.innertube.models.YouTubeClient.Companion.WEB_REMIX
-import dev.citali.lunartune.innertube.models.response.PlayerResponse
+import moe.rukamori.archivetune.innertube.NewPipeUtils
+import moe.rukamori.archivetune.innertube.PlaybackAuthState
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.models.YouTubeClient
+import moe.rukamori.archivetune.innertube.models.YouTubeClient.Companion.ANDROID_CREATOR
+import moe.rukamori.archivetune.innertube.models.YouTubeClient.Companion.ANDROID_MUSIC
+import moe.rukamori.archivetune.innertube.models.YouTubeClient.Companion.ANDROID_TESTSUITE
+import moe.rukamori.archivetune.innertube.models.YouTubeClient.Companion.ANDROID_UNPLUGGED
+import moe.rukamori.archivetune.innertube.models.YouTubeClient.Companion.ANDROID_VR_1_65_10
+import moe.rukamori.archivetune.innertube.models.YouTubeClient.Companion.IOS
+import moe.rukamori.archivetune.innertube.models.YouTubeClient.Companion.IOS_MUSIC
+import moe.rukamori.archivetune.innertube.models.YouTubeClient.Companion.IPADOS
+import moe.rukamori.archivetune.innertube.models.YouTubeClient.Companion.MOBILE
+import moe.rukamori.archivetune.innertube.models.YouTubeClient.Companion.TVHTML5
+import moe.rukamori.archivetune.innertube.models.YouTubeClient.Companion.TVHTML5_SIMPLY_EMBEDDED_PLAYER
+import moe.rukamori.archivetune.innertube.models.YouTubeClient.Companion.VISIONOS
+import moe.rukamori.archivetune.innertube.models.YouTubeClient.Companion.WEB
+import moe.rukamori.archivetune.innertube.models.YouTubeClient.Companion.WEB_CREATOR
+import moe.rukamori.archivetune.innertube.models.YouTubeClient.Companion.WEB_PRIMARY
+import moe.rukamori.archivetune.innertube.models.YouTubeClient.Companion.WEB_REMIX
+import moe.rukamori.archivetune.innertube.models.response.PlayerResponse
 import dev.citali.lunartune.utils.potoken.BotGuardTokenGenerator
 import dev.citali.lunartune.utils.potoken.PoTokenResult
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -116,7 +116,7 @@ object YTPlayerUtils {
      * Do not use other clients for this because it can result in inconsistent metadata.
      * For example other clients can have different normalization targets (loudnessDb).
      *
-     * [dev.citali.lunartune.innertube.models.YouTubeClient.WEB_REMIX] should be preferred here because currently it is the only client which provides:
+     * [moe.rukamori.archivetune.innertube.models.YouTubeClient.WEB_REMIX] should be preferred here because currently it is the only client which provides:
      * - the correct metadata (like loudnessDb)
      * - premium formats
      */

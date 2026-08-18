@@ -23,8 +23,8 @@ import dev.citali.lunartune.constants.PoTokenPlayerKey
 import dev.citali.lunartune.constants.PoTokenSourceUrlKey
 import dev.citali.lunartune.constants.VisitorDataKey
 import dev.citali.lunartune.constants.WebClientPoTokenEnabledKey
-import dev.citali.lunartune.innertube.PlaybackAuthState
-import dev.citali.lunartune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.PlaybackAuthState
+import moe.rukamori.archivetune.innertube.YouTube
 
 fun Preferences.toPlaybackAuthState(): PlaybackAuthState =
     PlaybackAuthState(

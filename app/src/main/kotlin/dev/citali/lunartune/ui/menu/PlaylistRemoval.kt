@@ -8,7 +8,7 @@
 package dev.citali.lunartune.ui.menu
 
 import dev.citali.lunartune.db.entities.PlaylistSongMap
-import dev.citali.lunartune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.YouTube
 
 suspend fun removeSongFromRemotePlaylist(
     playlistBrowseId: String,

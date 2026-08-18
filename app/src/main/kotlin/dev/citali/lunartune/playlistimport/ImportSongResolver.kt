@@ -15,8 +15,8 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import dev.citali.lunartune.db.entities.ArtistEntity
 import dev.citali.lunartune.db.entities.Song
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.models.SongItem
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.models.SongItem
 import dev.citali.lunartune.models.ImportSource
 import dev.citali.lunartune.models.ImportedSongResult
 import dev.citali.lunartune.models.toMediaMetadata

@@ -42,7 +42,7 @@ import androidx.navigation.NavController
 import dev.citali.lunartune.LocalPlayerAwareWindowInsets
 import dev.citali.lunartune.R
 import dev.citali.lunartune.constants.*
-import dev.citali.lunartune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.YouTube
 import dev.citali.lunartune.ui.component.EditTextPreference
 import dev.citali.lunartune.ui.component.IconButton
 import dev.citali.lunartune.ui.component.ListPreference

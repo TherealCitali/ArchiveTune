@@ -77,8 +77,8 @@ import dev.citali.lunartune.constants.ListThumbnailSize
 import dev.citali.lunartune.constants.SpeedDialSongIdsKey
 import dev.citali.lunartune.db.entities.Song
 import dev.citali.lunartune.extensions.toMediaItem
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.models.AlbumItem
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.models.AlbumItem
 import dev.citali.lunartune.playback.ExoDownloadService
 import dev.citali.lunartune.playback.queues.YouTubeAlbumRadio
 import dev.citali.lunartune.ui.component.ListDialog

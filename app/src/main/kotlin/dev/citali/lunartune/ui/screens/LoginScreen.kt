@@ -36,7 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import dev.citali.lunartune.LocalPlayerAwareWindowInsets
 import dev.citali.lunartune.R
-import dev.citali.lunartune.innertube.utils.hasYouTubeLoginCookie
+import moe.rukamori.archivetune.innertube.utils.hasYouTubeLoginCookie
 import dev.citali.lunartune.ui.component.IconButton
 import dev.citali.lunartune.ui.utils.backToMain
 import dev.citali.lunartune.utils.resetAuthWebViewSession

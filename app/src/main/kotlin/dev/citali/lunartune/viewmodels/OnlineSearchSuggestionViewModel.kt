@@ -24,10 +24,10 @@ import dev.citali.lunartune.constants.HideExplicitKey
 import dev.citali.lunartune.constants.HideVideoKey
 import dev.citali.lunartune.db.MusicDatabase
 import dev.citali.lunartune.db.entities.SearchHistory
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.models.YTItem
-import dev.citali.lunartune.innertube.models.filterExplicit
-import dev.citali.lunartune.innertube.models.filterVideo
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.models.YTItem
+import moe.rukamori.archivetune.innertube.models.filterExplicit
+import moe.rukamori.archivetune.innertube.models.filterVideo
 import dev.citali.lunartune.utils.dataStore
 import dev.citali.lunartune.utils.get
 import javax.inject.Inject

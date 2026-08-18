@@ -15,7 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import dev.citali.lunartune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.YouTube
 import java.time.LocalDateTime
 
 @Immutable

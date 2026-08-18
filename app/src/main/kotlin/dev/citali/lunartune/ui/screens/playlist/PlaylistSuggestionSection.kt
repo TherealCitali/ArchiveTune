@@ -49,7 +49,7 @@ import dev.citali.lunartune.LocalPlayerConnection
 import dev.citali.lunartune.R
 import dev.citali.lunartune.extensions.toMediaItem
 import dev.citali.lunartune.extensions.togglePlayPause
-import dev.citali.lunartune.innertube.models.SongItem
+import moe.rukamori.archivetune.innertube.models.SongItem
 import dev.citali.lunartune.playback.queues.ListQueue
 import dev.citali.lunartune.ui.component.DefaultDialog
 import dev.citali.lunartune.ui.component.IconButton

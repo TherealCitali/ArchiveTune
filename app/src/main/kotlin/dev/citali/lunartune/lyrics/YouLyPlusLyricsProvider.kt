@@ -13,7 +13,7 @@ import dev.citali.lunartune.constants.EnableYouLyPlusLyricsKey
 import dev.citali.lunartune.utils.GlobalLog
 import dev.citali.lunartune.utils.dataStore
 import dev.citali.lunartune.utils.get
-import dev.citali.lunartune.youlyplus.YouLyPlus
+import moe.rukamori.archivetune.youlyplus.YouLyPlus
 
 object YouLyPlusLyricsProvider : LyricsProvider {
     init {

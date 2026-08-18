@@ -9,7 +9,7 @@ package dev.citali.lunartune.lyrics
 
 import android.content.Context
 import dev.citali.lunartune.constants.EnableKugouKey
-import dev.citali.lunartune.kugou.KuGou
+import moe.rukamori.archivetune.kugou.KuGou
 import dev.citali.lunartune.utils.dataStore
 import dev.citali.lunartune.utils.get
 

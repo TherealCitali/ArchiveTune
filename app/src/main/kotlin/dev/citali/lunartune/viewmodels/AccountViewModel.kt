@@ -12,11 +12,11 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.models.AlbumItem
-import dev.citali.lunartune.innertube.models.ArtistItem
-import dev.citali.lunartune.innertube.models.PlaylistItem
-import dev.citali.lunartune.innertube.utils.completed
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.models.AlbumItem
+import moe.rukamori.archivetune.innertube.models.ArtistItem
+import moe.rukamori.archivetune.innertube.models.PlaylistItem
+import moe.rukamori.archivetune.innertube.utils.completed
 import dev.citali.lunartune.utils.reportException
 import javax.inject.Inject
 

@@ -19,8 +19,8 @@ import kotlinx.coroutines.withContext
 import dev.citali.lunartune.constants.HistorySource
 import dev.citali.lunartune.db.MusicDatabase
 import dev.citali.lunartune.db.entities.EventWithSong
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.pages.HistoryPage
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.pages.HistoryPage
 import dev.citali.lunartune.utils.reportException
 import timber.log.Timber
 import java.time.DayOfWeek

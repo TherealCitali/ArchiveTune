@@ -24,7 +24,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import dev.citali.lunartune.BuildConfig
 import dev.citali.lunartune.R
-import dev.citali.lunartune.innertube.NetworkGatekeeper
+import moe.rukamori.archivetune.innertube.NetworkGatekeeper
 import org.json.JSONObject
 import timber.log.Timber
 import java.io.IOException

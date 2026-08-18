@@ -47,7 +47,7 @@ import dev.citali.lunartune.LocalPlayerConnection
 import dev.citali.lunartune.R
 import dev.citali.lunartune.constants.SpeedDialSongIdsKey
 import dev.citali.lunartune.db.entities.ArtistEntity
-import dev.citali.lunartune.innertube.models.ArtistItem
+import moe.rukamori.archivetune.innertube.models.ArtistItem
 import dev.citali.lunartune.playback.queues.YouTubeQueue
 import dev.citali.lunartune.ui.component.MenuSurfaceSection
 import dev.citali.lunartune.ui.component.NewAction

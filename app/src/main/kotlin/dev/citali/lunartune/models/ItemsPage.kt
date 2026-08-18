@@ -7,7 +7,7 @@
 
 package dev.citali.lunartune.models
 
-import dev.citali.lunartune.innertube.models.YTItem
+import moe.rukamori.archivetune.innertube.models.YTItem
 
 data class ItemsPage(
     val items: List<YTItem>,

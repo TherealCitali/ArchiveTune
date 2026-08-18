@@ -9,10 +9,10 @@ package dev.citali.lunartune.search
 
 import androidx.compose.runtime.Immutable
 import com.google.common.collect.ImmutableList
-import dev.citali.lunartune.innertube.models.AlbumItem
-import dev.citali.lunartune.innertube.models.ArtistItem
-import dev.citali.lunartune.innertube.models.SongItem
-import dev.citali.lunartune.innertube.pages.MoodAndGenres
+import moe.rukamori.archivetune.innertube.models.AlbumItem
+import moe.rukamori.archivetune.innertube.models.ArtistItem
+import moe.rukamori.archivetune.innertube.models.SongItem
+import moe.rukamori.archivetune.innertube.pages.MoodAndGenres
 import dev.citali.lunartune.repository.SearchDiscoveryRepository
 import javax.inject.Inject
 

@@ -9,7 +9,7 @@ package dev.citali.lunartune.lyrics
 
 import android.content.Context
 import dev.citali.lunartune.constants.EnableLrcLibKey
-import dev.citali.lunartune.lrclib.LrcLib
+import moe.rukamori.archivetune.lrclib.LrcLib
 import dev.citali.lunartune.utils.dataStore
 import dev.citali.lunartune.utils.get
 

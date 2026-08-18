@@ -59,10 +59,10 @@ import dev.citali.lunartune.db.entities.SongWithStats
 import dev.citali.lunartune.db.entities.TagEntity
 import dev.citali.lunartune.extensions.reversed
 import dev.citali.lunartune.extensions.toSQLiteQuery
-import dev.citali.lunartune.innertube.models.PlaylistItem
-import dev.citali.lunartune.innertube.models.SongItem
-import dev.citali.lunartune.innertube.pages.AlbumPage
-import dev.citali.lunartune.innertube.pages.ArtistPage
+import moe.rukamori.archivetune.innertube.models.PlaylistItem
+import moe.rukamori.archivetune.innertube.models.SongItem
+import moe.rukamori.archivetune.innertube.pages.AlbumPage
+import moe.rukamori.archivetune.innertube.pages.ArtistPage
 import dev.citali.lunartune.models.MediaMetadata
 import dev.citali.lunartune.models.toMediaMetadata
 import dev.citali.lunartune.ui.utils.YtimgResizePolicy

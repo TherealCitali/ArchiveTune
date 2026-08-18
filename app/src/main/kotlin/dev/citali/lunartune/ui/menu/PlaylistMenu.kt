@@ -73,7 +73,7 @@ import dev.citali.lunartune.db.entities.Song
 import dev.citali.lunartune.extensions.isSyncEnabled
 import dev.citali.lunartune.extensions.isUserLoggedIn
 import dev.citali.lunartune.extensions.toMediaItem
-import dev.citali.lunartune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.YouTube
 import dev.citali.lunartune.playback.ExoDownloadService
 import dev.citali.lunartune.playback.queues.ListQueue
 import dev.citali.lunartune.playback.queues.YouTubeQueue

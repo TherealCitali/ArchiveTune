@@ -32,8 +32,8 @@ import dev.citali.lunartune.aicontentfilter.RefreshAiContentFilterUseCase
 import dev.citali.lunartune.aicontentfilter.UpdateAiContentFilterSettingsUseCase
 import dev.citali.lunartune.db.MusicDatabase
 import dev.citali.lunartune.lyrics.LyricsHelper
-import dev.citali.lunartune.paxsenix.PaxsenixLyrics
-import dev.citali.lunartune.paxsenix.models.PaxsenixStats
+import moe.rukamori.archivetune.paxsenix.PaxsenixLyrics
+import moe.rukamori.archivetune.paxsenix.models.PaxsenixStats
 import javax.inject.Inject
 
 sealed interface PaxsenixStatsState {

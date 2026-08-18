@@ -53,11 +53,11 @@ import dev.citali.lunartune.db.entities.Song
 import dev.citali.lunartune.extensions.metadata
 import dev.citali.lunartune.extensions.toMediaItem
 import dev.citali.lunartune.extensions.toggleRepeatMode
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.models.PlaylistItem
-import dev.citali.lunartune.innertube.models.SongItem
-import dev.citali.lunartune.innertube.models.filterExplicit
-import dev.citali.lunartune.innertube.models.filterVideo
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.models.PlaylistItem
+import moe.rukamori.archivetune.innertube.models.SongItem
+import moe.rukamori.archivetune.innertube.models.filterExplicit
+import moe.rukamori.archivetune.innertube.models.filterVideo
 import dev.citali.lunartune.models.PersistQueue
 import dev.citali.lunartune.playback.MusicService.Companion.PERSISTENT_QUEUE_FILE
 import dev.citali.lunartune.utils.dataStore

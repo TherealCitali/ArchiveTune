@@ -82,10 +82,10 @@ import dev.citali.lunartune.constants.ThumbnailCornerRadius
 import dev.citali.lunartune.db.entities.PlaylistEntity
 import dev.citali.lunartune.db.entities.PlaylistSongMap
 import dev.citali.lunartune.extensions.toMediaItem
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.models.PlaylistItem
-import dev.citali.lunartune.innertube.models.SongItem
-import dev.citali.lunartune.innertube.utils.completed
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.models.PlaylistItem
+import moe.rukamori.archivetune.innertube.models.SongItem
+import moe.rukamori.archivetune.innertube.utils.completed
 import dev.citali.lunartune.models.MediaMetadata
 import dev.citali.lunartune.models.toMediaMetadata
 import dev.citali.lunartune.playback.ExoDownloadService

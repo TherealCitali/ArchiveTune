@@ -26,8 +26,8 @@ import dev.citali.lunartune.R
 import dev.citali.lunartune.db.entities.Album
 import dev.citali.lunartune.db.entities.Artist
 import dev.citali.lunartune.db.entities.Playlist
-import dev.citali.lunartune.innertube.models.PlaylistItem
-import dev.citali.lunartune.innertube.models.WatchEndpoint
+import moe.rukamori.archivetune.innertube.models.PlaylistItem
+import moe.rukamori.archivetune.innertube.models.WatchEndpoint
 import dev.citali.lunartune.ui.menu.AlbumMenu
 import dev.citali.lunartune.ui.menu.ArtistMenu
 import dev.citali.lunartune.ui.menu.PlaylistMenu

@@ -10,7 +10,7 @@ package dev.citali.lunartune.lyrics
 import android.content.Context
 import android.util.Log
 import dev.citali.lunartune.constants.EnableUnisonLyricsKey
-import dev.citali.lunartune.unison.Unison
+import moe.rukamori.archivetune.unison.Unison
 import dev.citali.lunartune.utils.GlobalLog
 import dev.citali.lunartune.utils.dataStore
 import dev.citali.lunartune.utils.get

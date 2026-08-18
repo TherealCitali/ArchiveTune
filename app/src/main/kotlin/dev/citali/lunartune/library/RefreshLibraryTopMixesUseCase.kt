@@ -25,8 +25,8 @@ import dev.citali.lunartune.constants.AiProviderKey
 import dev.citali.lunartune.constants.AiSelectedModelKey
 import dev.citali.lunartune.db.entities.Song
 import dev.citali.lunartune.extensions.toEnum
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.models.SongItem
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.models.SongItem
 import dev.citali.lunartune.models.MediaMetadata
 import dev.citali.lunartune.models.toMediaMetadata
 import dev.citali.lunartune.repository.LibraryTopMixRepository
@@ -334,7 +334,7 @@ private fun String.matchesComparableTitle(other: String): Boolean {
         (self == target || (self.length > 3 && target.contains(self)) || (target.length > 3 && self.contains(target)))
 }
 
-private fun List<dev.citali.lunartune.innertube.models.Artist>.matchesAnyLocalArtist(song: Song): Boolean {
+private fun List<moe.rukamori.archivetune.innertube.models.Artist>.matchesAnyLocalArtist(song: Song): Boolean {
     val remoteArtists = map { it.name.normalizedForMixMatch() }.filter { it.isNotBlank() }
     val localArtists = song.artists.map { it.name.normalizedForMixMatch() }.filter { it.isNotBlank() }
     if (remoteArtists.isEmpty() || localArtists.isEmpty()) return false

@@ -23,10 +23,10 @@ import dev.citali.lunartune.constants.SavedAccountsKey
 import dev.citali.lunartune.constants.SelectedYtmPlaylistsKey
 import dev.citali.lunartune.constants.VisitorDataKey
 import dev.citali.lunartune.constants.YtmSyncKey
-import dev.citali.lunartune.innertube.PlaybackAuthState
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.models.AccountInfo
-import dev.citali.lunartune.innertube.utils.hasYouTubeLoginCookie
+import moe.rukamori.archivetune.innertube.PlaybackAuthState
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.models.AccountInfo
+import moe.rukamori.archivetune.innertube.utils.hasYouTubeLoginCookie
 import dev.citali.lunartune.utils.SavedAccount
 import dev.citali.lunartune.utils.dataStore
 import dev.citali.lunartune.utils.decodeSavedAccounts

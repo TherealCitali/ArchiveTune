@@ -76,7 +76,7 @@ import dev.citali.lunartune.extensions.filterExplicitAlbums
 import dev.citali.lunartune.extensions.filterVideo
 import dev.citali.lunartune.extensions.reversed
 import dev.citali.lunartune.extensions.toEnum
-import dev.citali.lunartune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.YouTube
 import dev.citali.lunartune.library.LibraryTopMix
 import dev.citali.lunartune.library.ObserveLibraryTopMixesUseCase
 import dev.citali.lunartune.library.RefreshLibraryTopMixesResult

@@ -51,11 +51,11 @@ import dev.citali.lunartune.db.entities.PlaylistSong
 import dev.citali.lunartune.extensions.filterBlockedArtists
 import dev.citali.lunartune.extensions.reversed
 import dev.citali.lunartune.extensions.toEnum
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.models.SongItem
-import dev.citali.lunartune.innertube.models.YTItem
-import dev.citali.lunartune.innertube.models.filterExplicit
-import dev.citali.lunartune.innertube.models.filterVideo
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.models.SongItem
+import moe.rukamori.archivetune.innertube.models.YTItem
+import moe.rukamori.archivetune.innertube.models.filterExplicit
+import moe.rukamori.archivetune.innertube.models.filterVideo
 import dev.citali.lunartune.models.PlaylistSuggestion
 import dev.citali.lunartune.models.PlaylistSuggestionPage
 import dev.citali.lunartune.models.PlaylistSuggestionQuery
@@ -463,7 +463,7 @@ class LocalPlaylistViewModel
         }
 
         suspend fun addSongToPlaylist(
-            song: dev.citali.lunartune.innertube.models.SongItem,
+            song: moe.rukamori.archivetune.innertube.models.SongItem,
             browseId: String?,
         ): Boolean {
             return try {

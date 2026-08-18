@@ -102,13 +102,13 @@ import dev.citali.lunartune.db.entities.Playlist
 import dev.citali.lunartune.db.entities.Song
 import dev.citali.lunartune.extensions.toMediaItem
 import dev.citali.lunartune.extensions.togglePlayPause
-import dev.citali.lunartune.innertube.models.AlbumItem
-import dev.citali.lunartune.innertube.models.ArtistItem
-import dev.citali.lunartune.innertube.models.PlaylistItem
-import dev.citali.lunartune.innertube.models.SongItem
-import dev.citali.lunartune.innertube.models.WatchEndpoint
-import dev.citali.lunartune.innertube.models.YTItem
-import dev.citali.lunartune.innertube.pages.HomePage
+import moe.rukamori.archivetune.innertube.models.AlbumItem
+import moe.rukamori.archivetune.innertube.models.ArtistItem
+import moe.rukamori.archivetune.innertube.models.PlaylistItem
+import moe.rukamori.archivetune.innertube.models.SongItem
+import moe.rukamori.archivetune.innertube.models.WatchEndpoint
+import moe.rukamori.archivetune.innertube.models.YTItem
+import moe.rukamori.archivetune.innertube.pages.HomePage
 import dev.citali.lunartune.models.MediaMetadata
 import dev.citali.lunartune.models.SimilarRecommendation
 import dev.citali.lunartune.models.toMediaMetadata
@@ -566,7 +566,7 @@ fun SpeedDialSection(
                                     title = localItem.title,
                                     artists =
                                         localItem.artists.map {
-                                            dev.citali.lunartune.innertube.models
+                                            moe.rukamori.archivetune.innertube.models
                                                 .Artist(name = it.name, id = it.id)
                                         },
                                     thumbnail = localItem.song.thumbnailUrl.orEmpty(),
@@ -581,7 +581,7 @@ fun SpeedDialSection(
                                     title = localItem.title,
                                     artists =
                                         localItem.artists.map {
-                                            dev.citali.lunartune.innertube.models
+                                            moe.rukamori.archivetune.innertube.models
                                                 .Artist(name = it.name, id = it.id)
                                         },
                                     year = localItem.album.year,

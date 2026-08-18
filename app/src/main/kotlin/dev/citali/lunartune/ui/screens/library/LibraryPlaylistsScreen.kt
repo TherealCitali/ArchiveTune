@@ -96,8 +96,8 @@ import dev.citali.lunartune.constants.PureBlackKey
 import dev.citali.lunartune.db.entities.Playlist
 import dev.citali.lunartune.extensions.move
 import dev.citali.lunartune.extensions.toMediaItem
-import dev.citali.lunartune.innertube.models.PlaylistItem
-import dev.citali.lunartune.innertube.models.WatchEndpoint
+import moe.rukamori.archivetune.innertube.models.PlaylistItem
+import moe.rukamori.archivetune.innertube.models.WatchEndpoint
 import dev.citali.lunartune.playback.queues.ListQueue
 import dev.citali.lunartune.ui.component.CreatePlaylistDialog
 import dev.citali.lunartune.ui.component.ExpressivePullToRefreshBox

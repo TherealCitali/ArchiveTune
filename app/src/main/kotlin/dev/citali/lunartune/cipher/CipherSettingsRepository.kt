@@ -14,9 +14,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import dev.citali.lunartune.constants.MoriCipherManualRefreshHistoryKey
-import dev.citali.lunartune.morideobfuscator.CipherRefreshResult
-import dev.citali.lunartune.morideobfuscator.CipherSnapshot
-import dev.citali.lunartune.morideobfuscator.MoriCipherRuntime
+import moe.rukamori.archivetune.morideobfuscator.CipherRefreshResult
+import moe.rukamori.archivetune.morideobfuscator.CipherSnapshot
+import moe.rukamori.archivetune.morideobfuscator.MoriCipherRuntime
 import dev.citali.lunartune.utils.dataStore
 import javax.inject.Inject
 import javax.inject.Singleton
