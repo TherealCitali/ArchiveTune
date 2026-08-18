@@ -1,8 +1,8 @@
 <div align="center">
 
-  <img src="https://github.com/rukamori/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/icon.png" width="160" height="160" alt="ArchiveTune Logo" style="border-radius: 22%">
+  <img src="https://github.com/rukamori/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/icon.png" width="160" height="160" alt="LunarTune Logo" style="border-radius: 22%">
 
-  <h1>ArchiveTune</h1>
+  <h1>LunarTune</h1>
 
   <p align="center">
     <a href="README.md">
@@ -20,9 +20,9 @@
   </p>
 
   <p align="center">
-    <a href="https://archivetune.koiiverse.cloud"><b>公式サイト</b></a> •
+    <a href="https://lunartune.koiiverse.cloud"><b>公式サイト</b></a> •
     <a href="#features"><b>機能</b></a> •
-    <a href="https://archivetune.koiiverse.cloud/privacy"><b>プライバシー</b></a> •
+    <a href="https://lunartune.koiiverse.cloud/privacy"><b>プライバシー</b></a> •
     <a href="#download-now"><b>ダウンロード</b></a> •
     <a href="#screenshots"><b>スクリーンショット</b></a> •
     <a href="https://github.com/rukamori/ArchiveTune/issues/new/choose"><b>サポート</b></a>
@@ -45,13 +45,13 @@
   <br />
 
   <a href="https://trendshift.io/repositories/17521" target="_blank">
-    <img src="https://trendshift.io/api/badge/repositories/17521" alt="ArchiveTune | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/>
+    <img src="https://trendshift.io/api/badge/repositories/17521" alt="LunarTune | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/>
   </a>
 </div>
 
 <hr />
 
-**ArchiveTune** は単なるYouTube Musicのラッパーアプリではありません。ゼロから構築された完全カスタムの音楽プレイヤーです。音楽はプライベートであるべき、美しくあるべき、そして思い通りに動くべきだと私たちは考えています。音質にこだわり、快適な操作体験を求めるなら、これが最適です。
+**LunarTune** は単なるYouTube Musicのラッパーアプリではありません。ゼロから構築された完全カスタムの音楽プレイヤーです。音楽はプライベートであるべき、美しくあるべき、そして思い通りに動くべきだと私たちは考えています。音質にこだわり、快適な操作体験を求めるなら、これが最適です。
 
 ---
 
@@ -179,7 +179,7 @@ Telegramチャンネルに参加してサポートやディスカッションに
 
 ## 🌍 グローバリゼーション
 
-ArchiveTuneは誰のものでもあります。あなたの地域向けにローカライズを手伝ってください。
+LunarTuneは誰のものでもあります。あなたの地域向けにローカライズを手伝ってください。
 
 ---
 
@@ -189,13 +189,13 @@ ArchiveTuneは誰のものでもあります。あなたの地域向けにロー
 ---
 
 ### 🛠️ 開発 & エンジニアリング
-プロジェクトのビルドや貢献に興味がありますか？ArchiveTuneは高性能なKotlinスタックで構築されています。  
+プロジェクトのビルドや貢献に興味がありますか？LunarTuneは高性能なKotlinスタックで構築されています。  
 <a href="CONTRIBUTING.md"><b>ビルドと貢献ガイドを見る →</b></a>
 
 ---
 
 ### ⭐ プロジェクトを支援
-ArchiveTuneは無料かつオープンソースです。気に入ったら開発支援をご検討ください！
+LunarTuneは無料かつオープンソースです。気に入ったら開発支援をご検討ください！
 
 ---
 
@@ -214,7 +214,7 @@ ArchiveTuneは無料かつオープンソースです。気に入ったら開発
 
 ## ⚖️ 法的免責事項
 
-ArchiveTuneは独立したサードパーティクライアントです。
+LunarTuneは独立したサードパーティクライアントです。
 
 - Google LLC および YouTube とは無関係です  
 - YouTubeの技術的保護を回避するものではありません  
@@ -223,8 +223,8 @@ ArchiveTuneは独立したサードパーティクライアントです。
 ---
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/archivetuneapp/ArchiveTune/refs/heads/dev/fastlane/metadata/android/en-US/images/ArchiveTuneFull.png" alt="ArchiveTune Banner" style="width: 100%; max-width: 500px;">
-  <p><b>ArchiveTuneで音楽体験が向上したなら、ぜひ⭐をお願いします</b></p>
+  <img src="https://raw.githubusercontent.com/archivetuneapp/ArchiveTune/refs/heads/dev/fastlane/metadata/android/en-US/images/ArchiveTuneFull.png" alt="LunarTune Banner" style="width: 100%; max-width: 500px;">
+  <p><b>LunarTuneで音楽体験が向上したなら、ぜひ⭐をお願いします</b></p>
   <br />
-  <img src="https://raw.githubusercontent.com/archivetuneapp/ArchiveTune/refs/heads/dev/assets/badge_part.png" alt="ArchiveTune Banner" style="width: 160px">
+  <img src="https://raw.githubusercontent.com/archivetuneapp/ArchiveTune/refs/heads/dev/assets/badge_part.png" alt="LunarTune Banner" style="width: 160px">
 </div>

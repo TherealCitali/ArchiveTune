@@ -44,7 +44,7 @@ jobs:
             const labelName = process.env.ISSUE_LABEL;
             const labelColor = process.env.ISSUE_LABEL_COLOR;
             const labelDescription = process.env.ISSUE_LABEL_DESCRIPTION;
-            const commentMarker = "<!-- archivetune-notify-user:nightly-reference -->";
+            const commentMarker = "<!-- lunartune-notify-user:nightly-reference -->";
             const referencedIssuePattern = /#([1-9]\d*)\b/g;
             const issueClosedReason = "completed";
             const workflowRun = context.payload.workflow_run;

@@ -54,7 +54,7 @@
     <string name="library_top_mixes_loading">กำลังจัดเตรียมมิกซ์ AI…</string>
     <string name="library_top_mixes_refresh">รีเฟรชมิกซ์</string>
     <string name="library_top_mixes_configure_ai">ตั้งค่า AI</string>
-    <string name="library_top_mixes_ai_not_configured_desc">จำเป็นต้องมีการผสานรวม AI ก่อนที่ ArchiveTune จะสามารถสร้างมิกซ์เพลงยอดนิยมส่วนบุคคลได้</string>
+    <string name="library_top_mixes_ai_not_configured_desc">จำเป็นต้องมีการผสานรวม AI ก่อนที่ LunarTune จะสามารถสร้างมิกซ์เพลงยอดนิยมส่วนบุคคลได้</string>
     <string name="library_top_mixes_no_recent_history_title">ยังไม่มีมิกซ์จากการฟังล่าสุดในตอนนี้</string>
     <string name="library_top_mixes_ai_not_configured_title">กำหนดค่า AI เพื่อสร้างมิกซ์เพลง</string>
     <string name="library_top_mixes_no_recent_history">ฟังเพลงเพิ่มเติม แล้วรีเฟรชเพื่อให้ AI สร้างมิกซ์เพลงจากประวัติการฟังล่าสุดของคุณ</string>
@@ -115,7 +115,7 @@
     <string name="retry">ลองใหม่อีกครั้ง</string>
     <string name="cast">แคสต์</string>
     <string name="cast_devices">แคสต์ไปยังอุปกรณ์</string>
-    <string name="cast_sheet_subtitle">เลือกอุปกรณ์สำหรับเล่น ArchiveTune</string>
+    <string name="cast_sheet_subtitle">เลือกอุปกรณ์สำหรับเล่น LunarTune</string>
     <string name="cast_available_devices">อุปกรณ์ที่พร้อมใช้งาน</string>
     <string name="cast_searching_devices">กำลังค้นหาอุปกรณ์</string>
     <string name="cast_no_devices">ไม่พบอุปกรณ์สำหรับแคสต์</string>
@@ -135,7 +135,7 @@
     <string name="play">เล่น</string>
     <string name="widget_pause">หยุดชั่วคราว</string>
     <string name="widget_previous">ก่อนหน้า</string>
-    <string name="widget_tap_to_open">แตะเพื่อเปิด ArchiveTune</string>
+    <string name="widget_tap_to_open">แตะเพื่อเปิด LunarTune</string>
     <string name="widget_insights_title">ข้อมูลเชิงลึกเกี่ยวกับการฟัง</string>
     <string name="widget_recommendations">ข้อแนะนำ</string>
     <string name="widget_listening_time_empty">ยังไม่มีสถิติการฟัง</string>
@@ -312,7 +312,7 @@
     <string name="app_icon_available">ไอคอนที่พร้อมใช้งาน</string>
     <string name="app_icon_builtin">ในตัว</string>
     <string name="app_icon_community">ไอคอนจากชุมชน</string>
-    <string name="app_icon_builtin_description">ไอคอน ArchiveTune แบบดั้งเดิม</string>
+    <string name="app_icon_builtin_description">ไอคอน LunarTune แบบดั้งเดิม</string>
     <string name="app_icon_community_notice">ไอคอนจากชุมชนสร้างโดยผู้ใช้ และอาจมีการ เปลี่ยนแปลงได้ตามเวลา</string>
     <plurals name="app_icon_count">
         <item quantity="other">%d ไอคอน</item>

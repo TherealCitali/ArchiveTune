@@ -227,7 +227,7 @@
     <string name="suggestions">اقتراحات</string>
     <string name="music_recognition_settings">إعدادات التعرف على الموسيقى</string>
     <string name="music_recognition_background_title">التعرف في الخلفية</string>
-    <string name="music_recognition_background_description">عند التفعيل، تتعرف لوحة الإعدادات السريعة على الصوت المشغل على هذا الجهاز دون فتح ArchiveTune.</string>
+    <string name="music_recognition_background_description">عند التفعيل، تتعرف لوحة الإعدادات السريعة على الصوت المشغل على هذا الجهاز دون فتح LunarTune.</string>
     <string name="music_recognition_background_foss_description">التعرف في الخلفية غير متاح في نسخة FOSS. تفتح لوحة الإعدادات السريعة شاشة التعرف بدلاً من ذلك.</string>
     <string name="music_recognition_notification_channel_name">التعرف على الموسيقى</string>
     <string name="music_recognition_notification_channel_description">تقدم ونتائج التعرف على الموسيقى</string>
@@ -441,14 +441,14 @@
     <string name="storage_folder_selected_restart">تم حفظ مجلد التخزين. سيتم إعادة تشغيل التطبيق خلال 3 ثوانٍ.</string>
     <string name="storage_folder_invalid">اختر مجلدًا صالحًا.</string>
     <string name="storage_folder_unsupported">لا يمكن استخدام هذا المجلد بواسطة ذاكرة التخزين المؤقت للوسائط.</string>
-    <string name="storage_folder_not_writable">لا يمكن لـ ArchiveTune كتابة ملفات التخزين المؤقت في هذا المجلد.</string>
+    <string name="storage_folder_not_writable">لا يمكن لـ LunarTune كتابة ملفات التخزين المؤقت في هذا المجلد.</string>
     <string name="storage_cache_cleared">تم مسح ذاكرة التخزين المؤقت.</string>
     <string name="storage_cache_clear_failed">تعذر مسح ذاكرة التخزين المؤقت. تحقق من الوصول إلى بطاقة SD.</string>
     <string name="storage_clear_song_cache_progress">جاري مسح ذاكرة التخزين المؤقت للأغاني...%1$d%%</string>
     <string name="storage_clear_downloads_progress">جاري مسح التنزيلات...%1$d%%</string>
     <string name="storage_clear_image_cache_progress">جاري مسح ذاكرة التخزين المؤقت للصور...%1$d%%</string>
     <string name="storage_clear_canvas_cache_progress">جاري مسح ذاكرة التخزين المؤقت للشاشة التفاعلية...%1$d%%</string>
-    <string name="storage_cache_clear_warning">أبقِ ArchiveTune مفتوحًا أثناء إزالة ملفات التخزين المؤقت.</string>
+    <string name="storage_cache_clear_warning">أبقِ LunarTune مفتوحًا أثناء إزالة ملفات التخزين المؤقت.</string>
     <string name="storage_size_ratio">%1$s / %2$s</string>
     <string name="canvas_cache">ذاكرة التخزين المؤقت للشاشة التفاعلية</string>
     <string name="clear_canvas_cache">مسح ذاكرة التخزين المؤقت للشاشة التفاعلية</string>
@@ -477,9 +477,9 @@
     <string name="audio_crossfade_seconds">%1$s ث</string>
     <string name="crossfade_gapless_title">تخطي ألبومات التشغيل المتواصل</string>
     <string name="crossfade_gapless_description">عدم تطبيق التلاشي المتقاطع على الأغاني المتتالية من نفس الألبوم.</string>
-    <string name="player_stream_client_archivetune_extractor">مستخرج ArchiveTune</string>
-    <string name="player_stream_client_archivetune_extractor_desc">يستخدم مستخرج ArchiveTune الخلفي لبث التشغيل. يفضل الصوت التلقائي عالي الجودة.</string>
-    <string name="player_stream_client_archivetune_extractor_login_required">يجب عليك تسجيل الدخول باستخدام حساب Google وتوكن PoToken في الإعدادات لاستخدام هذا</string>
+    <string name="player_stream_client_lunartune_extractor">مستخرج LunarTune</string>
+    <string name="player_stream_client_lunartune_extractor_desc">يستخدم مستخرج LunarTune الخلفي لبث التشغيل. يفضل الصوت التلقائي عالي الجودة.</string>
+    <string name="player_stream_client_lunartune_extractor_login_required">يجب عليك تسجيل الدخول باستخدام حساب Google وتوكن PoToken في الإعدادات لاستخدام هذا</string>
     <string name="settings_appearance_subtitle">السمات، التخطيط، والأنماط البصرية</string>
     <string name="settings_playback_title">التشغيل</string>
     <string name="settings_playback_subtitle">سلوك الصوت، التلاشي المتقاطع، والتشغيل في الخلفية</string>
@@ -619,7 +619,7 @@
     <string name="mori_cipher_refresh_remaining">تبقت %1$d تحديثات يدوية</string>
     <string name="mori_cipher_rate_limit_countdown">متاح مرة أخرى خلال %1$s</string>
     <string name="mori_cipher_automatic_updates">التحديثات التلقائية</string>
-    <string name="mori_cipher_automatic_updates_description">يقوم ArchiveTune بتحديث تكوين مشغل YouTube الحالي كل ست ساعات وبعد إخفاقات فك التشفير.</string>
+    <string name="mori_cipher_automatic_updates_description">يقوم LunarTune بتحديث تكوين مشغل YouTube الحالي كل ست ساعات وبعد إخفاقات فك التشفير.</string>
     <string name="mori_cipher_refresh_success">تم تحديث تكوين المشغل</string>
     <string name="mori_cipher_refresh_failed">تعذر تحديث تكوين المشغل</string>
     <string name="mori_cipher_rate_limited">تم الوصول إلى حد التحديث اليدوي</string>
@@ -648,7 +648,7 @@
     <string name="about_position_developers">مطور | الفريق</string>
     <string name="about_position_yuki">dummy reze | مسؤول</string>
     <string name="about_position_mo_agamy">الإطار الأساسي | Metrolist</string>
-    <string name="about_position_zion_huang">منشئ InnerTune · الأساس لـ Metrolist و ArchiveTune والتفرعات الأخرى</string>
+    <string name="about_position_zion_huang">منشئ InnerTune · الأساس لـ Metrolist و LunarTune والتفرعات الأخرى</string>
     <string name="about_content_desc_github">GitHub</string>
     <string name="about_content_desc_website">الموقع الإلكتروني</string>
     <string name="about_content_desc_discord">ديسكورد</string>

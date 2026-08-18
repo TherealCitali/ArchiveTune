@@ -1,8 +1,8 @@
 <div align="center">
 
-  <img src="https://github.com/rukamori/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/icon.png" width="160" height="160" alt="ArchiveTune Logo" style="border-radius: 22%">
+  <img src="https://github.com/rukamori/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/icon.png" width="160" height="160" alt="LunarTune Logo" style="border-radius: 22%">
 
-  <h1>ArchiveTune</h1>
+  <h1>LunarTune</h1>
 
   <p align="center">
     <a href="README.md">
@@ -20,9 +20,9 @@
   </p>
 
   <p align="center">
-    <a href="https://archivetune.koiiverse.cloud"><b>Official Website</b></a> •
+    <a href="https://lunartune.koiiverse.cloud"><b>Official Website</b></a> •
     <a href="#features"><b>Features</b></a> •
-    <a href="https://archivetune.koiiverse.cloud/privacy"><b>Privacy</b></a> •
+    <a href="https://lunartune.koiiverse.cloud/privacy"><b>Privacy</b></a> •
     <a href="#download-now"><b>Download</b></a> •
     <a href="#screenshots"><b>Screenshots</b></a> •
     <a href="https://github.com/rukamori/ArchiveTune/issues/new/choose"><b>Support</b></a>
@@ -45,7 +45,7 @@
   <br />
 
   <a href="https://trendshift.io/repositories/17521" target="_blank">
-    <img src="https://trendshift.io/api/badge/repositories/17521" alt="ArchiveTune | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/>
+    <img src="https://trendshift.io/api/badge/repositories/17521" alt="LunarTune | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/>
   </a>
 </div>
 
@@ -56,7 +56,7 @@
 We do not provide support, maintenance, troubleshooting, or assistance for any forked version of this project.
 If you choose to use a fork, you do so at your own risk.
 
-**ArchiveTune** isn’t just another generic YouTube Music wrapper. It’s a fully custom-built player made from the ground up, because we think your music should stay private, look clean, and work exactly the way you expect. If you care about sound quality and want something that actually feels good to use, this is it.
+**LunarTune** isn’t just another generic YouTube Music wrapper. It’s a fully custom-built player made from the ground up, because we think your music should stay private, look clean, and work exactly the way you expect. If you care about sound quality and want something that actually feels good to use, this is it.
 
 ---
 
@@ -189,12 +189,12 @@ If you choose to use a fork, you do so at your own risk.
     <tr>
       <td align="center">
         <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/rukamori/ArchiveTune/">
-          <img src="https://github.com/ImranR98/Obtainium/blob/main/assets/graphics/badge_obtainium.png" height="50" alt="Get ArchiveTune on Obtainium">
+          <img src="https://github.com/ImranR98/Obtainium/blob/main/assets/graphics/badge_obtainium.png" height="50" alt="Get LunarTune on Obtainium">
         </a>
       </td>
       <td align="center">
-        <a href="https://apt.izzysoft.de/fdroid/index/apk/moe.rukamori.archivetune">
-          <img src="https://raw.githubusercontent.com/rukamori/ArchiveTune/757d5932832e1da27ced56de98c5ad1275cf0db1/assets/IzzyOnDroidButtonBorder.svg" height="50" alt="Get ArchiveTune on IzzyOnDroid">
+        <a href="https://apt.izzysoft.de/fdroid/index/apk/dev.citali.lunartune">
+          <img src="https://raw.githubusercontent.com/rukamori/ArchiveTune/757d5932832e1da27ced56de98c5ad1275cf0db1/assets/IzzyOnDroidButtonBorder.svg" height="50" alt="Get LunarTune on IzzyOnDroid">
         </a>
       </td>
     </tr>
@@ -204,7 +204,7 @@ If you choose to use a fork, you do so at your own risk.
     <tr>
       <td align="center" colspan="2">
         <a href="https://github.com/rukamori/ArchiveTune/releases/latest">
-          <img src="https://raw.githubusercontent.com/rukamori/ArchiveTune/refs/heads/main/assets/badge_github.png" height="50" alt="Get ArchiveTune on GitHub">
+          <img src="https://raw.githubusercontent.com/rukamori/ArchiveTune/refs/heads/main/assets/badge_github.png" height="50" alt="Get LunarTune on GitHub">
         </a>
       </td>
     </tr>
@@ -214,13 +214,13 @@ If you choose to use a fork, you do so at your own risk.
     </tr>
     <tr>
       <td align="center">
-        <a href="https://www.openapk.net/archivetune/moe.rukamori.archivetune/">
-          <img src="https://www.openapk.net/images/openapk-badge.png" height="75" alt="Get ArchiveTune on OpenAPK">
+        <a href="https://www.openapk.net/lunartune/dev.citali.lunartune/">
+          <img src="https://www.openapk.net/images/openapk-badge.png" height="75" alt="Get LunarTune on OpenAPK">
         </a>
       </td>
       <td align="center">
-        <a href="https://unclouded.app/apps/archivetune/">
-          <img src="https://raw.githubusercontent.com/rukamori/ArchiveTune/refs/heads/dev/assets/badge_unclouded.png" height="50" alt="Get ArchiveTune on Unclouded">
+        <a href="https://unclouded.app/apps/lunartune/">
+          <img src="https://raw.githubusercontent.com/rukamori/ArchiveTune/refs/heads/dev/assets/badge_unclouded.png" height="50" alt="Get LunarTune on Unclouded">
         </a>
       </td>
     </tr>
@@ -239,7 +239,7 @@ If you choose to use a fork, you do so at your own risk.
     <tr>
       <td align="center">
         <a href="https://nightly.link/rukamori/ArchiveTune/workflows/build/dev/app-gms-mobile-universal-release">
-          <img src="https://raw.githubusercontent.com/rukamori/ArchiveTune/refs/heads/main/assets/badge_github.png" height="50" alt="Download the latest ArchiveTune nightly build">
+          <img src="https://raw.githubusercontent.com/rukamori/ArchiveTune/refs/heads/main/assets/badge_github.png" height="50" alt="Download the latest LunarTune nightly build">
         </a>
       </td>
     </tr>
@@ -260,13 +260,13 @@ Join Our Telegram Channels or Discord Servers for Support and Discussion.
 
 ## 🌍 Globalization
 
-ArchiveTune belongs to everyone. Help us localize the experience for your region.
+LunarTune belongs to everyone. Help us localize the experience for your region.
 
-[![Static Badge](https://img.shields.io/badge/translate-help?style=for-the-badge&logo=weblate&labelColor=grey)](https://translate.codeberg.org/engage/archivetune/)
+[![Static Badge](https://img.shields.io/badge/translate-help?style=for-the-badge&logo=weblate&labelColor=grey)](https://translate.codeberg.org/engage/lunartune/)
 
 <div align="center">
-  <a href="https://translate.codeberg.org/engage/archivetune/">
-    <img src="https://translate.codeberg.org/widget/archivetune/horizontal-blue.svg" alt="Translation status" />
+  <a href="https://translate.codeberg.org/engage/lunartune/">
+    <img src="https://translate.codeberg.org/widget/lunartune/horizontal-blue.svg" alt="Translation status" />
   </a>
 </div>
 
@@ -276,14 +276,14 @@ ArchiveTune belongs to everyone. Help us localize the experience for your region
 </a>
 
 ### 🛠️ Development & Engineering
-Interested in building the project or contributing? ArchiveTune is built on a high-performance Kotlin stack.
+Interested in building the project or contributing? LunarTune is built on a high-performance Kotlin stack.
 <a href="CONTRIBUTING.md"><b>Read the Build & Contribution Guide →</b></a>
 
 ---
 
 ### Open-Source Acknowledgments
 
-ArchiveTune is made possible by the work of many open-source projects and communities:
+LunarTune is made possible by the work of many open-source projects and communities:
 
 - **Metrolist** by [Mostafa Alagamy](https://github.com/mostafaalagamy/Metrolist) for the base framework.
 - **SimpMusic** by [maxrave-dev](https://github.com/maxrave-dev/SimpMusic) for the lyrics API provider.
@@ -296,20 +296,20 @@ ArchiveTune is made possible by the work of many open-source projects and commun
 
 ## ⚖️ Legal Disclaimer
 
-ArchiveTune is an independent third-party client.
+LunarTune is an independent third-party client.
 - Not affiliated with Google LLC or YouTube.
 - Does not bypass YouTube's technical protections.
 - Users are encouraged to support artists by purchasing music via official channels.
 
 ## ⚖️ License, Copyright, and Trademark Notice
 
-ArchiveTune is licensed under the **GNU General Public License v3.0 (GPLv3)**.
+LunarTune is licensed under the **GNU General Public License v3.0 (GPLv3)**.
 
 You may copy, modify, and redistribute the source code, including commercially, provided that you comply with the GPLv3. This includes preserving applicable copyright and license notices, clearly identifying modified versions, and providing the corresponding source code when required.
 
-Copyright © Rukamori and the ArchiveTune contributors for their respective original contributions.
+Copyright © Rukamori and the LunarTune contributors for their respective original contributions.
 
-The **ArchiveTune™** name, logo, application icon, and official branding are not licensed under the GPLv3. Unofficial forks must not present themselves as official ArchiveTune releases or imply endorsement by the ArchiveTune maintainers.
+The **LunarTune™** name, logo, application icon, and official branding are not licensed under the GPLv3. Unofficial forks must not present themselves as official LunarTune releases or imply endorsement by the LunarTune maintainers.
 
 See the [`LICENSE`](LICENSE) file for the complete GPLv3 terms.
 
@@ -317,8 +317,8 @@ See the [`LICENSE`](LICENSE) file for the complete GPLv3 terms.
 ---
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/rukamori/ArchiveTune/refs/heads/dev/fastlane/metadata/android/en-US/images/ArchiveTuneFull.png" alt="ArchiveTune Banner" style="width: 100%; max-width: 500px;">
-  <p><b>If ArchiveTune elevated your music experience, please consider giving us a ⭐</b></p>
+  <img src="https://raw.githubusercontent.com/rukamori/ArchiveTune/refs/heads/dev/fastlane/metadata/android/en-US/images/ArchiveTuneFull.png" alt="LunarTune Banner" style="width: 100%; max-width: 500px;">
+  <p><b>If LunarTune elevated your music experience, please consider giving us a ⭐</b></p>
   <br />
-  <img src="https://raw.githubusercontent.com/rukamori/ArchiveTune/refs/heads/dev/assets/badge_part.png" alt="ArchiveTune Banner" style="width: 180px">
+  <img src="https://raw.githubusercontent.com/rukamori/ArchiveTune/refs/heads/dev/assets/badge_part.png" alt="LunarTune Banner" style="width: 180px">
 </div>

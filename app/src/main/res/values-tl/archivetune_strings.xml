@@ -12,7 +12,7 @@
     <string name="music_recognition_lyrics_preview">Pasilip sa lyrics</string>
     <string name="music_recognition_permission_title">Permisyón para sa microphone</string>
     <string name="music_recognition_permission_desc">Payagan ang paggamit ng microphone sa pagkilala ng kanta.</string>
-    <string name="music_recognition_background_description">Kapag naka-enabled, ang Quick Settings tile ay kikilala sa tunog sa device kahit hindi buksan ang ArchiveTune.</string>
+    <string name="music_recognition_background_description">Kapag naka-enabled, ang Quick Settings tile ay kikilala sa tunog sa device kahit hindi buksan ang LunarTune.</string>
     <string name="music_recognition_history_search">Hanapin ang mga nakilalang kanta</string>
     <string name="music_recognition_permission_action">Payagan</string>
     <string name="music_recognition_error">May maling nangyari</string>

@@ -325,14 +325,14 @@
     <string name="storage_folder_selected_restart">Pasta de armazenamento salva. O app será reiniciado em 3 segundos.</string>
     <string name="storage_folder_invalid">Selecione uma pasta válida.</string>
     <string name="storage_folder_unsupported">Esta pasta não pode ser usada pelo cache de mídia baseado em arquivos.</string>
-    <string name="storage_folder_not_writable">O ArchiveTune não pode gravar arquivos de cache nesta pasta.</string>
+    <string name="storage_folder_not_writable">O LunarTune não pode gravar arquivos de cache nesta pasta.</string>
     <string name="storage_cache_cleared">Cache limpo.</string>
     <string name="storage_cache_clear_failed">Não foi possível limpar o cache. Verifique o acesso ao cartão SD.</string>
     <string name="storage_clear_song_cache_progress">Limpando cache de músicas...%1$d%%</string>
     <string name="storage_clear_downloads_progress">Limpando downloads...%1$d%%</string>
     <string name="storage_clear_image_cache_progress">Limpando cache de imagens...%1$d%%</string>
     <string name="storage_clear_canvas_cache_progress">Limpando cache de canvas...%1$d%%</string>
-    <string name="storage_cache_clear_warning">Mantenha o ArchiveTune aberto enquanto os arquivos de cache são removidos.</string>
+    <string name="storage_cache_clear_warning">Mantenha o LunarTune aberto enquanto os arquivos de cache são removidos.</string>
     <string name="storage_size_ratio">%1$s / %2$s</string>
     <string name="sensitivity_percentage">%1$d%%</string>
     <string name="clear_song_cache_dialog">  Tem certeza de que deseja limpar todas as músicas em cache?</string>
@@ -566,7 +566,7 @@
     <string name="about_position_developers">Desenvolvedor | Equipe</string>
     <string name="about_position_yuki">reze idiota | Admin</string>
     <string name="about_position_mo_agamy">Framework base | Metrolist</string>
-    <string name="about_position_zion_huang">Criador do InnerTune · Fundação do Metrolist, ArchiveTune e outros forks</string>
+    <string name="about_position_zion_huang">Criador do InnerTune · Fundação do Metrolist, LunarTune e outros forks</string>
     <string name="about_content_desc_github">GitHub</string>
     <string name="about_content_desc_website">Site</string>
     <string name="about_content_desc_discord">Discord</string>
@@ -574,7 +574,7 @@
     <string name="about_content_desc_donate">Doar</string>
     <string name="music_recognition_settings">Configurações de reconhecimento de música</string>
     <string name="music_recognition_background_title">Reconhecimento em segundo plano</string>
-    <string name="music_recognition_background_description">Quando ativado, o bloco de Configurações Rápidas reconhece o áudio que está sendo reproduzido neste dispositivo sem abrir o ArchiveTune.</string>
+    <string name="music_recognition_background_description">Quando ativado, o bloco de Configurações Rápidas reconhece o áudio que está sendo reproduzido neste dispositivo sem abrir o LunarTune.</string>
     <string name="music_recognition_background_foss_description">O reconhecimento em segundo plano não está disponível na versão FOSS. Em vez disso, o bloco “Configurações rápidas” abre a tela de reconhecimento.</string>
     <string name="music_recognition_notification_channel_name">Reconhecimento de músicas</string>
     <string name="music_recognition_notification_channel_description">Progresso e resultados no reconhecimento musical</string>
@@ -600,9 +600,9 @@
     <string name="show_lyrics_player_controls">Mostrar controles do player</string>
     <string name="block_artist">Bloquear artista</string>
     <string name="unblock_artist">Desbloquear artista</string>
-    <string name="player_stream_client_archivetune_extractor">Extrator do ArchiveTune</string>
-    <string name="player_stream_client_archivetune_extractor_desc">Utiliza o extrator de back-end do ArchiveTune para fluxos de reprodução. Dá preferência ao áudio de alta qualidade automático.</string>
-    <string name="player_stream_client_archivetune_extractor_login_required">Para usar esse recurso, você precisa fazer login usando sua conta do Google e o Token Po nas configurações</string>
+    <string name="player_stream_client_lunartune_extractor">Extrator do LunarTune</string>
+    <string name="player_stream_client_lunartune_extractor_desc">Utiliza o extrator de back-end do LunarTune para fluxos de reprodução. Dá preferência ao áudio de alta qualidade automático.</string>
+    <string name="player_stream_client_lunartune_extractor_login_required">Para usar esse recurso, você precisa fazer login usando sua conta do Google e o Token Po nas configurações</string>
     <string name="stats_top_songs">Top músicas</string>
     <string name="stats_show_all_songs">Mostrar todas as %1$d músicas</string>
     <string name="stats_show_top_songs">Mostrar top 5</string>
@@ -628,7 +628,7 @@
     <string name="mori_cipher_refresh_remaining">%1$d atualizações manuais restantes</string>
     <string name="mori_cipher_rate_limit_countdown">Disponível novamente em %1$s</string>
     <string name="mori_cipher_automatic_updates">Atualizações automáticas</string>
-    <string name="mori_cipher_automatic_updates_description">O ArchiveTune atualiza a configuração atual do reprodutor do YouTube a cada seis horas e após falhas na descriptografia.</string>
+    <string name="mori_cipher_automatic_updates_description">O LunarTune atualiza a configuração atual do reprodutor do YouTube a cada seis horas e após falhas na descriptografia.</string>
     <string name="mori_cipher_refresh_success">Configuração do player atualizada</string>
     <string name="mori_cipher_refresh_failed">Não foi possível atualizar a configuração do player</string>
     <string name="mori_cipher_rate_limited">Limite de atualizações manuais atingido</string>
