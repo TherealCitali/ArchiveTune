@@ -67,6 +67,7 @@ import dev.citali.lunartune.ui.screens.settings.LastFMSettings
 import dev.citali.lunartune.ui.screens.settings.LogcatScreen
 import dev.citali.lunartune.ui.screens.settings.LyricsAnimationSettings
 import dev.citali.lunartune.ui.screens.settings.LyricsSettings
+import dev.citali.lunartune.ui.screens.settings.NavigationBarSettings
 import dev.citali.lunartune.ui.screens.settings.MusicTogetherScreen
 import dev.citali.lunartune.ui.screens.settings.PalettePickerScreen
 import dev.citali.lunartune.ui.screens.settings.PlayerSettings
