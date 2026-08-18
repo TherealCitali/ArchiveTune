@@ -63,8 +63,11 @@ import dev.citali.lunartune.utils.get
 import dev.citali.lunartune.utils.potoken.BotGuardTokenGenerator
 import dev.citali.lunartune.utils.reportException
 import dev.citali.lunartune.utils.toPlaybackAuthState
+import okhttp3.ConnectionPool
 import okhttp3.Dns
+import okhttp3.OkHttpClient
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -346,6 +349,7 @@ class App :
     override fun newImageLoader(context: PlatformContext): ImageLoader {
         val smartTrimmer = dataStore[SmartTrimmerKey] ?: false
         val imageCacheConfig = resolveImageDiskCacheConfig(dataStore[MaxImageCacheSizeKey])
+        val lowRam = isLowRamDevice()
 
         val diskCache =
             DiskCache
@@ -358,10 +362,33 @@ class App :
             applicationScope.launch(Dispatchers.IO) { trimImageDiskCache(diskCache) }
         }
 
+        // Home feed fires many thumbnail requests in parallel. Coil/OkHttp defaults
+        // (5 idle connections) serialize those fetches and make grids feel slow.
+        val imageHttpClient =
+            OkHttpClient
+                .Builder()
+                .connectionPool(ConnectionPool(20, 5, TimeUnit.MINUTES))
+                .connectTimeout(6, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(10, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(true)
+                .followRedirects(true)
+                .followSslRedirects(true)
+                .build()
+
         return ImageLoader
             .Builder(this)
-            .crossfade(true)
+            .components {
+                add(OkHttpNetworkFetcherFactory(imageHttpClient))
+            }
+            .crossfade(!lowRam)
             .allowHardware(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+            .memoryCache {
+                MemoryCache
+                    .Builder()
+                    .maxSizePercent(this@App, if (lowRam) 0.15 else 0.25)
+                    .build()
+            }.memoryCachePolicy(CachePolicy.ENABLED)
             .diskCache(diskCache)
             .diskCachePolicy(imageCacheConfig.policy)
             .build()
