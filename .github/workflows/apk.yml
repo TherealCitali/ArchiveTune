@@ -1,15 +1,20 @@
-name: Build Pull Request
+name: APK
 
 on:
   workflow_dispatch:
   pull_request:
-    branches:
-      - "**"
+  push:
+    branches: [main, dev]
+
+permissions:
+  contents: read
+  actions: read
 
 jobs:
-  build:
+  debug-apk:
+    name: Debug APK
     runs-on: ubuntu-latest
-
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7
         with:
@@ -18,19 +23,18 @@ jobs:
       - name: Set up JDK 21
         uses: actions/setup-java@v5
         with:
-          java-version: 21
-          distribution: "temurin"
+          java-version: "21"
+          distribution: temurin
 
-      - name: Set Up Gradle
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
         with:
-          cache-read-only: true
           cache-cleanup: on-success
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Generate debug.keystore if not exists
+      - name: Generate debug keystore
         run: |
           mkdir -p ~/.android
           if [ ! -f ~/.android/debug.keystore ]; then
@@ -45,26 +49,27 @@ jobs:
               -dname "CN=Android Debug,O=Android,C=US"
           fi
 
-      - name: Build and Lint Mobile Universal Debug APK
-        shell: bash
-        run: |
-          set -euo pipefail
-          ./gradlew --console=plain assembleGmsMobileUniversalDebug :app:lintGmsMobileUniversalDebug --warning-mode summary 2>&1 | python3 -c "import re,sys;p=re.compile(r'^(WARNING: )?\[CXX5202\] This app only has 32-bit \[(armeabi-v7a|x86)\] native libraries\. Beginning August 1, 2019 Google Play store requires that all apps that include native libraries must provide 64-bit versions\. For more information, visit https://g\.co/64-bit-requirement\$');[sys.stdout.write(l) for l in sys.stdin if not p.match(l.rstrip())]"
+      - name: Build GMS mobile universal debug APK
+        run: ./gradlew --console=plain assembleGmsMobileUniversalDebug
         env:
+          PULL_REQUEST: ${{ github.event_name == 'pull_request' && 'true' || 'false' }}
           GITHUB_EVENT_NAME: ${{ github.event_name }}
-          PULL_REQUEST: "true"
           LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
           LASTFM_SECRET: ${{ secrets.LASTFM_SECRET }}
           API_BEARER_TOKEN: ${{ secrets.API_BEARER_TOKEN }}
           CANVAS_BEARER_TOKEN: ${{ secrets.CANVAS_BEARER_TOKEN }}
           EXTRACTOR_BEARER: ${{ secrets.EXTRACTOR_BEARER }}
 
+      - name: Collect APK
+        run: |
+          mkdir -p artifacts
+          find app/build/outputs/apk -type f -name "*.apk" -print -exec cp {} artifacts/ \;
+          ls -lah artifacts
+
       - name: Upload APK
         uses: actions/upload-artifact@v7
         with:
-          name: app-mobile-universal-debug-pr-${{ github.event.number }}
-          path: |
-            app/build/outputs/apk/gms/mobile/universal/debug/*.apk
-            app/build/outputs/apk/gmsMobileUniversal/debug/*.apk
-            app/build/outputs/apk/mobile/universal/debug/*.apk
-            app/build/outputs/apk/mobileUniversal/debug/*.apk
+          name: lunartune-gms-mobile-universal-debug
+          path: artifacts/*.apk
+          if-no-files-found: error
+          retention-days: 14
