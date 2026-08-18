@@ -61,7 +61,6 @@ import dev.citali.lunartune.ui.screens.settings.CustomizeBackground
 import dev.citali.lunartune.ui.screens.settings.DebugSettings
 import dev.citali.lunartune.ui.screens.settings.DiscordSettings
 import dev.citali.lunartune.ui.screens.settings.HiddenPlaylistsScreen
-import dev.citali.lunartune.ui.screens.settings.IconScreen
 import dev.citali.lunartune.ui.screens.settings.IntegrationScreen
 import dev.citali.lunartune.ui.screens.settings.InternetSettings
 import dev.citali.lunartune.ui.screens.settings.LastFMSettings
@@ -389,9 +388,6 @@ fun NavGraphBuilder.navigationBuilder(
     }
     composable("settings/appearance/navigation_bar") {
         NavigationBarSettings(navController)
-    }
-    composable("settings/appearance/icon") {
-        IconScreen(navController)
     }
     composable("settings/appearance/aod_customized") {
         AodCustomizedScreen(navController)
