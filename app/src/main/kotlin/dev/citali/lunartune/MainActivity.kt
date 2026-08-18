@@ -3159,8 +3159,3 @@ private fun Context.isTvDevice(): Boolean {
         packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK) ||
         packageManager.hasSystemFeature(PackageManager.FEATURE_TELEVISION)
 }
-ration.UI_MODE_TYPE_TELEVISION
-    return isTelevisionUiMode ||
-        packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK) ||
-        packageManager.hasSystemFeature(PackageManager.FEATURE_TELEVISION)
-}
