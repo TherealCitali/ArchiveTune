@@ -48,7 +48,6 @@ jobs:
     name: Build Release APKs (${{ matrix.distribution }}-${{ matrix.device }}-${{ matrix.abi }})
     if: github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]'
     runs-on: ubuntu-latest
-    needs: notifyTelegram
 
     strategy:
       matrix:
@@ -223,6 +222,9 @@ jobs:
           exit 1
 
       - name: Sign APK
+        id: sign
+        if: ${{ secrets.KEYSTORE != '' }}
+        continue-on-error: true
         uses: ilharp/sign-android-release@v2.0.0
         with:
           releaseDir: ${{ steps.release_dir.outputs.release_dir }}/
@@ -231,21 +233,27 @@ jobs:
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
           buildToolsVersion: 35.0.0
-      
-      - name: Move signed APK
+
+      - name: Package APK
         shell: bash
         run: |
           set -euo pipefail
           RELEASE_DIR="${{ steps.release_dir.outputs.release_dir }}"
           mkdir -p "$RELEASE_DIR/out"
-          SIGNED_APK=$(find "$RELEASE_DIR" -type f \( -name "*-signed.apk" -o -name "*-unsigned-signed.apk" \) | head -n 1)
-          mv "$SIGNED_APK" "$RELEASE_DIR/out/${{ steps.variant.outputs.apk_name }}"
-  
-      - name: Upload Signed APK
+          SIGNED_APK=$(find "$RELEASE_DIR" -type f \( -name "*-signed.apk" -o -name "*-unsigned-signed.apk" \) | head -n 1 || true)
+          if [ -n "${SIGNED_APK:-}" ]; then
+            mv "$SIGNED_APK" "$RELEASE_DIR/out/${{ steps.variant.outputs.apk_name }}"
+          else
+            UNSIGNED_APK=$(find "$RELEASE_DIR" -type f -name "*.apk" | head -n 1)
+            cp "$UNSIGNED_APK" "$RELEASE_DIR/out/${{ steps.variant.outputs.apk_name }}"
+          fi
+
+      - name: Upload APK
         uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.variant.outputs.artifact_name }}
           path: ${{ steps.release_dir.outputs.release_dir }}/out/${{ steps.variant.outputs.apk_name }}
+          if-no-files-found: error
 
   aggregateAndSend:
     name: Send APKs to Telegram
