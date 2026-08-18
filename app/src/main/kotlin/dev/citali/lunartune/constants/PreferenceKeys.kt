@@ -927,6 +927,26 @@ enum class NavigationBarStyle {
 
 val NavigationBarStyleKey = stringPreferencesKey("navigationBarStyle")
 
+val HideNavigationBarLabelsKey = booleanPreferencesKey("hideNavigationBarLabels")
+
+val NavigationBarWidthKey = floatPreferencesKey("navigationBarWidth")
+const val NAVIGATION_BAR_WIDTH_DEFAULT = 0.8f
+
+val NavigationBarHeightKey = floatPreferencesKey("navigationBarHeight")
+const val NAVIGATION_BAR_HEIGHT_DEFAULT = 1.0f
+
+val NavigationBarOpacityKey = floatPreferencesKey("navigationBarOpacity")
+const val NAVIGATION_BAR_OPACITY_DEFAULT = 1.0f
+
+val NavigationBarTransparencyKey = floatPreferencesKey("navigationBarTransparency")
+const val NAVIGATION_BAR_TRANSPARENCY_DEFAULT = 0.0f
+
+val NavigationBarLabelSpacingKey = floatPreferencesKey("navigationBarLabelSpacing")
+const val NAVIGATION_BAR_LABEL_SPACING_DEFAULT = 4f
+
+val NavigationBarCornerRadiusKey = floatPreferencesKey("navigationBarCornerRadius")
+const val NAVIGATION_BAR_CORNER_RADIUS_DEFAULT = 28f
+
 enum class UpdateChannel {
     STABLE,
     CANARY,
