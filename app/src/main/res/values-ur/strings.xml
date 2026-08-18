@@ -732,7 +732,7 @@
     <string name="target_language">ہدف شدہ زبان</string>
     <string name="close_dialog">بند کریں</string>
     <string name="support_development_title">ترقی کا سہارا بنیں</string>
-    <string name="support_development_message">‫آداب! میں rukamori ہوں، LunarTune کا مہیا کار۔اگر LunarTune نے آپکی روز مررہ کی زندگی میں جکہ بنا لی ہے تو آپ عطیہ کرکے یا اس منصوبے کو GitHub پر ستارہ دے کر اس کو آگے بڑھانے میں مدد کر سکتے ہیں ۔ ایپ کا وسیلہ بننے کے لئے شکریہ۔</string>
+    <string name="support_development_message">‫آداب! میں cognitiveshadows03 ہوں، LunarTune کا مہیا کار۔اگر LunarTune نے آپکی روز مررہ کی زندگی میں جکہ بنا لی ہے تو آپ عطیہ کرکے یا اس منصوبے کو GitHub پر ستارہ دے کر اس کو آگے بڑھانے میں مدد کر سکتے ہیں ۔ ایپ کا وسیلہ بننے کے لئے شکریہ۔</string>
     <string name="support_development_donate">عطیہ کرکے ترقی کا وسیلہ بنیں</string>
     <string name="support_development_star">گٹ ہب پر ستارہ دیں</string>
     <string name="later">بعد میں</string>
@@ -1108,5 +1108,5 @@
     <string name="scheduled_backup_directory_saved">متبادل کی ڈائریکٹری محفوظ ہوئ</string>
     <string name="scheduled_backup_load_failed">جدول متبادل کی ترتیب لادی نہ جا سکیں</string>
     <string name="scheduled_backup_update_failed">جدول متبادل کی ترتیبات محفوظ نہ ہو سکیں</string>
-    <string name="gatekeeper_connection_blocked">‪‫‪‫LunarTune Remote نے رابطہ مسدود کردیا۔ اس ایپ کی بطور آفیشل LunarTune تعمیر تصدیق نہیں ہو سکی۔ آفیشل تعمیر https://github.com/rukamori/ArchiveTune یا https://t.me/ArchiveTuneGC سے نصب کریں۔</string>
+    <string name="gatekeeper_connection_blocked">‪‫‪‫LunarTune Remote نے رابطہ مسدود کردیا۔ اس ایپ کی بطور آفیشل LunarTune تعمیر تصدیق نہیں ہو سکی۔ آفیشل تعمیر https://github.com/cognitiveshadows03/ArchiveTune یا https://t.me/ArchiveTuneGC سے نصب کریں۔</string>
 </resources>

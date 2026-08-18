@@ -1,6 +1,6 @@
 /*
  * LunarTune (2026)
- * © Rukamori — github.com/rukamori
+ * © cognitiveshadows03 — github.com/cognitiveshadows03
  * GPL-3.0 License | Contributors: see git history
  * Do not remove or alter this notice. - Per GPL-3.0 Section 4 & Section 5
  */
@@ -471,9 +471,9 @@ class AboutAttributionRepository
         )
 
         private companion object {
-            const val GitHubCommitsUrl = "https://api.github.com/repos/rukamori/ArchiveTune/commits"
+            const val GitHubCommitsUrl = "https://api.github.com/repos/cognitiveshadows03/ArchiveTune/commits"
             const val GitHubTranslationResourceUrl =
-                "https://api.github.com/repos/rukamori/ArchiveTune/contents/app/src/main/res"
+                "https://api.github.com/repos/cognitiveshadows03/ArchiveTune/contents/app/src/main/res"
             const val TranslationResourceRoot = "app/src/main/res"
             const val TranslationResourcePrefix = "values-"
             const val TranslationCommitMessagePrefix = "Translated using Weblate"

@@ -797,7 +797,7 @@
     <string name="target_language">Target Language</string>
     <string name="close_dialog">Close</string>
     <string name="support_development_title">Support development</string>
-    <string name="support_development_message">Hey there! I\'m rukamori, the developer of LunarTune. If LunarTune has earned a place in your daily listening, you can help keep it moving forward by donating or starring the project on GitHub. Thanks for supporting the work behind the app.</string>
+    <string name="support_development_message">Hey there! I\'m cognitiveshadows03, the developer of LunarTune. If LunarTune has earned a place in your daily listening, you can help keep it moving forward by donating or starring the project on GitHub. Thanks for supporting the work behind the app.</string>
     <string name="support_development_donate">Donate to support development</string>
     <string name="support_development_star">Star on GitHub</string>
     <string name="later">Later</string>
@@ -1108,7 +1108,7 @@
     <string name="scheduled_backup_directory_saved">Backup directory saved</string>
     <string name="scheduled_backup_load_failed">Scheduled backup settings could not be loaded</string>
     <string name="scheduled_backup_update_failed">Scheduled backup settings could not be saved</string>
-    <string name="gatekeeper_connection_blocked">Connection blocked by LunarTune Remote. This app could not be verified as an official LunarTune build. Install an official build from https://github.com/rukamori/ArchiveTune or https://t.me/ArchiveTuneGC.</string>
+    <string name="gatekeeper_connection_blocked">Connection blocked by LunarTune Remote. This app could not be verified as an official LunarTune build. Install an official build from https://github.com/cognitiveshadows03/ArchiveTune or https://t.me/ArchiveTuneGC.</string>
     <string name="navigation_bar_style">Navigation bar style</string>
     <string name="navigation_bar_style_default">Docked</string>
     <string name="navigation_bar_style_floating">Floating</string>

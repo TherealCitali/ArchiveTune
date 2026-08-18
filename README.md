@@ -25,14 +25,14 @@
     <a href="https://lunartune.koiiverse.cloud/privacy"><b>Privacy</b></a> •
     <a href="#download-now"><b>Download</b></a> •
     <a href="#screenshots"><b>Screenshots</b></a> •
-    <a href="https://github.com/rukamori/ArchiveTune/issues/new/choose"><b>Support</b></a>
+    <a href="https://github.com/cognitiveshadows03/ArchiveTune/issues/new/choose"><b>Support</b></a>
   </p>
 
   <div align="center">
-    <img src="https://img.shields.io/github/v/release/rukamori/ArchiveTune?style=for-the-badge&color=6366f1&labelColor=1e1e2e&logo=github" alt="Latest Version" />
-    <img src="https://img.shields.io/github/downloads/rukamori/ArchiveTune/total?style=for-the-badge&color=6366f1&labelColor=1e1e2e&logo=github" alt="Downloads" />
-    <img src="https://img.shields.io/github/stars/rukamori/ArchiveTune?style=for-the-badge&color=6366f1&labelColor=1e1e2e&logo=github" alt="Stars" />
-    <img src="https://img.shields.io/github/license/rukamori/ArchiveTune?style=for-the-badge&color=6366f1&labelColor=1e1e2e" alt="License" />
+    <img src="https://img.shields.io/github/v/release/cognitiveshadows03/ArchiveTune?style=for-the-badge&color=6366f1&labelColor=1e1e2e&logo=github" alt="Latest Version" />
+    <img src="https://img.shields.io/github/downloads/cognitiveshadows03/ArchiveTune/total?style=for-the-badge&color=6366f1&labelColor=1e1e2e&logo=github" alt="Downloads" />
+    <img src="https://img.shields.io/github/stars/cognitiveshadows03/ArchiveTune?style=for-the-badge&color=6366f1&labelColor=1e1e2e&logo=github" alt="Stars" />
+    <img src="https://img.shields.io/github/license/cognitiveshadows03/ArchiveTune?style=for-the-badge&color=6366f1&labelColor=1e1e2e" alt="License" />
     <img src="https://img.shields.io/badge/Architecture-MVVM-6366f1?style=for-the-badge&labelColor=1e1e2e&logo=kotlin" alt="MVVM Architecture" />
     <img src="https://img.shields.io/badge/Language-Kotlin-7f52ff?style=for-the-badge&logo=kotlin&color=6366f1&labelColor=1e1e2e" alt="Kotlin Language" />
     <img src="https://img.shields.io/badge/Toolkit-Jetpack_Compose-4285f4?style=for-the-badge&logo=jetpack-compose&color=6366f1&labelColor=1e1e2e" alt="Jetpack Compose Toolkit" />
@@ -69,15 +69,15 @@ If you choose to use a fork, you do so at your own risk.
 
 <div align="center">
 
-<img src="https://github.com/rukamori/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_1.jpg" alt="Browse" width="30%" />
-<img src="https://github.com/rukamori/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_2.jpg" alt="Live Lyrics" width="30%" />
-<img src="https://github.com/rukamori/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_3.jpg" alt="Theme Customization" width="30%" />
-<img src="https://github.com/rukamori/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_4.jpg" alt="Live Statistics" width="30%" />
-<img src="https://github.com/rukamori/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_5.jpg" alt="Artist" width="30%" />
-<img src="https://github.com/rukamori/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_6.jpg" alt="Album" width="30%" />
-<img src="https://github.com/rukamori/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_7.jpg" alt="Player" width="30%" />
-<img src="https://github.com/rukamori/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_8.jpg" alt="Settings" width="30%" />
-<img src="https://github.com/rukamori/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_9.jpg" alt="Settings" width="30%" />
+<img src="https://github.com/cognitiveshadows03/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_1.jpg" alt="Browse" width="30%" />
+<img src="https://github.com/cognitiveshadows03/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_2.jpg" alt="Live Lyrics" width="30%" />
+<img src="https://github.com/cognitiveshadows03/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_3.jpg" alt="Theme Customization" width="30%" />
+<img src="https://github.com/cognitiveshadows03/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_4.jpg" alt="Live Statistics" width="30%" />
+<img src="https://github.com/cognitiveshadows03/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_5.jpg" alt="Artist" width="30%" />
+<img src="https://github.com/cognitiveshadows03/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_6.jpg" alt="Album" width="30%" />
+<img src="https://github.com/cognitiveshadows03/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_7.jpg" alt="Player" width="30%" />
+<img src="https://github.com/cognitiveshadows03/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_8.jpg" alt="Settings" width="30%" />
+<img src="https://github.com/cognitiveshadows03/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_9.jpg" alt="Settings" width="30%" />
 
 </div>
 
@@ -188,13 +188,13 @@ If you choose to use a fork, you do so at your own risk.
   <tbody>
     <tr>
       <td align="center">
-        <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/rukamori/ArchiveTune/">
+        <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/cognitiveshadows03/ArchiveTune/">
           <img src="https://github.com/ImranR98/Obtainium/blob/main/assets/graphics/badge_obtainium.png" height="50" alt="Get LunarTune on Obtainium">
         </a>
       </td>
       <td align="center">
         <a href="https://apt.izzysoft.de/fdroid/index/apk/dev.citali.lunartune">
-          <img src="https://raw.githubusercontent.com/rukamori/ArchiveTune/757d5932832e1da27ced56de98c5ad1275cf0db1/assets/IzzyOnDroidButtonBorder.svg" height="50" alt="Get LunarTune on IzzyOnDroid">
+          <img src="https://raw.githubusercontent.com/cognitiveshadows03/ArchiveTune/757d5932832e1da27ced56de98c5ad1275cf0db1/assets/IzzyOnDroidButtonBorder.svg" height="50" alt="Get LunarTune on IzzyOnDroid">
         </a>
       </td>
     </tr>
@@ -203,8 +203,8 @@ If you choose to use a fork, you do so at your own risk.
     </tr>
     <tr>
       <td align="center" colspan="2">
-        <a href="https://github.com/rukamori/ArchiveTune/releases/latest">
-          <img src="https://raw.githubusercontent.com/rukamori/ArchiveTune/refs/heads/main/assets/badge_github.png" height="50" alt="Get LunarTune on GitHub">
+        <a href="https://github.com/cognitiveshadows03/ArchiveTune/releases/latest">
+          <img src="https://raw.githubusercontent.com/cognitiveshadows03/ArchiveTune/refs/heads/main/assets/badge_github.png" height="50" alt="Get LunarTune on GitHub">
         </a>
       </td>
     </tr>
@@ -220,7 +220,7 @@ If you choose to use a fork, you do so at your own risk.
       </td>
       <td align="center">
         <a href="https://unclouded.app/apps/lunartune/">
-          <img src="https://raw.githubusercontent.com/rukamori/ArchiveTune/refs/heads/dev/assets/badge_unclouded.png" height="50" alt="Get LunarTune on Unclouded">
+          <img src="https://raw.githubusercontent.com/cognitiveshadows03/ArchiveTune/refs/heads/dev/assets/badge_unclouded.png" height="50" alt="Get LunarTune on Unclouded">
         </a>
       </td>
     </tr>
@@ -238,8 +238,8 @@ If you choose to use a fork, you do so at your own risk.
   <tbody>
     <tr>
       <td align="center">
-        <a href="https://nightly.link/rukamori/ArchiveTune/workflows/build/dev/app-gms-mobile-universal-release">
-          <img src="https://raw.githubusercontent.com/rukamori/ArchiveTune/refs/heads/main/assets/badge_github.png" height="50" alt="Download the latest LunarTune nightly build">
+        <a href="https://nightly.link/cognitiveshadows03/ArchiveTune/workflows/build/dev/app-gms-mobile-universal-release">
+          <img src="https://raw.githubusercontent.com/cognitiveshadows03/ArchiveTune/refs/heads/main/assets/badge_github.png" height="50" alt="Download the latest LunarTune nightly build">
         </a>
       </td>
     </tr>
@@ -271,8 +271,8 @@ LunarTune belongs to everyone. Help us localize the experience for your region.
 </div>
 
 ### ✨ Project Contributors
-<a href="https://github.com/rukamori/ArchiveTune/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=rukamori/ArchiveTune&columns=6" />
+<a href="https://github.com/cognitiveshadows03/ArchiveTune/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=cognitiveshadows03/ArchiveTune&columns=6" />
 </a>
 
 ### 🛠️ Development & Engineering
@@ -307,7 +307,7 @@ LunarTune is licensed under the **GNU General Public License v3.0 (GPLv3)**.
 
 You may copy, modify, and redistribute the source code, including commercially, provided that you comply with the GPLv3. This includes preserving applicable copyright and license notices, clearly identifying modified versions, and providing the corresponding source code when required.
 
-Copyright © Rukamori and the LunarTune contributors for their respective original contributions.
+Copyright © cognitiveshadows03 and the LunarTune contributors for their respective original contributions.
 
 The **LunarTune™** name, logo, application icon, and official branding are not licensed under the GPLv3. Unofficial forks must not present themselves as official LunarTune releases or imply endorsement by the LunarTune maintainers.
 
@@ -317,8 +317,8 @@ See the [`LICENSE`](LICENSE) file for the complete GPLv3 terms.
 ---
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/rukamori/ArchiveTune/refs/heads/dev/fastlane/metadata/android/en-US/images/ArchiveTuneFull.png" alt="LunarTune Banner" style="width: 100%; max-width: 500px;">
+  <img src="https://raw.githubusercontent.com/cognitiveshadows03/ArchiveTune/refs/heads/dev/fastlane/metadata/android/en-US/images/ArchiveTuneFull.png" alt="LunarTune Banner" style="width: 100%; max-width: 500px;">
   <p><b>If LunarTune elevated your music experience, please consider giving us a ⭐</b></p>
   <br />
-  <img src="https://raw.githubusercontent.com/rukamori/ArchiveTune/refs/heads/dev/assets/badge_part.png" alt="LunarTune Banner" style="width: 180px">
+  <img src="https://raw.githubusercontent.com/cognitiveshadows03/ArchiveTune/refs/heads/dev/assets/badge_part.png" alt="LunarTune Banner" style="width: 180px">
 </div>

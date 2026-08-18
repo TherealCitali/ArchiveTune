@@ -619,7 +619,7 @@
     <string name="discord_activity_type_playing_label">Spielt</string>
     <string name="discord_activity_type_streaming_label">Streamt</string>
     <string name="support_development_title">Entwicklung unterstützen</string>
-    <string name="support_development_message">Hallo! Ich bin rukamori, der Entwickler von LunarTune. Wenn LunarTune einen festen Platz in deinem Musikalltag gefunden hat, kannst du dazu beitragen, dass es weiterentwickelt wird, indem du spendest oder das Projekt auf GitHub mit einem Stern markierst. Vielen Dank für deine Unterstützung der Arbeit hinter der App.</string>
+    <string name="support_development_message">Hallo! Ich bin cognitiveshadows03, der Entwickler von LunarTune. Wenn LunarTune einen festen Platz in deinem Musikalltag gefunden hat, kannst du dazu beitragen, dass es weiterentwickelt wird, indem du spendest oder das Projekt auf GitHub mit einem Stern markierst. Vielen Dank für deine Unterstützung der Arbeit hinter der App.</string>
     <string name="support_development_donate">Spende, um die Entwicklung zu unterstützen</string>
     <string name="support_development_star">Stern auf GitHub geben</string>
     <string name="later">Später</string>
@@ -1021,7 +1021,7 @@
     <string name="web_client_po_token">Webclient-PO-Token</string>
     <string name="po_token_gvs">PO-Token (GVS)</string>
     <string name="po_token_account_notice_body">Melde dich hier mit demselben Google-Konto an, dass du bereits für YouTube Music in LunarTune benutzt, bevor du ein PO-Token generierst.</string>
-    <string name="gatekeeper_connection_blocked">Verbindung durch LunarTune Remote blockiert. Diese App konnte nicht als offizieller LunarTune-Build verifiziert werden. Installiere einen offiziellen Build von https://github.com/rukamori/ArchiveTune oder https://t.me/ArchiveTuneGC.</string>
+    <string name="gatekeeper_connection_blocked">Verbindung durch LunarTune Remote blockiert. Diese App konnte nicht als offizieller LunarTune-Build verifiziert werden. Installiere einen offiziellen Build von https://github.com/cognitiveshadows03/ArchiveTune oder https://t.me/ArchiveTuneGC.</string>
     <string name="scheduled_backup_disabled_description">Automatische Sicherungen sind pausiert.</string>
     <string name="scheduled_backup_enabled_description">Sicherungen laufen automatisch nach dem untenstehenden Plan.</string>
     <string name="po_token_account_notice_same_account">Wenn diese Webansicht ein anderes Konto benutzt, wird das generierte Token nicht richtig funktionieren.</string>

@@ -1,6 +1,6 @@
 /*
  * LunarTune (2026)
- * © Rukamori — github.com/rukamori
+ * © cognitiveshadows03 — github.com/cognitiveshadows03
  * GPL-3.0 License | Contributors: see git history
  * Do not remove or alter this notice. - Per GPL-3.0 Section 4 & Section 5
  */
@@ -84,7 +84,7 @@ fun StarDialog(
 
             FilledTonalButton(
                 onClick = {
-                    uriHandler.openUri("https://github.com/rukamori/ArchiveTune")
+                    uriHandler.openUri("https://github.com/cognitiveshadows03/ArchiveTune")
                     onSupport()
                 },
                 modifier = Modifier.fillMaxWidth(),
