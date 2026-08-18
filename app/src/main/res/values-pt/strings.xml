@@ -807,7 +807,7 @@
     <string name="target_language">Idioma de Destino</string>
     <string name="close_dialog">Fechar</string>
     <string name="support_development_title">Apoiar o desenvolvimento</string>
-    <string name="support_development_message">Olá! Sou rukamori, desenvolvedora do LunarTune. Se o LunarTune conquistou um lugar tua rotina diária, poderás ajudar o projeto a evoluir fazendo uma doação ou dando uma estrela no GitHub. Obrigada por apoiar o trabalho por detrás desta app.</string>
+    <string name="support_development_message">Olá! Sou cognitiveshadows03, desenvolvedora do LunarTune. Se o LunarTune conquistou um lugar tua rotina diária, poderás ajudar o projeto a evoluir fazendo uma doação ou dando uma estrela no GitHub. Obrigada por apoiar o trabalho por detrás desta app.</string>
     <string name="support_development_donate">Doa para apoiar o desenvolvimento</string>
     <string name="support_development_star">Dar estrela no GitHub</string>
     <string name="later">Depois</string>
@@ -1118,5 +1118,5 @@
     <string name="scheduled_backup_directory_saved">Diretório de cópias de segurança guardado</string>
     <string name="scheduled_backup_load_failed">Não foi possível carregar as configurações de cópia de segurança programadas</string>
     <string name="scheduled_backup_update_failed">Não foi possível guardar as configurações de cópia de segurança programadas</string>
-    <string name="gatekeeper_connection_blocked">Ligação bloqueada pelo LunarTune Remote. Não foi possível verificar se esta aplicação é uma versão oficial do LunarTune. Instala uma versão oficial em https://github.com/rukamori/ArchiveTune ou https://t.me/ArchiveTuneGC.</string>
+    <string name="gatekeeper_connection_blocked">Ligação bloqueada pelo LunarTune Remote. Não foi possível verificar se esta aplicação é uma versão oficial do LunarTune. Instala uma versão oficial em https://github.com/cognitiveshadows03/ArchiveTune ou https://t.me/ArchiveTuneGC.</string>
 </resources>
