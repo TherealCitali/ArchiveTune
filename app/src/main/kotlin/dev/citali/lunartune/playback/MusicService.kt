@@ -367,6 +367,7 @@ class MusicService :
         PlayerStreamClient.ANDROID_VR,
     )
     private val playbackUrlCache = ConcurrentHashMap<String, AuthScopedCacheValue>()
+    private var nextMediaItemPrefetchJob: Job? = null
     private val extractorPlaybackUrlCache = ConcurrentHashMap<String, AuthScopedCacheValue>()
     private val remotePlaybackTrackingUrlCache = ConcurrentHashMap<String, String>()
     private val contentLengthCache = ConcurrentHashMap<String, Long>()
@@ -6719,6 +6720,56 @@ class MusicService :
         if (!isCrossfading) {
             scheduleCrossfade()
         }
+        prefetchNextMediaItemStream()
+    }
+
+    /**
+     * Resolve the next queue item's YouTube stream URL in the background so skip/next
+     * can hit [playbackUrlCache] instead of waiting on Innertube.
+     */
+    private fun prefetchNextMediaItemStream() {
+        nextMediaItemPrefetchJob?.cancel()
+        if (player.mediaItemCount == 0 || player.currentTimeline.isEmpty) return
+        if (preferredStreamClient == PlayerStreamClient.ARCHIVETUNE_EXTRACTOR) return
+        val nextIndex = player.nextMediaItemIndex
+        if (nextIndex == C.INDEX_UNSET || nextIndex < 0 || nextIndex >= player.mediaItemCount) return
+        val nextItem = player.getMediaItemAt(nextIndex)
+        val mediaId = nextItem.mediaId.trim().takeIf { it.isNotBlank() } ?: return
+        if (mediaId.isLocalMediaId()) return
+        val authFingerprint = YouTube.currentPlaybackAuthState().fingerprint
+        if (playbackUrlCache[mediaId]?.isValidFor(authFingerprint) == true) return
+        if (isLowDataModeActive()) return
+
+        nextMediaItemPrefetchJob =
+            scope.launch(Dispatchers.IO + SilentHandler) {
+                runCatching {
+                    val lowData = isLowDataModeActive()
+                    val result =
+                        retryWithoutPlaybackLoginContext {
+                            YTPlayerUtils.playerResponseForPlayback(
+                                mediaId,
+                                audioQuality = if (lowData) AudioQuality.LOW else audioQuality,
+                                connectivityManager = connectivityManager,
+                                preferredStreamClient = preferredStreamClient,
+                                networkMetered = lowData,
+                            )
+                        }
+                    result.onSuccess { playbackData ->
+                        if (lowData) return@onSuccess
+                        playbackUrlCache[mediaId] =
+                            AuthScopedCacheValue(
+                                url = playbackData.streamUrl,
+                                expiresAtMs =
+                                    System.currentTimeMillis() +
+                                        (playbackData.streamExpiresInSeconds.coerceAtLeast(1) * 1000L),
+                                authFingerprint = playbackData.authFingerprint,
+                            )
+                    }
+                }.onFailure { error ->
+                    if (error is CancellationException) throw error
+                    Timber.tag(TAG).d(error, "Prefetch failed for %s", mediaId)
+                }
+            }
     }
 
     private fun isCurrentPlaybackItemLocal(currentMediaMetadata: MediaMetadata): Boolean =
@@ -8795,8 +8846,8 @@ class MusicService :
         const val CROSSFADE_MAX_BUFFER_BEFORE_START_MS = 12_500L
         const val PRIMARY_MIN_BUFFER_MS = 20_000
         const val PRIMARY_MAX_BUFFER_MS = 60_000
-        const val PRIMARY_BUFFER_FOR_PLAYBACK_MS = 750
-        const val PRIMARY_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = 2_500
+        const val PRIMARY_BUFFER_FOR_PLAYBACK_MS = 150
+        const val PRIMARY_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = 750
         const val CROSSFADE_MIN_BUFFER_MS = 15_000
         const val CROSSFADE_MAX_BUFFER_MS = 45_000
         const val CROSSFADE_FRAME_MS = 32L
