@@ -58,6 +58,7 @@ data class AboutUiModel(
     val buildVariant: String,
     val primaryLinks: AboutLinkCollection,
     val leadDeveloper: TeamMember,
+    val credits: TeamMemberCollection,
     val collaborators: TeamMemberCollection,
     val respecters: TeamMemberCollection,
     val contributorsState: AboutContributorsUiState,
@@ -415,7 +416,7 @@ class AboutViewModel
                             id = "github",
                             iconResId = R.drawable.github,
                             labelResId = R.string.about_content_desc_github,
-                            url = "https://github.com/rukamori/ArchiveTune",
+                            url = "https://github.com/cognitiveshadows03/ArchiveTune",
                         ),
                         AboutLinkUiModel(
                             id = "website",
@@ -450,31 +451,37 @@ class AboutViewModel
                     ),
                 leadDeveloper =
                     TeamMember(
-                        avatarUrl = "https://avatars.githubusercontent.com/u/107134739?v=4",
-                        name = "morie",
+                        avatarUrl = "https://avatars.githubusercontent.com/u/273977667?v=4",
+                        name = "cognitiveshadows03",
                         positionResId = R.string.about_position_lead_dev,
-                        profileUrl = "https://github.com/rukamori",
+                        profileUrl = "https://github.com/cognitiveshadows03",
                         links =
                             AboutLinkCollection.of(
                                 AboutLinkUiModel(
                                     id = "github",
                                     iconResId = R.drawable.github,
                                     labelResId = R.string.about_content_desc_github,
-                                    url = "https://github.com/rukamori",
-                                ),
-                                AboutLinkUiModel(
-                                    id = "website",
-                                    iconResId = R.drawable.website,
-                                    labelResId = R.string.about_content_desc_website,
-                                    url = "https://koiiverse.cloud",
-                                ),
-                                AboutLinkUiModel(
-                                    id = "discord",
-                                    iconResId = R.drawable.alternate_email,
-                                    labelResId = R.string.about_content_desc_discord,
-                                    url = "https://discord.com/users/886971572668219392",
+                                    url = "https://github.com/cognitiveshadows03",
                                 ),
                             ),
+                    ),
+                credits =
+                    TeamMemberCollection.of(
+                        TeamMember(
+                            avatarUrl = "https://avatars.githubusercontent.com/u/107134739?v=4",
+                            name = "ArchiveTune",
+                            positionResId = R.string.about_position_original,
+                            profileUrl = "https://github.com/rukamori/ArchiveTune",
+                            links =
+                                AboutLinkCollection.of(
+                                    AboutLinkUiModel(
+                                        id = "github",
+                                        iconResId = R.drawable.github,
+                                        labelResId = R.string.about_content_desc_github,
+                                        url = "https://github.com/rukamori/ArchiveTune",
+                                    ),
+                                ),
+                        ),
                     ),
                 collaborators =
                     TeamMemberCollection.of(
@@ -617,6 +624,6 @@ class AboutViewModel
         private companion object {
             const val MaxDisplayedContributors = 20
             const val DebugBuildBadge = "DEBUG"
-            const val ContributorsReadMoreUrl = "https://github.com/rukamori/ArchiveTune/graphs/contributors"
+            const val ContributorsReadMoreUrl = "https://github.com/cognitiveshadows03/ArchiveTune/graphs/contributors"
         }
     }

@@ -62,7 +62,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
@@ -872,19 +871,15 @@ private fun SurfaceAppIcon(modifier: Modifier = Modifier) {
     androidx.compose.material3.Surface(
         modifier = modifier,
         shape = CircleShape,
-        color = MaterialTheme.colorScheme.primaryContainer,
-        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
     ) {
-        val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
-        val iconColorFilter = remember(iconTint) { ColorFilter.tint(iconTint) }
         Image(
             painter = painterResource(R.drawable.about_splash),
-            contentDescription = null,
-            colorFilter = iconColorFilter,
+            contentDescription = stringResource(R.string.app_name),
             modifier =
                 Modifier
-                    .padding(AboutSpacing.sm)
-                    .size(64.dp),
+                    .padding(AboutSpacing.xs)
+                    .size(88.dp),
         )
     }
 }
