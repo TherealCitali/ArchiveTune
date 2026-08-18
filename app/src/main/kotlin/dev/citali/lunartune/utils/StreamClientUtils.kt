@@ -7,7 +7,7 @@
 
 package dev.citali.lunartune.utils
 
-import dev.citali.lunartune.innertube.models.YouTubeClient
+import moe.rukamori.archivetune.innertube.models.YouTubeClient
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Request

@@ -11,7 +11,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
-import dev.citali.lunartune.morideobfuscator.CipherSnapshot
+import moe.rukamori.archivetune.morideobfuscator.CipherSnapshot
 import javax.inject.Inject
 
 data class CipherSettingsDomainState(

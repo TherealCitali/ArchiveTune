@@ -26,8 +26,8 @@ import dev.citali.lunartune.cipher.CipherSettingsDomainState
 import dev.citali.lunartune.cipher.ManualCipherRefreshResult
 import dev.citali.lunartune.cipher.ObserveCipherSettingsUseCase
 import dev.citali.lunartune.cipher.RefreshCipherUseCase
-import dev.citali.lunartune.morideobfuscator.CipherRuntimeStatus
-import dev.citali.lunartune.morideobfuscator.MORI_CIPHER_REFRESH_INTERVAL_MILLIS
+import moe.rukamori.archivetune.morideobfuscator.CipherRuntimeStatus
+import moe.rukamori.archivetune.morideobfuscator.MORI_CIPHER_REFRESH_INTERVAL_MILLIS
 import dev.citali.lunartune.utils.reportException
 import java.util.Locale
 import javax.inject.Inject

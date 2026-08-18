@@ -8,7 +8,7 @@
 package dev.citali.lunartune.lyrics
 
 import android.content.Context
-import dev.citali.lunartune.betterlyrics.BetterLyrics
+import moe.rukamori.archivetune.betterlyrics.BetterLyrics
 import dev.citali.lunartune.constants.EnableBetterLyricsPortatoKey
 import dev.citali.lunartune.utils.dataStore
 import dev.citali.lunartune.utils.get

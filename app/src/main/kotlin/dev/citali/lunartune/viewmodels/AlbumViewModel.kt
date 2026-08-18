@@ -26,8 +26,8 @@ import dev.citali.lunartune.constants.HideVideoKey
 import dev.citali.lunartune.db.MusicDatabase
 import dev.citali.lunartune.extensions.filterBlockedArtists
 import dev.citali.lunartune.extensions.filterVideo
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.models.AlbumItem
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.models.AlbumItem
 import dev.citali.lunartune.utils.dataStore
 import dev.citali.lunartune.utils.reportException
 import javax.inject.Inject

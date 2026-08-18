@@ -9,7 +9,7 @@ package dev.citali.lunartune.lyrics
 
 import android.content.Context
 import android.util.Log
-import dev.citali.lunartune.betterlyrics.BetterLyrics
+import moe.rukamori.archivetune.betterlyrics.BetterLyrics
 import dev.citali.lunartune.constants.EnableBetterLyricsKey
 import dev.citali.lunartune.utils.GlobalLog
 import dev.citali.lunartune.utils.dataStore

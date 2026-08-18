@@ -111,9 +111,9 @@ import dev.citali.lunartune.db.entities.EventWithSong
 import dev.citali.lunartune.extensions.metadata
 import dev.citali.lunartune.extensions.toMediaItem
 import dev.citali.lunartune.extensions.togglePlayPause
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.pages.HistoryPage
-import dev.citali.lunartune.innertube.utils.hasYouTubeLoginCookie
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.pages.HistoryPage
+import moe.rukamori.archivetune.innertube.utils.hasYouTubeLoginCookie
 import dev.citali.lunartune.models.toMediaMetadata
 import dev.citali.lunartune.playback.queues.ListQueue
 import dev.citali.lunartune.playback.queues.YouTubeQueue
@@ -797,8 +797,8 @@ private fun RemoteHistoryFeed(
     activeMediaId: String?,
     navController: NavController,
     onRetry: () -> Unit,
-    onSongMenu: (dev.citali.lunartune.innertube.models.SongItem) -> Unit,
-    onSongClick: (dev.citali.lunartune.innertube.models.SongItem) -> Unit,
+    onSongMenu: (moe.rukamori.archivetune.innertube.models.SongItem) -> Unit,
+    onSongClick: (moe.rukamori.archivetune.innertube.models.SongItem) -> Unit,
 ) {
     LazyColumn(
         state = listState,

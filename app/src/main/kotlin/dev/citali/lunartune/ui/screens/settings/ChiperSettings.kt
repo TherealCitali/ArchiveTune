@@ -71,7 +71,7 @@ import androidx.navigation.NavController
 import dev.citali.lunartune.LocalAnimationsDisabled
 import dev.citali.lunartune.LocalPlayerAwareWindowInsets
 import dev.citali.lunartune.R
-import dev.citali.lunartune.morideobfuscator.CipherRuntimeStatus
+import moe.rukamori.archivetune.morideobfuscator.CipherRuntimeStatus
 import dev.citali.lunartune.ui.component.IconButton
 import dev.citali.lunartune.ui.component.PreferenceEntry
 import dev.citali.lunartune.ui.component.PreferenceGroup

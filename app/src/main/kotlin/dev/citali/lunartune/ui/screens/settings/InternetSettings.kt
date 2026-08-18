@@ -64,7 +64,7 @@ import kotlinx.coroutines.launch
 import dev.citali.lunartune.LocalPlayerAwareWindowInsets
 import dev.citali.lunartune.R
 import dev.citali.lunartune.constants.*
-import dev.citali.lunartune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.YouTube
 import dev.citali.lunartune.ui.component.*
 import dev.citali.lunartune.ui.utils.backToMain
 import dev.citali.lunartune.utils.ProxyUtils

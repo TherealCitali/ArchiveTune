@@ -9,7 +9,7 @@ package dev.citali.lunartune.lyrics
 
 import android.content.Context
 import dev.citali.lunartune.constants.EnableSimpMusicLyricsKey
-import dev.citali.lunartune.simpmusic.SimpMusicLyrics
+import moe.rukamori.archivetune.simpmusic.SimpMusicLyrics
 import dev.citali.lunartune.utils.dataStore
 import dev.citali.lunartune.utils.get
 

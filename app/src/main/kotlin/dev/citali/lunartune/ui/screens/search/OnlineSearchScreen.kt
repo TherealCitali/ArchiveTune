@@ -40,7 +40,7 @@ import kotlinx.coroutines.flow.drop
 import dev.citali.lunartune.LocalPlayerConnection
 import dev.citali.lunartune.R
 import dev.citali.lunartune.extensions.togglePlayPause
-import dev.citali.lunartune.innertube.models.*
+import moe.rukamori.archivetune.innertube.models.*
 import dev.citali.lunartune.models.toMediaMetadata
 import dev.citali.lunartune.playback.queues.YouTubeQueue
 import dev.citali.lunartune.ui.component.LocalMenuState

@@ -26,7 +26,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import dev.citali.lunartune.canvas.models.CanvasArtwork
-import dev.citali.lunartune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.YouTube
 import dev.citali.lunartune.storage.StorageFolderKind
 import dev.citali.lunartune.storage.StorageLocationRepository
 import dev.citali.lunartune.utils.StreamClientUtils

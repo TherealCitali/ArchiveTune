@@ -12,8 +12,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.pages.MoodAndGenres
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.pages.MoodAndGenres
 import dev.citali.lunartune.utils.reportException
 import javax.inject.Inject
 

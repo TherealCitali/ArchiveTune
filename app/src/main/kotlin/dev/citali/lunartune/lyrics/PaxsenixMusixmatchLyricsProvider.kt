@@ -9,7 +9,7 @@ package dev.citali.lunartune.lyrics
 
 import android.content.Context
 import dev.citali.lunartune.constants.EnablePaxsenixMusixmatchLyricsKey
-import dev.citali.lunartune.paxsenix.PaxsenixLyrics
+import moe.rukamori.archivetune.paxsenix.PaxsenixLyrics
 import dev.citali.lunartune.utils.dataStore
 import dev.citali.lunartune.utils.get
 

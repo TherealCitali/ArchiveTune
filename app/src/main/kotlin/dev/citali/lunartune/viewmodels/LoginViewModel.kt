@@ -20,7 +20,7 @@ import dev.citali.lunartune.auth.CompleteYouTubeLoginUseCase
 import dev.citali.lunartune.auth.MissingYouTubeDataSyncIdException
 import dev.citali.lunartune.auth.SaveYouTubePoTokenUseCase
 import dev.citali.lunartune.auth.UpdateYouTubeLoginContextUseCase
-import dev.citali.lunartune.innertube.PlaybackAuthState
+import moe.rukamori.archivetune.innertube.PlaybackAuthState
 import timber.log.Timber
 import javax.inject.Inject
 

@@ -96,8 +96,8 @@ import dev.citali.lunartune.constants.PreferredLyricsProvider
 import dev.citali.lunartune.constants.PreloadQueueLyricsEnabledKey
 import dev.citali.lunartune.constants.QueueLyricsPreloadCountKey
 import dev.citali.lunartune.constants.deserializeLyricsProviderOrder
-import dev.citali.lunartune.paxsenix.models.PaxsenixStats
-import dev.citali.lunartune.paxsenix.models.ProviderStats
+import moe.rukamori.archivetune.paxsenix.models.PaxsenixStats
+import moe.rukamori.archivetune.paxsenix.models.ProviderStats
 import dev.citali.lunartune.ui.component.ActionPromptDialog
 import dev.citali.lunartune.ui.component.DefaultDialog
 import dev.citali.lunartune.ui.component.EnumListPreference

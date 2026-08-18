@@ -20,11 +20,11 @@ import dev.citali.lunartune.constants.HideExplicitKey
 import dev.citali.lunartune.constants.HideVideoKey
 import dev.citali.lunartune.db.MusicDatabase
 import dev.citali.lunartune.extensions.filterBlockedArtists
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.models.BrowseEndpoint
-import dev.citali.lunartune.innertube.models.filterExplicit
-import dev.citali.lunartune.innertube.models.filterVideo
-import dev.citali.lunartune.innertube.pages.ArtistItemsPageLayout
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.models.BrowseEndpoint
+import moe.rukamori.archivetune.innertube.models.filterExplicit
+import moe.rukamori.archivetune.innertube.models.filterVideo
+import moe.rukamori.archivetune.innertube.pages.ArtistItemsPageLayout
 import dev.citali.lunartune.models.ItemsPage
 import dev.citali.lunartune.utils.dataStore
 import dev.citali.lunartune.utils.get

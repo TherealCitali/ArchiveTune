@@ -116,8 +116,8 @@ import dev.citali.lunartune.constants.UseLoginForBrowse
 import dev.citali.lunartune.constants.VisitorDataKey
 import dev.citali.lunartune.constants.WebClientPoTokenEnabledKey
 import dev.citali.lunartune.constants.YtmSyncKey
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.utils.hasYouTubeLoginCookie
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.utils.hasYouTubeLoginCookie
 import dev.citali.lunartune.ui.component.IconButton
 import dev.citali.lunartune.ui.component.InfoLabel
 import dev.citali.lunartune.ui.component.TextFieldDialog

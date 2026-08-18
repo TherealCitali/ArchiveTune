@@ -7,7 +7,7 @@
 
 package dev.citali.lunartune.utils
 
-import dev.citali.lunartune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.YouTube
 import java.net.InetSocketAddress
 import java.net.Proxy
 

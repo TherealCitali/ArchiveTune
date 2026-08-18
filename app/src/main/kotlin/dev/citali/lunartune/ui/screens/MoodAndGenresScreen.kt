@@ -57,8 +57,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import dev.citali.lunartune.LocalPlayerAwareWindowInsets
 import dev.citali.lunartune.R
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.models.BrowseEndpoint
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.models.BrowseEndpoint
 import dev.citali.lunartune.ui.component.NavigationTitle
 import dev.citali.lunartune.ui.component.shimmer.ShimmerHost
 import dev.citali.lunartune.ui.component.shimmer.TextPlaceholder

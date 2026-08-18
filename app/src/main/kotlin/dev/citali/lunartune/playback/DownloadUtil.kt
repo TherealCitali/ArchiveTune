@@ -39,7 +39,7 @@ import dev.citali.lunartune.db.entities.FormatEntity
 import dev.citali.lunartune.db.entities.SongEntity
 import dev.citali.lunartune.di.DownloadCache
 import dev.citali.lunartune.di.PlayerCache
-import dev.citali.lunartune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.YouTube
 import dev.citali.lunartune.utils.AuthScopedCacheValue
 import dev.citali.lunartune.utils.StreamClientUtils
 import dev.citali.lunartune.utils.YTPlayerUtils

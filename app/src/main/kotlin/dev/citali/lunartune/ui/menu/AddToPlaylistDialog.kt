@@ -90,8 +90,8 @@ import dev.citali.lunartune.LocalDatabase
 import dev.citali.lunartune.R
 import dev.citali.lunartune.constants.InnerTubeCookieKey
 import dev.citali.lunartune.db.entities.Playlist
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.utils.hasYouTubeLoginCookie
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.utils.hasYouTubeLoginCookie
 import dev.citali.lunartune.ui.component.CreatePlaylistDialog
 import dev.citali.lunartune.ui.component.DefaultDialog
 import dev.citali.lunartune.ui.component.PlaylistListItem

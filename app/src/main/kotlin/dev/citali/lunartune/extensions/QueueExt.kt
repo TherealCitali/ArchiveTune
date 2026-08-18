@@ -7,7 +7,7 @@
 
 package dev.citali.lunartune.extensions
 
-import dev.citali.lunartune.innertube.models.WatchEndpoint
+import moe.rukamori.archivetune.innertube.models.WatchEndpoint
 import dev.citali.lunartune.models.MediaMetadata
 import dev.citali.lunartune.models.PersistQueue
 import dev.citali.lunartune.models.QueueData

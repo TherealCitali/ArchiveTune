@@ -83,8 +83,8 @@ import coil3.compose.AsyncImage
 import dev.citali.lunartune.LocalDatabase
 import dev.citali.lunartune.LocalPlayerConnection
 import dev.citali.lunartune.R
-import dev.citali.lunartune.innertube.YouTube
-import dev.citali.lunartune.innertube.models.MediaInfo
+import moe.rukamori.archivetune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.models.MediaInfo
 import dev.citali.lunartune.ui.component.LocalBottomSheetPageState
 
 private enum class MediaInfoTab(

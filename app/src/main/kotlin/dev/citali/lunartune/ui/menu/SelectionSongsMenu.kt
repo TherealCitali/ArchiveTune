@@ -64,7 +64,7 @@ import dev.citali.lunartune.R
 import dev.citali.lunartune.db.entities.PlaylistSongMap
 import dev.citali.lunartune.db.entities.Song
 import dev.citali.lunartune.extensions.toMediaItem
-import dev.citali.lunartune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.YouTube
 import dev.citali.lunartune.models.MediaMetadata
 import dev.citali.lunartune.playback.ExoDownloadService
 import dev.citali.lunartune.playback.queues.ListQueue

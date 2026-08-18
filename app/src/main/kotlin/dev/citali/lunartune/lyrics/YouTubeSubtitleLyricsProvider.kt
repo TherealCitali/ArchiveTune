@@ -8,7 +8,7 @@
 package dev.citali.lunartune.lyrics
 
 import android.content.Context
-import dev.citali.lunartune.innertube.YouTube
+import moe.rukamori.archivetune.innertube.YouTube
 
 object YouTubeSubtitleLyricsProvider : LyricsProvider {
     override val name = "YouTube Subtitle"
