@@ -1097,7 +1097,7 @@
     <string name="scheduled_backup_directory_saved">اتحفظ مجلد النسخ الاحتياطي بنجاح</string>
     <string name="scheduled_backup_load_failed">معرفناش نحمل إعدادات النسخ الاحتياطي المجدول</string>
     <string name="scheduled_backup_update_failed">معرفناش نحفظ إعدادات النسخ الاحتياطي المجدول</string>
-    <string name="gatekeeper_connection_blocked">الاتصال اتقفل من LunarTune Remote. معرفناش نتحقق إن النسخة دي رسمية من التطبيق. حمل نسخة رسمية من https://github.com/cognitiveshadows03/ArchiveTune أو https://t.me/ArchiveTuneGC.</string>
+    <string name="gatekeeper_connection_blocked">الاتصال اتقفل من LunarTune Remote. معرفناش نتحقق إن النسخة دي رسمية من التطبيق. حمل نسخة رسمية من https://github.com/cognitiveshadows03/ArchiveTune أو https://t.me/LunarTuneGC.</string>
     <string name="remove_from_library_confirm">عايز تشيل \"%1$s\" من المكتبة؟</string>
     <string name="eq_advanced_description">نطاقات دقيقة، تعديل الكسب، التأثيرات، والملفات الشخصية</string>
     <string name="eq_profiles_description">احفظ، استورد، وشارك إعدادات كاملة</string>

@@ -212,7 +212,7 @@ class BuildOnboardingUiStateUseCase
                         titleResId = R.string.onboarding_community_telegram_title,
                         descriptionResId = R.string.onboarding_community_telegram_desc,
                         iconResId = R.drawable.telegram,
-                        url = "https://t.me/ArchiveTuneGC",
+                        url = "https://t.me/LunarTuneGC",
                     ),
                     OnboardingCommunityActionUiModel(
                         id = "donate",

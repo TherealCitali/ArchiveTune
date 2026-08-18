@@ -428,7 +428,7 @@ class AboutViewModel
                             id = "telegram",
                             iconResId = R.drawable.telegram,
                             labelResId = R.string.about_content_desc_telegram,
-                            url = "https://t.me/ArchiveTuneGC",
+                            url = "https://t.me/LunarTuneGC",
                         ),
                         AboutLinkUiModel(
                             id = "donate",

@@ -1036,7 +1036,7 @@
     <string name="eq_decibels">%1$+.1f dB</string>
     <string name="eq_percent">%1$d%%</string>
     <string name="eq_frequency_hertz">%1$d Hz</string>
-    <string name="gatekeeper_connection_blocked">連線被 LunarTune Remote 阻止。該應用程式無法被驗證為 LunarTune 官方版本。請從 https://github.com/cognitiveshadows03/ArchiveTune 或 https://t.me/ArchiveTuneGC 安裝官方版本。</string>
+    <string name="gatekeeper_connection_blocked">連線被 LunarTune Remote 阻止。該應用程式無法被驗證為 LunarTune 官方版本。請從 https://github.com/cognitiveshadows03/ArchiveTune 或 https://t.me/LunarTuneGC 安裝官方版本。</string>
     <string name="eq_frequency_kilohertz">%1$.1f kHz</string>
     <string name="ai_content_filter">AI 內容過濾器</string>
     <string name="ai_content_filter_hide">隱藏AI生成的內容</string>

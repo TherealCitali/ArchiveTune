@@ -60,7 +60,7 @@ object Updater {
         "https://github.com/cognitiveshadows03/canary/releases"
     private const val CanaryWorkflowRunsUrl =
         "https://api.github.com/repos/cognitiveshadows03/ArchiveTune/actions/workflows/build.yml/runs" +
-            "?branch=dev&status=success&per_page=1&exclude_pull_requests=true"
+            "?branch=main&status=success&per_page=1&exclude_pull_requests=true"
     var lastCheckTime = -1L
         private set
     private var latestReleaseTag: String? = null
@@ -98,7 +98,7 @@ object Updater {
 
     private fun workflowArtifactDownloadUrl(): String {
         val artifactUrl =
-            "https://nightly.link/cognitiveshadows03/ArchiveTune/workflows/build/dev/${workflowArtifactName()}"
+            "https://nightly.link/cognitiveshadows03/ArchiveTune/workflows/build/main/${workflowArtifactName()}"
         return if (canDownloadUpdatesDirectly) "$artifactUrl.zip" else artifactUrl
     }
 
@@ -385,7 +385,7 @@ object Updater {
 
     suspend fun getCommitHistory(
         count: Int = 20,
-        branch: String = "dev",
+        branch: String = "main",
     ): Result<List<GitCommit>> =
         runCatchingCancellable {
             if (!isUpdaterDistribution) {
