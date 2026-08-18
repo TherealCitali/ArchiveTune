@@ -58,7 +58,7 @@ import kotlinx.coroutines.CoroutineScope
 import dev.citali.lunartune.LocalPlayerAwareWindowInsets
 import dev.citali.lunartune.LocalPlayerConnection
 import dev.citali.lunartune.R
-import dev.citali.lunartune.constants.QuickPicks
+
 import dev.citali.lunartune.home.HomeAction
 import dev.citali.lunartune.home.HomeScreenState
 import dev.citali.lunartune.home.HomeUiState
@@ -271,10 +271,6 @@ private fun HomeContent(
     onAction: (HomeAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val remoteQuickPicks =
-        uiState
-            .takeIf { it.quickPicksMode == QuickPicks.QUICK_PICKS }
-            ?.remoteQuickPicks
     val tonalStart = MaterialTheme.colorScheme.primaryContainer
     val tonalMiddle = MaterialTheme.colorScheme.secondaryContainer
     Box(modifier = modifier.fillMaxSize()) {
@@ -338,33 +334,7 @@ private fun HomeContent(
                         }
                     }
 
-                    if (remoteQuickPicks?.items?.isNotEmpty() == true) {
-                        item(
-                            key = "home_remote_quick_picks_header",
-                            contentType = "section_header",
-                        ) {
-                            HomeSectionHeader(
-                                title = remoteQuickPicks.title,
-                                modifier = Modifier.animateItem(),
-                            )
-                        }
-                        item(
-                            key = "home_remote_quick_picks",
-                            contentType = "media_shelf",
-                        ) {
-                            HomePageSectionContent(
-                                section = remoteQuickPicks,
-                                mediaMetadata = mediaMetadata,
-                                isPlaying = isPlaying,
-                                navController = navController,
-                                playerConnection = playerConnection,
-                                menuState = menuState,
-                                haptic = haptic,
-                                scope = scope,
-                                modifier = Modifier.animateItem(),
-                            )
-                        }
-                    } else if (uiState.quickPicks.isNotEmpty()) {
+                    if (uiState.quickPicks.isNotEmpty()) {
                         item(
                             key = "home_quick_picks_header",
                             contentType = "section_header",

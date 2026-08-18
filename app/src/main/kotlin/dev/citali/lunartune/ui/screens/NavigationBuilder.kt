@@ -74,6 +74,7 @@ import dev.citali.lunartune.ui.screens.settings.PlayerSettings
 import dev.citali.lunartune.ui.screens.settings.PrivacySettings
 import dev.citali.lunartune.ui.screens.settings.SettingsScreen
 import dev.citali.lunartune.ui.screens.settings.StorageSettings
+import dev.citali.lunartune.ui.screens.settings.StreamSourcesSettings
 import dev.citali.lunartune.ui.screens.settings.ThemeCreatorScreen
 import dev.citali.lunartune.ui.screens.settings.UpdateScreen
 import dev.citali.lunartune.viewmodels.OnlineSearchSort
@@ -415,6 +416,9 @@ fun NavGraphBuilder.navigationBuilder(
     }
     composable("settings/player") {
         PlayerSettings(navController)
+    }
+    composable("settings/player/stream_sources") {
+        StreamSourcesSettings(navController)
     }
     composable("settings/player/chiper") {
         ChiperSettings(navController)
