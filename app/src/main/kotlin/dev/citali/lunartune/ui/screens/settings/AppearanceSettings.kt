@@ -19,6 +19,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -96,8 +97,6 @@ import dev.citali.lunartune.constants.LyricsBackgroundStyle
 import dev.citali.lunartune.constants.LyricsBackgroundStyleKey
 import dev.citali.lunartune.constants.MiniPlayerBackgroundStyle
 import dev.citali.lunartune.constants.MiniPlayerBackgroundStyleKey
-import dev.citali.lunartune.constants.NavigationBarStyle
-import dev.citali.lunartune.constants.NavigationBarStyleKey
 import dev.citali.lunartune.constants.PlayerBackgroundStyle
 import dev.citali.lunartune.constants.PlayerBackgroundStyleKey
 import dev.citali.lunartune.constants.PlayerButtonsStyle
@@ -212,11 +211,6 @@ fun AppearanceSettings(navController: NavController) {
             defaultValue = MiniPlayerBackgroundStyle.THEME,
         )
     val (pureBlack, onPureBlackChange) = rememberPreference(PureBlackKey, defaultValue = false)
-    val (navigationBarStyle, onNavigationBarStyleChange) =
-        rememberEnumPreference(
-            NavigationBarStyleKey,
-            defaultValue = NavigationBarStyle.DEFAULT,
-        )
     val (disableBlur, onDisableBlurChange) = rememberPreference(DisableBlurKey, defaultValue = false)
     val (disableAnimations, onDisableAnimationsChange) =
         rememberPreference(
@@ -1019,6 +1013,15 @@ fun AppearanceSettings(navController: NavController) {
                                 QuickPicksDisplayMode.LIST -> stringResource(R.string.quick_picks_display_mode_list)
                             }
                         },
+                    )
+                }
+
+                item {
+                    PreferenceEntry(
+                        title = { Text(stringResource(R.string.navigation_bar_settings_title)) },
+                        description = stringResource(R.string.navigation_bar_settings_subtitle),
+                        icon = { Icon(painterResource(R.drawable.nav_bar), null) },
+                        onClick = { navController.navigate("settings/appearance/navigation_bar") },
                     )
                 }
 

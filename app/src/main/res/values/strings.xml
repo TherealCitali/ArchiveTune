@@ -1109,8 +1109,27 @@
     <string name="scheduled_backup_load_failed">Scheduled backup settings could not be loaded</string>
     <string name="scheduled_backup_update_failed">Scheduled backup settings could not be saved</string>
     <string name="gatekeeper_connection_blocked">Connection blocked by LunarTune Remote. This app could not be verified as an official LunarTune build. Install an official build from https://github.com/rukamori/ArchiveTune or https://t.me/ArchiveTuneGC.</string>
-    <string name="navigation_bar_style">Navigation bar</string>
+    <string name="navigation_bar_style">Navigation bar style</string>
     <string name="navigation_bar_style_default">Docked</string>
     <string name="navigation_bar_style_floating">Floating</string>
+    <string name="navigation_bar_settings_title">Navigation bar</string>
+    <string name="navigation_bar_settings_subtitle">Style, labels, and dimensions</string>
+    <string name="hide_navigation_bar_labels">Hide labels in navigation bar</string>
+    <string name="hide_navigation_bar_labels_desc">Show only icons in the bottom navigation bar</string>
+    <string name="navigation_bar_dimensions">Dimensions</string>
+    <string name="navigation_bar_width">Width</string>
+    <string name="navigation_bar_width_desc">Fraction of screen width used by the floating bar</string>
+    <string name="navigation_bar_height">Height</string>
+    <string name="navigation_bar_height_desc">Multiplier applied to the default bar height</string>
+    <string name="navigation_bar_opacity">Opacity</string>
+    <string name="navigation_bar_opacity_desc">Opacity of the bar surface</string>
+    <string name="navigation_bar_transparency">Transparency</string>
+    <string name="navigation_bar_transparency_desc">See-through amount of the bar surface</string>
+    <string name="navigation_bar_label_spacing">Label spacing</string>
+    <string name="navigation_bar_label_spacing_desc">Gap between icon and label (dp)</string>
+    <string name="navigation_bar_corner_radius">Corner radius</string>
+    <string name="navigation_bar_corner_radius_desc">Roundedness of the bar corners (dp)</string>
+    <string name="navigation_bar_reset_dimensions">Reset dimensions to default</string>
+    <string name="general">General</string>
 </resources>
 

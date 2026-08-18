@@ -17,7 +17,9 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -65,10 +67,24 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import dev.citali.lunartune.constants.FloatingNavigationBarMaxWidth
+import dev.citali.lunartune.constants.HideNavigationBarLabelsKey
+import dev.citali.lunartune.constants.NAVIGATION_BAR_CORNER_RADIUS_DEFAULT
+import dev.citali.lunartune.constants.NAVIGATION_BAR_HEIGHT_DEFAULT
+import dev.citali.lunartune.constants.NAVIGATION_BAR_LABEL_SPACING_DEFAULT
+import dev.citali.lunartune.constants.NAVIGATION_BAR_OPACITY_DEFAULT
+import dev.citali.lunartune.constants.NAVIGATION_BAR_TRANSPARENCY_DEFAULT
+import dev.citali.lunartune.constants.NAVIGATION_BAR_WIDTH_DEFAULT
+import dev.citali.lunartune.constants.NavigationBarCornerRadiusKey
 import dev.citali.lunartune.constants.NavigationBarHeight
+import dev.citali.lunartune.constants.NavigationBarHeightKey
+import dev.citali.lunartune.constants.NavigationBarLabelSpacingKey
 import dev.citali.lunartune.constants.NavigationBarMaxWidth
+import dev.citali.lunartune.constants.NavigationBarOpacityKey
 import dev.citali.lunartune.constants.NavigationBarStyle
+import dev.citali.lunartune.constants.NavigationBarTransparencyKey
+import dev.citali.lunartune.constants.NavigationBarWidthKey
 import dev.citali.lunartune.ui.screens.Screens
+import dev.citali.lunartune.utils.rememberPreference
 import kotlin.math.roundToInt
 
 private val NavigationItemsMaxWidth = 360.dp
@@ -90,22 +106,41 @@ fun FloatingNavigationToolbar(
     onSearchItemDoubleClick: (() -> Unit)? = null,
 ) {
     val isFloating = style == NavigationBarStyle.FLOATING
+    val (navBarWidthFraction) =
+        rememberPreference(NavigationBarWidthKey, defaultValue = NAVIGATION_BAR_WIDTH_DEFAULT)
+    val (navBarHeightMultiplier) =
+        rememberPreference(NavigationBarHeightKey, defaultValue = NAVIGATION_BAR_HEIGHT_DEFAULT)
+    val (navBarOpacity) =
+        rememberPreference(NavigationBarOpacityKey, defaultValue = NAVIGATION_BAR_OPACITY_DEFAULT)
+    val (navBarTransparency) =
+        rememberPreference(NavigationBarTransparencyKey, defaultValue = NAVIGATION_BAR_TRANSPARENCY_DEFAULT)
+    val (navBarLabelSpacing) =
+        rememberPreference(NavigationBarLabelSpacingKey, defaultValue = NAVIGATION_BAR_LABEL_SPACING_DEFAULT)
+    val (navBarCornerRadius) =
+        rememberPreference(NavigationBarCornerRadiusKey, defaultValue = NAVIGATION_BAR_CORNER_RADIUS_DEFAULT)
+    val (hideNavigationLabels) = rememberPreference(HideNavigationBarLabelsKey, defaultValue = false)
+    val resolvedBarHeight = NavigationBarHeight * navBarHeightMultiplier
     val navigationShape =
-        remember(isPairedWithMiniPlayer, isFloating) {
+        remember(isPairedWithMiniPlayer, isFloating, navBarCornerRadius) {
             when {
-                isFloating -> RoundedCornerShape(28.dp)
+                isFloating -> RoundedCornerShape(navBarCornerRadius.dp)
                 isPairedWithMiniPlayer ->
                     RoundedCornerShape(
                         topStart = 12.dp,
                         topEnd = 12.dp,
-                        bottomStart = 28.dp,
-                        bottomEnd = 28.dp,
+                        bottomStart = navBarCornerRadius.dp,
+                        bottomEnd = navBarCornerRadius.dp,
                     )
                 else -> null
             }
         } ?: MaterialTheme.shapes.extraLarge
     val navigationContainerColor =
-        if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer
+        if (pureBlack) {
+            Color.Black
+        } else {
+            val effectiveAlpha = navBarOpacity * (1f - navBarTransparency)
+            MaterialTheme.colorScheme.surfaceContainer.copy(alpha = effectiveAlpha.coerceIn(0.05f, 1f))
+        }
     val motionScheme = MaterialTheme.motionScheme
     val density = LocalDensity.current
     val indicatorColor =
@@ -175,8 +210,8 @@ fun FloatingNavigationToolbar(
             modifier =
                 Modifier
                     .widthIn(max = if (isFloating) FloatingNavigationBarMaxWidth else NavigationBarMaxWidth)
-                    .fillMaxWidth(if (isFloating) 0.88f else 1f)
-                    .height(NavigationBarHeight),
+                    .fillMaxWidth(if (isFloating) navBarWidthFraction.coerceIn(0.5f, 1f) else 1f)
+                    .height(resolvedBarHeight),
             shape = navigationShape,
             color = navigationContainerColor,
             tonalElevation = NavigationBarDefaults.Elevation,

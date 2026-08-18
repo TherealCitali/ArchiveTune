@@ -42,6 +42,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
@@ -135,6 +136,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -209,7 +211,9 @@ import dev.citali.lunartune.constants.FloatingNavigationBarBottomPadding
 import dev.citali.lunartune.constants.FloatingNavigationBarHorizontalPadding
 import dev.citali.lunartune.constants.NavigationBarAnimationSpec
 import dev.citali.lunartune.constants.NavigationBarBottomPadding
+import dev.citali.lunartune.constants.NAVIGATION_BAR_HEIGHT_DEFAULT
 import dev.citali.lunartune.constants.NavigationBarHeight
+import dev.citali.lunartune.constants.NavigationBarHeightKey
 import dev.citali.lunartune.constants.NavigationBarHorizontalPadding
 import dev.citali.lunartune.constants.NavigationBarStyle
 import dev.citali.lunartune.constants.NavigationBarStyleKey
@@ -1010,23 +1014,27 @@ class MainActivity : ComponentActivity() {
                         currentRoute == Screens.Home.route &&
                             (allLocalItems.isNotEmpty() || allYtItems.isNotEmpty())
 
-                    fun getBottomNavPadding(): Dp =
-                        if (shouldShowNavigationBar && !useRail) {
-                            NavigationBarHeight
-                        } else {
-                            0.dp
-                        }
-
                     val navigationBarStyle by rememberEnumPreference(
                         NavigationBarStyleKey,
                         defaultValue = NavigationBarStyle.DEFAULT,
+                    )
+                    val navigationBarHeightMultiplier by rememberPreference(
+                        NavigationBarHeightKey,
+                        defaultValue = NAVIGATION_BAR_HEIGHT_DEFAULT,
                     )
                     val isFloatingNavBar = navigationBarStyle == NavigationBarStyle.FLOATING
                     val floatingBarsBottomPadding =
                         if (isFloatingNavBar) FloatingNavigationBarBottomPadding else NavigationBarBottomPadding
                     val navBarHorizontalPadding =
                         if (isFloatingNavBar) FloatingNavigationBarHorizontalPadding else NavigationBarHorizontalPadding
-                    val navVisibleHeight = NavigationBarHeight
+                    val navVisibleHeight = NavigationBarHeight * navigationBarHeightMultiplier
+
+                    fun getBottomNavPadding(): Dp =
+                        if (shouldShowNavigationBar && !useRail) {
+                            navVisibleHeight
+                        } else {
+                            0.dp
+                        }
 
                     val bottomNavigationBarHeight by animateDpAsState(
                         targetValue = if (shouldShowNavigationBar && !useRail) navVisibleHeight else 0.dp,
@@ -1204,6 +1212,8 @@ class MainActivity : ComponentActivity() {
                             bottomInset,
                             shouldShowNavigationBar,
                             playerBottomSheetState.isDismissed,
+                            navVisibleHeight,
+                            floatingBarsBottomPadding,
                         ) {
                             var bottom = bottomInset
                             if (shouldShowNavigationBar && !useRail) {
@@ -1658,10 +1668,7 @@ class MainActivity : ComponentActivity() {
 
                             Scaffold(
                                 topBar = {
-                                    if (shouldShowTopBar) {
-                                        val shouldUseFloatingTopBar =
-                                            remember(navBackStackEntry) {
-                                                navBackStackEntry?.destination?.route == Screens.Home.route ||
+                                   navBackStackEntry?.destination?.route == Screens.Home.route ||
                                                     navBackStackEntry?.destination?.route == Screens.Search.route ||
                                                     navBackStackEntry?.destination?.route == Screens.Library.route
                                             }
@@ -2345,7 +2352,11 @@ class MainActivity : ComponentActivity() {
                                         } else if (initialState.destination.route in topLevelScreens &&
                                             targetState.destination.route in topLevelScreens
                                         ) {
-                                            fadeIn(tween(250))
+                                            fadeIn(tween(220, delayMillis = 90)) +
+                                                scaleIn(
+                                                    animationSpec = tween(220, delayMillis = 90),
+                                                    initialScale = 0.92f,
+                                                )
                                         } else {
                                             fadeIn(tween(250)) + slideInHorizontally { it / 2 }
                                         }
@@ -2356,7 +2367,7 @@ class MainActivity : ComponentActivity() {
                                         } else if (initialState.destination.route in topLevelScreens &&
                                             targetState.destination.route in topLevelScreens
                                         ) {
-                                            fadeOut(tween(200))
+                                            fadeOut(tween(90))
                                         } else {
                                             fadeOut(tween(200)) + slideOutHorizontally { -it / 2 }
                                         }
@@ -2370,7 +2381,11 @@ class MainActivity : ComponentActivity() {
                                             ) &&
                                             targetState.destination.route in topLevelScreens
                                         ) {
-                                            fadeIn(tween(250))
+                                            fadeIn(tween(220, delayMillis = 90)) +
+                                                scaleIn(
+                                                    animationSpec = tween(220, delayMillis = 90),
+                                                    initialScale = 0.92f,
+                                                )
                                         } else {
                                             fadeIn(tween(250)) + slideInHorizontally { -it / 2 }
                                         }
@@ -2384,7 +2399,7 @@ class MainActivity : ComponentActivity() {
                                             ) &&
                                             targetState.destination.route in topLevelScreens
                                         ) {
-                                            fadeOut(tween(200))
+                                            fadeOut(tween(90))
                                         } else {
                                             fadeOut(tween(200)) + slideOutHorizontally { it / 2 }
                                         }
@@ -3177,6 +3192,11 @@ private fun Context.isTvDevice(): Boolean {
     val isTelevisionUiMode =
         (resources.configuration.uiMode and Configuration.UI_MODE_TYPE_MASK) ==
             Configuration.UI_MODE_TYPE_TELEVISION
+    return isTelevisionUiMode ||
+        packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK) ||
+        packageManager.hasSystemFeature(PackageManager.FEATURE_TELEVISION)
+}
+ration.UI_MODE_TYPE_TELEVISION
     return isTelevisionUiMode ||
         packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK) ||
         packageManager.hasSystemFeature(PackageManager.FEATURE_TELEVISION)

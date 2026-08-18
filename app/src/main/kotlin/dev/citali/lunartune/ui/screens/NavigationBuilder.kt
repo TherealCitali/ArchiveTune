@@ -386,6 +386,9 @@ fun NavGraphBuilder.navigationBuilder(
     composable("settings/appearance") {
         AppearanceSettings(navController)
     }
+    composable("settings/appearance/navigation_bar") {
+        NavigationBarSettings(navController)
+    }
     composable("settings/appearance/icon") {
         IconScreen(navController)
     }
