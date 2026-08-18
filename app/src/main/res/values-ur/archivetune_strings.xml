@@ -17,7 +17,7 @@
     <string name="music_recognition_error">کچھ غلط ہو گیا</string>
     <string name="music_recognition_settings">موسیقی کی شناخت کی ترتیبات</string>
     <string name="music_recognition_background_title">پس منطر میں شناخت</string>
-    <string name="music_recognition_background_description">‫فعل ہونے پر، فوری ترتیبات والا کھپرا اس آلہ پر چلتی ہوئ موسیقی کی ArchiveTune کھولے بغیر شناخت کرتا ہے۔</string>
+    <string name="music_recognition_background_description">‫فعل ہونے پر، فوری ترتیبات والا کھپرا اس آلہ پر چلتی ہوئ موسیقی کی LunarTune کھولے بغیر شناخت کرتا ہے۔</string>
     <string name="music_recognition_background_foss_description">‫پس منطر میں شناخت کرنا FOSS والے نحخے میں دستیاب نہیں ہے۔ بلکے فوری ترتیبات والا کھپرا شناخت سکرین کھولتا ہے۔</string>
     <string name="music_recognition_notification_channel_name">موسیقی شناخت</string>
     <string name="music_recognition_notification_channel_description">موسیقی کی شناخت کا تقدم اور نتائج</string>

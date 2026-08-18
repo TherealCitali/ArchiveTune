@@ -324,14 +324,14 @@
     <string name="storage_folder_selected_restart">اتحفظ مجلد التخزين. التطبيق هيقفل ويفتح تاني خلال 3 ثواني.</string>
     <string name="storage_folder_invalid">اختار مجلد صالح.</string>
     <string name="storage_folder_unsupported">المجلد ده مش متاح للاستخدام بواسطة التخزين المؤقت المدعوم بالملفات.</string>
-    <string name="storage_folder_not_writable">ArchiveTune مش قادر يكتب ملفات التخزين المؤقت في المجلد ده.</string>
+    <string name="storage_folder_not_writable">LunarTune مش قادر يكتب ملفات التخزين المؤقت في المجلد ده.</string>
     <string name="storage_cache_cleared">اتمسحت الملفات المؤقتة.</string>
     <string name="storage_cache_clear_failed">معرفناش نمسح الملفات المؤقتة. اتأكد من صلاحية الوصول لكارت الميموري.</string>
     <string name="storage_clear_song_cache_progress">جاري مسح التخزين المؤقت للأغاني… %1$d%%</string>
     <string name="storage_clear_downloads_progress">جاري مسح التنزيلات… %1$d%%</string>
     <string name="storage_clear_image_cache_progress">جاري مسح التخزين المؤقت للصور… %1$d%%</string>
     <string name="storage_clear_canvas_cache_progress">جاري مسح التخزين المؤقت للخلفيات… %1$d%%</string>
-    <string name="storage_cache_clear_warning">سيب ArchiveTune مفتوح لحد ما نخلص مسح ملفات التخزين المؤقت.</string>
+    <string name="storage_cache_clear_warning">سيب LunarTune مفتوح لحد ما نخلص مسح ملفات التخزين المؤقت.</string>
     <string name="storage_size_ratio">%1$s / %2$s</string>
     <string name="sensitivity_percentage">%1$d%%</string>
     <string name="clear_song_cache_dialog">متأكد إنك عايز تمسح كل الأغاني المتخزنة مؤقتاً؟</string>
@@ -397,8 +397,8 @@
     <string name="player_stream_client_desc">يتحكم في مصدر التشغيل المستخدم لجلب البث</string>
     <string name="player_stream_client_web_remix">ويب ريمكس</string>
     <string name="player_stream_client_web_remix_desc">دعم تنسيقات ممتدة على حساب السرعة. فك تشفير توقيع JavaScript بيسبب تأخير في بدء التشغيل من 5 لـ 10 ثوانٍ.</string>
-    <string name="player_stream_client_archivetune_extractor">مستخرج ArchiveTune</string>
-    <string name="player_stream_client_archivetune_extractor_desc">بيستخدم مستخرج ArchiveTune الخلفي لبث التشغيل. يُفضل استخدامه لجودة الصوت التلقائية العالية.</string>
+    <string name="player_stream_client_lunartune_extractor">مستخرج LunarTune</string>
+    <string name="player_stream_client_lunartune_extractor_desc">بيستخدم مستخرج LunarTune الخلفي لبث التشغيل. يُفضل استخدامه لجودة الصوت التلقائية العالية.</string>
     <string name="settings_section_player_content">المشغل والمحتوى</string>
     <string name="settings_appearance_subtitle">السمات، التخطيط، والأنماط البصرية</string>
     <string name="settings_playback_title">التشغيل</string>
@@ -565,7 +565,7 @@
     <string name="about_position_lead_dev">إيه؟</string>
     <string name="about_position_developers">مطور | فريق</string>
     <string name="about_position_mo_agamy">إطار العمل الأساسي | Metrolist</string>
-    <string name="about_position_zion_huang">مبتكر InnerTune · الأساس لـ Metrolist و ArchiveTune والتفرعات التانية</string>
+    <string name="about_position_zion_huang">مبتكر InnerTune · الأساس لـ Metrolist و LunarTune والتفرعات التانية</string>
     <string name="about_content_desc_github">GitHub</string>
     <string name="about_content_desc_website">الموقع الإلكتروني</string>
     <string name="about_content_desc_discord">ديسكورد</string>
@@ -600,7 +600,7 @@
     <string name="release_type_album">ألبوم</string>
     <string name="release_type_single">أغنية منفردة (Single)</string>
     <string name="release_metadata">%1$s • %2$d</string>
-    <string name="player_stream_client_archivetune_extractor_login_required">لازم تسجل دخول بحساب Google ورمز PoToken من الإعدادات عشان تستخدم الميزة دي</string>
+    <string name="player_stream_client_lunartune_extractor_login_required">لازم تسجل دخول بحساب Google ورمز PoToken من الإعدادات عشان تستخدم الميزة دي</string>
     <string name="stats_top_songs">أفضل الأغاني</string>
     <string name="stats_show_all_songs">عرض كل الـ %1$d أغنية</string>
     <string name="stats_show_top_songs">عرض أعلى 5</string>
@@ -626,7 +626,7 @@
     <string name="mori_cipher_refresh_remaining">فاضل %1$d تحديثات يدوية</string>
     <string name="mori_cipher_rate_limit_countdown">هيبقى متاح تاني خلال %1$s</string>
     <string name="mori_cipher_automatic_updates">التحديثات التلقائية</string>
-    <string name="mori_cipher_automatic_updates_description">ArchiveTune بيحدث تكوين مشغل يوتيوب الحالي كل 6 ساعات وبعد أي فشل في فك التشفير.</string>
+    <string name="mori_cipher_automatic_updates_description">LunarTune بيحدث تكوين مشغل يوتيوب الحالي كل 6 ساعات وبعد أي فشل في فك التشفير.</string>
     <string name="mori_cipher_refresh_success">اتحدث تكوين المشغل بنجاح</string>
     <string name="mori_cipher_refresh_failed">مقدرناش نحدث تكوين المشغل</string>
     <string name="mori_cipher_rate_limited">وصلت للحد الأقصى للتحديث اليدوي</string>
@@ -635,7 +635,7 @@
     <string name="mori_cipher_error_title">فك التشفير غير متاح</string>
     <string name="mori_cipher_load_failed">مقدرناش نحمل تكوين المشغل الحالي. الخيارات البديلة للتشغيل هتفضل متاحة.</string>
     <string name="about_position_yuki">dummy reze | مدير</string>
-    <string name="music_recognition_background_description">لما تفعل الميزة دي، زر الإعدادات السريعة هيتعرف على الصوت الشغال على الجهاز من غير ما تفتح ArchiveTune.</string>
+    <string name="music_recognition_background_description">لما تفعل الميزة دي، زر الإعدادات السريعة هيتعرف على الصوت الشغال على الجهاز من غير ما تفتح LunarTune.</string>
     <string name="music_recognition_notification_no_match_text">خلي المزيكا شغالة بوضوح وجرب التعرف تاني.</string>
     <string name="music_recognition_notification_recording_failed_text">التطبيق اللي شغال التاني ممكن يكون حاطط حماية مانعة تسجيل الصوت، أو المزيكا وقفت.</string>
 </resources>

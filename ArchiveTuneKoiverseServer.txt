@@ -1,1 +1,1 @@
-https://archivetune-api.koiiverse.cloud
+https://lunartune-api.koiiverse.cloud

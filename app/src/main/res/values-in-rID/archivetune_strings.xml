@@ -487,7 +487,7 @@
     <string name="suggestions">Saran</string>
     <string name="music_recognition_settings">Pengaturan pengenalan musik</string>
     <string name="music_recognition_background_title">Pengenalan di latar belakang</string>
-    <string name="music_recognition_background_description">Jika diaktifkan, ubin Pengaturan Cepat akan mengenali audio yang diputar di perangkat ini tanpa membuka ArchiveTune.</string>
+    <string name="music_recognition_background_description">Jika diaktifkan, ubin Pengaturan Cepat akan mengenali audio yang diputar di perangkat ini tanpa membuka LunarTune.</string>
     <string name="music_recognition_background_foss_description">Pengenalan latar belakang tidak tersedia di varian FOSS. Ubin Pengaturan Cepat akan membuka layar pengenalan sebagai gantinya.</string>
     <string name="music_recognition_notification_channel_name">Pengenalan musik</string>
     <string name="music_recognition_notification_channel_description">Progres dan hasil pengenalan musik</string>
@@ -550,14 +550,14 @@
     <string name="storage_folder_selected_restart">Folder penyimpanan disimpan. Aplikasi akan dimulai ulang dalam 3 detik.</string>
     <string name="storage_folder_invalid">Pilih folder yang valid.</string>
     <string name="storage_folder_unsupported">Folder ini tidak dapat digunakan oleh cache media berbasis file.</string>
-    <string name="storage_folder_not_writable">ArchiveTune tidak dapat menulis file cache di folder ini.</string>
+    <string name="storage_folder_not_writable">LunarTune tidak dapat menulis file cache di folder ini.</string>
     <string name="storage_cache_cleared">Cache dibersihkan.</string>
     <string name="storage_cache_clear_failed">Cache tidak dapat dibersihkan. Periksa akses kartu SD.</string>
     <string name="storage_clear_song_cache_progress">Membersihkan cache lagu...%1$d%%</string>
     <string name="storage_clear_downloads_progress">Membersihkan unduhan...%1$d%%</string>
     <string name="storage_clear_image_cache_progress">Membersihkan cache gambar...%1$d%%</string>
     <string name="storage_clear_canvas_cache_progress">Membersihkan cache kanvas...%1$d%%</string>
-    <string name="storage_cache_clear_warning">Biarkan ArchiveTune tetap terbuka saat file cache sedang dihapus.</string>
+    <string name="storage_cache_clear_warning">Biarkan LunarTune tetap terbuka saat file cache sedang dihapus.</string>
     <string name="storage_size_ratio">%1$s / %2$s</string>
     <string name="history_duration_desc">Waktu pemutaran minimum untuk menghitung lagu sebagai didengarkan</string>
     <string name="history_duration_seconds">%1$s dtk</string>
@@ -565,9 +565,9 @@
     <string name="release_type_album">Album</string>
     <string name="release_type_single">Single</string>
     <string name="release_metadata">%1$s • %2$d</string>
-    <string name="player_stream_client_archivetune_extractor">Ekstraktor ArchiveTune</string>
-    <string name="player_stream_client_archivetune_extractor_desc">Menggunakan ekstraktor backend ArchiveTune untuk aliran pemutaran. Lebih disukai Audio Kualitas Tinggi Otomatis.</string>
-    <string name="player_stream_client_archivetune_extractor_login_required">Anda Harus Login Menggunakan Akun Google dan PoToken di Pengaturan untuk menggunakan ini</string>
+    <string name="player_stream_client_lunartune_extractor">Ekstraktor LunarTune</string>
+    <string name="player_stream_client_lunartune_extractor_desc">Menggunakan ekstraktor backend LunarTune untuk aliran pemutaran. Lebih disukai Audio Kualitas Tinggi Otomatis.</string>
+    <string name="player_stream_client_lunartune_extractor_login_required">Anda Harus Login Menggunakan Akun Google dan PoToken di Pengaturan untuk menggunakan ini</string>
     <string name="top_albums">Album Teratas</string>
     <string name="stats_top_songs">Lagu teratas</string>
     <string name="stats_show_all_songs">Tampilkan semua %1$d lagu</string>
@@ -610,7 +610,7 @@
     <string name="mori_cipher_refresh_remaining">Tersisa %1$d penyegaran manual</string>
     <string name="mori_cipher_rate_limit_countdown">Tersedia lagi dalam %1$s</string>
     <string name="mori_cipher_automatic_updates">Pembaruan otomatis</string>
-    <string name="mori_cipher_automatic_updates_description">ArchiveTune menyegarkan konfigurasi pemutar YouTube saat ini setiap enam jam dan setelah kegagalan dekripsi.</string>
+    <string name="mori_cipher_automatic_updates_description">LunarTune menyegarkan konfigurasi pemutar YouTube saat ini setiap enam jam dan setelah kegagalan dekripsi.</string>
     <string name="mori_cipher_refresh_success">Konfigurasi pemutar diperbarui</string>
     <string name="mori_cipher_refresh_failed">Konfigurasi pemutar tidak dapat diperbarui</string>
     <string name="mori_cipher_rate_limited">Batas penyegaran manual tercapai</string>
@@ -629,7 +629,7 @@
     <string name="about_position_developers">Pengembang | Tim</string>
     <string name="about_position_yuki">dummy reze | Admin</string>
     <string name="about_position_mo_agamy">Base dari | Metrolist</string>
-    <string name="about_position_zion_huang">Pencipta InnerTune · Fondasi untuk Metrolist, ArchiveTune, dan fork lainnya</string>
+    <string name="about_position_zion_huang">Pencipta InnerTune · Fondasi untuk Metrolist, LunarTune, dan fork lainnya</string>
     <string name="about_content_desc_github">GitHub</string>
     <string name="about_content_desc_website">Situs Web</string>
     <string name="about_content_desc_discord">Discord</string>

@@ -43,7 +43,7 @@
     <string name="library_top_mixes_refresh">mixek újrafrissítése</string>
     <string name="library_top_mixes_configure_ai">Érzék(e)t[e]len eszköz(ai) konfigurálása</string>
     <string name="library_top_mixes_ai_not_configured_title">Lélektelen zenét akarok hallgatni ai</string>
-    <string name="library_top_mixes_ai_not_configured_desc">Vízpazarló rendszer most az egyszer muszály használnia az archivetune hoz hogy a \"legjobb\" mixer adjuk önnek aki nem ismeri művészetet és zenét ai</string>
+    <string name="library_top_mixes_ai_not_configured_desc">Vízpazarló rendszer most az egyszer muszály használnia az lunartune hoz hogy a \"legjobb\" mixer adjuk önnek aki nem ismeri művészetet és zenét ai</string>
     <string name="library_top_mixes_no_recent_history_title">Nincs mostani mixt (még)</string>
     <string name="library_top_mixes_no_recent_history">Hallgason több zenét és pazaroljon még több vizet ahoz hogy azokat a szar ai mixeket megkapja</string>
     <string name="library_top_mixes_no_valid_mixes">Ahh.. ki gondolta volna? az nem talált semmi játszaható mixet a előzményeiből. talája ki hogy ez mit is jelent</string>

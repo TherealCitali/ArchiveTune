@@ -108,11 +108,11 @@
 
 ## Queue Persistence Rules
 # Keep queue-related classes to prevent serialization issues in release builds
--keep class moe.rukamori.archivetune.models.PersistQueue { *; }
--keep class moe.rukamori.archivetune.models.PersistPlayerState { *; }
--keep class moe.rukamori.archivetune.models.QueueData { *; }
--keep class moe.rukamori.archivetune.models.QueueType { *; }
--keep class moe.rukamori.archivetune.playback.queues.** { *; }
+-keep class dev.citali.lunartune.models.PersistQueue { *; }
+-keep class dev.citali.lunartune.models.PersistPlayerState { *; }
+-keep class dev.citali.lunartune.models.QueueData { *; }
+-keep class dev.citali.lunartune.models.QueueType { *; }
+-keep class dev.citali.lunartune.playback.queues.** { *; }
 
 # Keep serialization methods for queue persistence
 -keepclassmembers class * implements java.io.Serializable {
@@ -153,7 +153,7 @@
 # internal Ktor HTTP Client
 -keep class io.ktor.** { *; }
 -dontwarn io.ktor.**
--keep class moe.rukamori.archivetune.moriextractor.BackendExtractorResponse { *; }
+-keep class dev.citali.lunartune.moriextractor.BackendExtractorResponse { *; }
 
 # engine HTTP Android/OkHttp Ktor
 -dontwarn kotlinx.coroutines.**

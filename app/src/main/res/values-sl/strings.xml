@@ -58,7 +58,7 @@
     <string name="library_top_mixes_refresh">Posodobi mešanice</string>
     <string name="library_top_mixes_configure_ai">Konfiguriraj UI</string>
     <string name="library_top_mixes_ai_not_configured_title">Konfigurirajte UI, da zgradite mešanice</string>
-    <string name="library_top_mixes_ai_not_configured_desc">Preden ArchiveTune pripravi osebne izbore najboljših skladb, je potrebna integracija UI.</string>
+    <string name="library_top_mixes_ai_not_configured_desc">Preden LunarTune pripravi osebne izbore najboljših skladb, je potrebna integracija UI.</string>
     <string name="library_top_mixes_no_recent_history_title">Še ni nedavnega mešanega nabora.</string>
     <string name="library_top_mixes_no_recent_history">Poslušaj več pesmi, potem osvežite da zgradite mixe z UI.</string>
     <string name="library_top_mixes_no_valid_mixes">UI ni ustvaril uporabnih mixov.</string>
