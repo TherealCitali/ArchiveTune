@@ -96,6 +96,8 @@ import dev.citali.lunartune.constants.LyricsBackgroundStyle
 import dev.citali.lunartune.constants.LyricsBackgroundStyleKey
 import dev.citali.lunartune.constants.MiniPlayerBackgroundStyle
 import dev.citali.lunartune.constants.MiniPlayerBackgroundStyleKey
+import dev.citali.lunartune.constants.NavigationBarStyle
+import dev.citali.lunartune.constants.NavigationBarStyleKey
 import dev.citali.lunartune.constants.PlayerBackgroundStyle
 import dev.citali.lunartune.constants.PlayerBackgroundStyleKey
 import dev.citali.lunartune.constants.PlayerButtonsStyle
@@ -210,6 +212,11 @@ fun AppearanceSettings(navController: NavController) {
             defaultValue = MiniPlayerBackgroundStyle.THEME,
         )
     val (pureBlack, onPureBlackChange) = rememberPreference(PureBlackKey, defaultValue = false)
+    val (navigationBarStyle, onNavigationBarStyleChange) =
+        rememberEnumPreference(
+            NavigationBarStyleKey,
+            defaultValue = NavigationBarStyle.DEFAULT,
+        )
     val (disableBlur, onDisableBlurChange) = rememberPreference(DisableBlurKey, defaultValue = false)
     val (disableAnimations, onDisableAnimationsChange) =
         rememberPreference(

@@ -920,6 +920,13 @@ val TogetherOnlineEndpointLastCheckedAtKey = longPreferencesKey("together_online
 
 val RedownloadOnRestoreKey = booleanPreferencesKey("redownloadOnRestore")
 
+enum class NavigationBarStyle {
+    DEFAULT,
+    FLOATING,
+}
+
+val NavigationBarStyleKey = stringPreferencesKey("navigationBarStyle")
+
 enum class UpdateChannel {
     STABLE,
     CANARY,

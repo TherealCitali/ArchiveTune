@@ -12,6 +12,10 @@ package dev.citali.lunartune.ui.component
 import android.os.SystemClock
 import android.view.ViewConfiguration
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -20,9 +24,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,24 +39,44 @@ import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.ShortNavigationBar
 import androidx.compose.material3.ShortNavigationBarArrangement
 import androidx.compose.material3.ShortNavigationBarItem
+import androidx.compose.material3.ShortNavigationBarItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import dev.citali.lunartune.constants.FloatingNavigationBarMaxWidth
 import dev.citali.lunartune.constants.NavigationBarHeight
 import dev.citali.lunartune.constants.NavigationBarMaxWidth
+import dev.citali.lunartune.constants.NavigationBarStyle
 import dev.citali.lunartune.ui.screens.Screens
+import kotlin.math.roundToInt
 
 private val NavigationItemsMaxWidth = 360.dp
 private val NavigationItemVerticalPadding = 8.dp
+private val NavigationIndicatorWidth = 56.dp
+private val NavigationIndicatorHeight = 32.dp
+private val FloatingNavigationIndicatorWidth = 64.dp
+private val FloatingNavigationIndicatorHeight = 42.dp
 
 @Composable
 fun FloatingNavigationToolbar(
@@ -58,26 +84,86 @@ fun FloatingNavigationToolbar(
     pureBlack: Boolean,
     modifier: Modifier = Modifier,
     isPairedWithMiniPlayer: Boolean = false,
+    style: NavigationBarStyle = NavigationBarStyle.DEFAULT,
     isSelected: (Screens) -> Boolean,
     onItemClick: (Screens, Boolean) -> Unit,
     onSearchItemDoubleClick: (() -> Unit)? = null,
 ) {
+    val isFloating = style == NavigationBarStyle.FLOATING
     val navigationShape =
-        remember(isPairedWithMiniPlayer) {
-            if (isPairedWithMiniPlayer) {
-                RoundedCornerShape(
-                    topStart = 12.dp,
-                    topEnd = 12.dp,
-                    bottomStart = 28.dp,
-                    bottomEnd = 28.dp,
-                )
-            } else {
-                null
+        remember(isPairedWithMiniPlayer, isFloating) {
+            when {
+                isFloating -> RoundedCornerShape(28.dp)
+                isPairedWithMiniPlayer ->
+                    RoundedCornerShape(
+                        topStart = 12.dp,
+                        topEnd = 12.dp,
+                        bottomStart = 28.dp,
+                        bottomEnd = 28.dp,
+                    )
+                else -> null
             }
         } ?: MaterialTheme.shapes.extraLarge
     val navigationContainerColor =
         if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer
     val motionScheme = MaterialTheme.motionScheme
+    val density = LocalDensity.current
+    val indicatorColor =
+        when {
+            isFloating -> MaterialTheme.colorScheme.primary.copy(alpha = 0.30f)
+            pureBlack -> Color.White.copy(alpha = 0.16f)
+            else -> MaterialTheme.colorScheme.secondaryContainer
+        }
+    val indicatorWidth = if (isFloating) FloatingNavigationIndicatorWidth else NavigationIndicatorWidth
+    val indicatorHeight = if (isFloating) FloatingNavigationIndicatorHeight else NavigationIndicatorHeight
+    val itemColors =
+        if (isFloating) {
+            ShortNavigationBarItemDefaults.colors(
+                selectedIndicatorColor = Color.Transparent,
+                selectedIconColor = MaterialTheme.colorScheme.primary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
+                unselectedIconColor =
+                    if (pureBlack) Color.White.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor =
+                    if (pureBlack) Color.White.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        } else if (pureBlack) {
+            ShortNavigationBarItemDefaults.colors(
+                selectedIndicatorColor = Color.Transparent,
+                selectedIconColor = Color.White,
+                selectedTextColor = Color.White,
+                unselectedIconColor = Color.White.copy(alpha = 0.6f),
+                unselectedTextColor = Color.White.copy(alpha = 0.6f),
+            )
+        } else {
+            ShortNavigationBarItemDefaults.colors(selectedIndicatorColor = Color.Transparent)
+        }
+
+    val selectedIndex = items.indexOfFirst { isSelected(it) }
+    val iconCenters = remember { mutableStateMapOf<Int, Offset>() }
+    var containerPos by remember { mutableStateOf(Offset.Zero) }
+    val indicatorX = remember { Animatable(0f) }
+    var indicatorY by remember { mutableFloatStateOf(0f) }
+    var indicatorPlaced by remember { mutableStateOf(false) }
+    val selectedCenter = if (selectedIndex >= 0) iconCenters[selectedIndex] else null
+
+    LaunchedEffect(selectedIndex, selectedCenter, containerPos, indicatorWidth, indicatorHeight) {
+        val center = selectedCenter ?: return@LaunchedEffect
+        val widthPx = with(density) { indicatorWidth.toPx() }
+        val heightPx = with(density) { indicatorHeight.toPx() }
+        val targetX = (center.x - containerPos.x) - widthPx / 2f
+        indicatorY = (center.y - containerPos.y) - heightPx / 2f
+        if (!indicatorPlaced) {
+            indicatorX.snapTo(targetX)
+            indicatorPlaced = true
+        } else {
+            indicatorX.animateTo(
+                targetValue = targetX,
+                animationSpec = spring(dampingRatio = 0.72f, stiffness = Spring.StiffnessMediumLow),
+            )
+        }
+    }
+
     Box(
         modifier =
             modifier
@@ -88,13 +174,13 @@ fun FloatingNavigationToolbar(
         Surface(
             modifier =
                 Modifier
-                    .widthIn(max = NavigationBarMaxWidth)
-                    .fillMaxWidth()
+                    .widthIn(max = if (isFloating) FloatingNavigationBarMaxWidth else NavigationBarMaxWidth)
+                    .fillMaxWidth(if (isFloating) 0.88f else 1f)
                     .height(NavigationBarHeight),
             shape = navigationShape,
             color = navigationContainerColor,
             tonalElevation = NavigationBarDefaults.Elevation,
-            shadowElevation = NavigationBarDefaults.Elevation,
+            shadowElevation = if (isFloating) 8.dp else NavigationBarDefaults.Elevation,
         ) {
             ShortNavigationBar(
                 modifier = Modifier.fillMaxSize(),
@@ -104,9 +190,28 @@ fun FloatingNavigationToolbar(
                 arrangement = ShortNavigationBarArrangement.EqualWeight,
             ) {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .onGloballyPositioned { containerPos = it.positionInRoot() },
                     contentAlignment = Alignment.Center,
                 ) {
+                    if (selectedIndex >= 0 && indicatorPlaced) {
+                        Box(
+                            modifier =
+                                Modifier
+                                    .align(Alignment.TopStart)
+                                    .offset {
+                                        IntOffset(
+                                            indicatorX.value.roundToInt(),
+                                            indicatorY.roundToInt(),
+                                        )
+                                    }.width(indicatorWidth)
+                                    .height(indicatorHeight)
+                                    .clip(RoundedCornerShape(percent = 50))
+                                    .background(indicatorColor),
+                        )
+                    }
                     Row(
                         modifier =
                             Modifier
@@ -116,8 +221,23 @@ fun FloatingNavigationToolbar(
                                 .padding(vertical = NavigationItemVerticalPadding),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        items.forEach { screen ->
+                        items.forEachIndexed { index, screen ->
                             val selected = isSelected(screen)
+                            val iconScale = remember(screen) { Animatable(1f) }
+                            LaunchedEffect(selected) {
+                                if (selected) {
+                                    iconScale.snapTo(0.85f)
+                                    iconScale.animateTo(
+                                        1f,
+                                        spring(
+                                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                                            stiffness = Spring.StiffnessMediumLow,
+                                        ),
+                                    )
+                                } else {
+                                    iconScale.snapTo(1f)
+                                }
+                            }
                             val onDoubleClick =
                                 remember(screen, onSearchItemDoubleClick) {
                                     if (screen == Screens.Search) onSearchItemDoubleClick else null
@@ -143,20 +263,39 @@ fun FloatingNavigationToolbar(
                             ShortNavigationBarItem(
                                 selected = selected,
                                 onClick = onClick,
+                                colors = itemColors,
                                 modifier = Modifier.weight(1f),
                                 icon = {
-                                    Crossfade(
-                                        targetState = selected,
-                                        animationSpec = motionScheme.fastEffectsSpec(),
-                                        label = "navigationItemIcon",
-                                    ) { isSelected ->
-                                        Icon(
-                                            painter =
-                                                painterResource(
-                                                    if (isSelected) screen.iconIdActive else screen.iconIdInactive,
-                                                ),
-                                            contentDescription = null,
-                                        )
+                                    Box(
+                                        modifier =
+                                            Modifier.onGloballyPositioned { coordinates ->
+                                                val pos = coordinates.positionInRoot()
+                                                iconCenters[index] =
+                                                    Offset(
+                                                        pos.x + coordinates.size.width / 2f,
+                                                        pos.y + coordinates.size.height / 2f,
+                                                    )
+                                            },
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Crossfade(
+                                            targetState = selected,
+                                            animationSpec = motionScheme.fastEffectsSpec(),
+                                            label = "navigationItemIcon",
+                                        ) { isSelected ->
+                                            Icon(
+                                                painter =
+                                                    painterResource(
+                                                        if (isSelected) screen.iconIdActive else screen.iconIdInactive,
+                                                    ),
+                                                contentDescription = null,
+                                                modifier =
+                                                    Modifier.graphicsLayer {
+                                                        scaleX = iconScale.value
+                                                        scaleY = iconScale.value
+                                                    },
+                                            )
+                                        }
                                     }
                                 },
                                 label = {

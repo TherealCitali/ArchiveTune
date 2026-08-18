@@ -205,10 +205,14 @@ import dev.citali.lunartune.constants.LaunchCountKey
 import dev.citali.lunartune.constants.MiniPlayerBottomSpacing
 import dev.citali.lunartune.constants.MiniPlayerHeight
 import dev.citali.lunartune.constants.MiniPlayerLastAnchorKey
+import dev.citali.lunartune.constants.FloatingNavigationBarBottomPadding
+import dev.citali.lunartune.constants.FloatingNavigationBarHorizontalPadding
 import dev.citali.lunartune.constants.NavigationBarAnimationSpec
 import dev.citali.lunartune.constants.NavigationBarBottomPadding
 import dev.citali.lunartune.constants.NavigationBarHeight
 import dev.citali.lunartune.constants.NavigationBarHorizontalPadding
+import dev.citali.lunartune.constants.NavigationBarStyle
+import dev.citali.lunartune.constants.NavigationBarStyleKey
 import dev.citali.lunartune.constants.PauseSearchHistoryKey
 import dev.citali.lunartune.constants.PlayerBackgroundStyle
 import dev.citali.lunartune.constants.PlayerBackgroundStyleKey
@@ -1013,7 +1017,15 @@ class MainActivity : ComponentActivity() {
                             0.dp
                         }
 
-                    val floatingBarsBottomPadding = NavigationBarBottomPadding
+                    val navigationBarStyle by rememberEnumPreference(
+                        NavigationBarStyleKey,
+                        defaultValue = NavigationBarStyle.DEFAULT,
+                    )
+                    val isFloatingNavBar = navigationBarStyle == NavigationBarStyle.FLOATING
+                    val floatingBarsBottomPadding =
+                        if (isFloatingNavBar) FloatingNavigationBarBottomPadding else NavigationBarBottomPadding
+                    val navBarHorizontalPadding =
+                        if (isFloatingNavBar) FloatingNavigationBarHorizontalPadding else NavigationBarHorizontalPadding
                     val navVisibleHeight = NavigationBarHeight
 
                     val bottomNavigationBarHeight by animateDpAsState(
@@ -2101,6 +2113,7 @@ class MainActivity : ComponentActivity() {
                                         val areBottomBarsPaired =
                                             shouldShowNavigationBar &&
                                                 !useRail &&
+                                                !isFloatingNavBar &&
                                                 playerBottomSheetState.isCollapsed
 
                                         BottomSheetPlayer(
@@ -2151,12 +2164,13 @@ class MainActivity : ComponentActivity() {
                                                 items = navigationItems,
                                                 pureBlack = pureBlack,
                                                 isPairedWithMiniPlayer = areBottomBarsPaired,
+                                                style = navigationBarStyle,
                                                 modifier =
                                                     Modifier
                                                         .align(Alignment.BottomCenter)
                                                         .padding(
-                                                            start = NavigationBarHorizontalPadding,
-                                                            end = NavigationBarHorizontalPadding,
+                                                            start = navBarHorizontalPadding,
+                                                            end = navBarHorizontalPadding,
                                                             bottom = bottomInset + floatingBarsBottomPadding,
                                                         ).height(navVisibleHeight),
                                                 isSelected = { screen ->
