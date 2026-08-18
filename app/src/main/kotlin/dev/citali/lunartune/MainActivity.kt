@@ -1665,7 +1665,10 @@ class MainActivity : ComponentActivity() {
 
                             Scaffold(
                                 topBar = {
-                                   navBackStackEntry?.destination?.route == Screens.Home.route ||
+                                    if (shouldShowTopBar) {
+                                        val shouldUseFloatingTopBar =
+                                            remember(navBackStackEntry) {
+                                                navBackStackEntry?.destination?.route == Screens.Home.route ||
                                                     navBackStackEntry?.destination?.route == Screens.Search.route ||
                                                     navBackStackEntry?.destination?.route == Screens.Library.route
                                             }
