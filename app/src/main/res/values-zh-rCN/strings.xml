@@ -942,7 +942,7 @@
     <string name="discord_image_artist_artwork">艺人图片</string>
     <string name="discord_image_album_artwork">专辑封面</string>
     <string name="support_development_title">支持项目开发</string>
-    <string name="support_development_message">你好！我是 LunarTune 的开发者 rukamori。如果 LunarTune 已经成为你日常听歌不可或缺的一部分，欢迎通过捐赠或在 GitHub 上点亮 Star 来支持后续的开发与维护。感谢你对本应用的支持与鼓励！</string>
+    <string name="support_development_message">你好！我是 LunarTune 的开发者 cognitiveshadows03。如果 LunarTune 已经成为你日常听歌不可或缺的一部分，欢迎通过捐赠或在 GitHub 上点亮 Star 来支持后续的开发与维护。感谢你对本应用的支持与鼓励！</string>
     <string name="support_development_donate">捐赠支持开发</string>
     <string name="support_development_star">在 GitHub 点亮 Star</string>
     <string name="later">以后再说</string>
@@ -1091,7 +1091,7 @@
     <string name="scheduled_backup_directory_saved">备份目录已保存</string>
     <string name="scheduled_backup_load_failed">无法加载计划自动备份设置</string>
     <string name="scheduled_backup_update_failed">无法保存计划自动备份设置</string>
-    <string name="gatekeeper_connection_blocked">连接已被 LunarTune Remote 拒绝。当前应用未能通过官方 LunarTune 构建验证。请从 https://github.com/rukamori/ArchiveTune 或 https://t.me/ArchiveTuneGC 获取官方构建版本</string>
+    <string name="gatekeeper_connection_blocked">连接已被 LunarTune Remote 拒绝。当前应用未能通过官方 LunarTune 构建验证。请从 https://github.com/cognitiveshadows03/ArchiveTune 或 https://t.me/LunarTuneGC 获取官方构建版本</string>
     <plurals name="widget_total_plays">
         <item quantity="other">%d 次播放</item>
     </plurals>

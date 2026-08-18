@@ -896,7 +896,7 @@
     <string name="discord_image_album_artwork">غلاف الألبوم</string>
     <string name="discord_image_artist_artwork">صورة الفنان</string>
     <string name="support_development_title">دعم التطوير</string>
-    <string name="support_development_message">مرحبًا! أنا rukamori، مطور LunarTune. إذا كسب LunarTune مكاناً في استماعك اليومي، يمكنك المساعدة في استمرار تطويره بالتبرع أو إعطاء نجمة للمشروع على GitHub. شكرًا لدعمك للعمل خلف التطبيق.</string>
+    <string name="support_development_message">مرحبًا! أنا cognitiveshadows03، مطور LunarTune. إذا كسب LunarTune مكاناً في استماعك اليومي، يمكنك المساعدة في استمرار تطويره بالتبرع أو إعطاء نجمة للمشروع على GitHub. شكرًا لدعمك للعمل خلف التطبيق.</string>
     <string name="support_development_donate">تبرع لدعم التطوير</string>
     <string name="support_development_star">نجمة على GitHub</string>
     <string name="later">لاحقًا</string>
@@ -1149,7 +1149,7 @@
     <string name="scheduled_backup_directory_saved">تم حفظ دليل النسخ الاحتياطي</string>
     <string name="scheduled_backup_load_failed">تعذر تحميل إعدادات النسخ الاحتياطي المجدول</string>
     <string name="scheduled_backup_update_failed">تعذر حفظ إعدادات النسخ الاحتياطي المجدول</string>
-    <string name="gatekeeper_connection_blocked">تم حظر الاتصال بواسطة LunarTune Remote. لم يتم التحقق من هذا التطبيق كإصدار رسمي من LunarTune. قم بتثبيت إصدار رسمي من https://github.com/rukamori/ArchiveTune أو https://t.me/ArchiveTuneGC.</string>
+    <string name="gatekeeper_connection_blocked">تم حظر الاتصال بواسطة LunarTune Remote. لم يتم التحقق من هذا التطبيق كإصدار رسمي من LunarTune. قم بتثبيت إصدار رسمي من https://github.com/cognitiveshadows03/ArchiveTune أو https://t.me/LunarTuneGC.</string>
     <string name="updates_channel_warning_canary_unstable">تُوفر إصدارات Canary للاختبار والوصول المبكر فقط.\nالاستقرار، التوافق، والوظائف غير مضمونة.</string>
     <string name="updates_channel_warning_canary_acknowledgement">ملاحظة: التنزيل مباشرة من GitHub يتجاوز أي فحص إضافي يجريه المتجر الذي ربما ثبّت التطبيق منه سابقًا.\nبالمتابعة، فإنك تقر بأن إصدارات Canary قد تكون غير مستقرة وتتحمل مسؤولية استخدامها.</string>
     <string name="updates_canary_channel_confirmation">التبديل إلى قناة Canary لتلقي إصدارات التطوير.\n\nتُحمل إصدارات Canary تلقائيًا من أحدث فرع تطوير.\nملاحظة: التنزيل مباشرة من GitHub يتجاوز أي فحص إضافي يجريه المتجر الذي ربما ثبّت التطبيق منه سابقًا.</string>

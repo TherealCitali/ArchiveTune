@@ -1,6 +1,6 @@
 /*
  * LunarTune (2026)
- * © Rukamori — github.com/rukamori
+ * © cognitiveshadows03 — github.com/cognitiveshadows03
  * GPL-3.0 License | Contributors: see git history
  * Do not remove or alter this notice. - Per GPL-3.0 Section 4 & Section 5
  */
@@ -55,12 +55,12 @@ private data class ReleasesNetworkResult(
 object Updater {
     private val client = HttpClient()
     private const val ReleaseCacheCheckIntervalMs: Long = 6 * 60 * 60 * 1000L
-    private const val StableReleaseBaseUrl = "https://github.com/rukamori/ArchiveTune/releases"
+    private const val StableReleaseBaseUrl = "https://github.com/cognitiveshadows03/ArchiveTune/releases"
     private const val CanaryReleaseBaseUrl =
-        "https://github.com/rukamori/canary/releases"
+        "https://github.com/cognitiveshadows03/canary/releases"
     private const val CanaryWorkflowRunsUrl =
-        "https://api.github.com/repos/rukamori/ArchiveTune/actions/workflows/build.yml/runs" +
-            "?branch=dev&status=success&per_page=1&exclude_pull_requests=true"
+        "https://api.github.com/repos/cognitiveshadows03/ArchiveTune/actions/workflows/build.yml/runs" +
+            "?branch=main&status=success&per_page=1&exclude_pull_requests=true"
     var lastCheckTime = -1L
         private set
     private var latestReleaseTag: String? = null
@@ -98,7 +98,7 @@ object Updater {
 
     private fun workflowArtifactDownloadUrl(): String {
         val artifactUrl =
-            "https://nightly.link/rukamori/ArchiveTune/workflows/build/dev/${workflowArtifactName()}"
+            "https://nightly.link/cognitiveshadows03/ArchiveTune/workflows/build/main/${workflowArtifactName()}"
         return if (canDownloadUpdatesDirectly) "$artifactUrl.zip" else artifactUrl
     }
 
@@ -322,7 +322,7 @@ object Updater {
         cachedEtag: String?,
     ): ReleasesNetworkResult {
         val response: HttpResponse =
-            client.get("https://api.github.com/repos/rukamori/ArchiveTune/releases?per_page=$perPage") {
+            client.get("https://api.github.com/repos/cognitiveshadows03/ArchiveTune/releases?per_page=$perPage") {
                 headers {
                     append("Accept", "application/vnd.github+json")
                     append("User-Agent", "LunarTune")
@@ -385,7 +385,7 @@ object Updater {
 
     suspend fun getCommitHistory(
         count: Int = 20,
-        branch: String = "dev",
+        branch: String = "main",
     ): Result<List<GitCommit>> =
         runCatchingCancellable {
             if (!isUpdaterDistribution) {
@@ -394,7 +394,7 @@ object Updater {
 
             val response =
                 client
-                    .get("https://api.github.com/repos/rukamori/ArchiveTune/commits?sha=$branch&per_page=$count")
+                    .get("https://api.github.com/repos/cognitiveshadows03/ArchiveTune/commits?sha=$branch&per_page=$count")
                     .bodyAsText()
             val jsonArray = JSONArray(response)
             val commits = mutableListOf<GitCommit>()
@@ -619,7 +619,7 @@ object Updater {
         cachedEtag: String?,
     ): ReleasesNetworkResult {
         val response: HttpResponse =
-            client.get("https://api.github.com/repos/rukamori/canary/releases?per_page=$perPage") {
+            client.get("https://api.github.com/repos/cognitiveshadows03/canary/releases?per_page=$perPage") {
                 headers {
                     append("Accept", "application/vnd.github+json")
                     append("User-Agent", "LunarTune")

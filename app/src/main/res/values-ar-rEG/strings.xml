@@ -743,7 +743,7 @@
     <string name="context_info">السياقات (مفصولة بفاصلة)</string>
     <string name="close_dialog">إغلاق</string>
     <string name="support_development_title">دعم تطوير التطبيق</string>
-    <string name="support_development_message">أهلاً بيك! أنا rukamori مطور LunarTune. لو التطبيق بقى جزء من يومك وبيرافقك علطول، تقدر تساعدنا نكمله ونطوره أكتر عن طريق التبرع أو تعمل نجمة للمشروع على GitHub. شكراً جداً لدعمك وتشجيعك لينا!</string>
+    <string name="support_development_message">أهلاً بيك! أنا cognitiveshadows03 مطور LunarTune. لو التطبيق بقى جزء من يومك وبيرافقك علطول، تقدر تساعدنا نكمله ونطوره أكتر عن طريق التبرع أو تعمل نجمة للمشروع على GitHub. شكراً جداً لدعمك وتشجيعك لينا!</string>
     <string name="support_development_donate">تبرع لدعم التطوير</string>
     <string name="support_development_star">اعمل نجمة على GitHub</string>
     <string name="later">بعدين</string>
@@ -1097,7 +1097,7 @@
     <string name="scheduled_backup_directory_saved">اتحفظ مجلد النسخ الاحتياطي بنجاح</string>
     <string name="scheduled_backup_load_failed">معرفناش نحمل إعدادات النسخ الاحتياطي المجدول</string>
     <string name="scheduled_backup_update_failed">معرفناش نحفظ إعدادات النسخ الاحتياطي المجدول</string>
-    <string name="gatekeeper_connection_blocked">الاتصال اتقفل من LunarTune Remote. معرفناش نتحقق إن النسخة دي رسمية من التطبيق. حمل نسخة رسمية من https://github.com/rukamori/ArchiveTune أو https://t.me/ArchiveTuneGC.</string>
+    <string name="gatekeeper_connection_blocked">الاتصال اتقفل من LunarTune Remote. معرفناش نتحقق إن النسخة دي رسمية من التطبيق. حمل نسخة رسمية من https://github.com/cognitiveshadows03/ArchiveTune أو https://t.me/LunarTuneGC.</string>
     <string name="remove_from_library_confirm">عايز تشيل \"%1$s\" من المكتبة؟</string>
     <string name="eq_advanced_description">نطاقات دقيقة، تعديل الكسب، التأثيرات، والملفات الشخصية</string>
     <string name="eq_profiles_description">احفظ، استورد، وشارك إعدادات كاملة</string>

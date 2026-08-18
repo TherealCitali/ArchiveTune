@@ -1,6 +1,6 @@
 /*
  * LunarTune (2026)
- * © Rukamori — github.com/rukamori
+ * © cognitiveshadows03 — github.com/cognitiveshadows03
  * GPL-3.0 License | Contributors: see git history
  * Do not remove or alter this notice. - Per GPL-3.0 Section 4 & Section 5
  */
@@ -134,7 +134,7 @@ object DiscordImageResolver {
             }
 
             "appicon" -> {
-                "https://raw.githubusercontent.com/rukamori/ArchiveTune/main/fastlane/metadata/android/en-US/images/icon.png"
+                "https://raw.githubusercontent.com/cognitiveshadows03/ArchiveTune/main/fastlane/metadata/android/en-US/images/icon.png"
             }
 
             "custom" -> {

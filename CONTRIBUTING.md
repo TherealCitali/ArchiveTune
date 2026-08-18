@@ -41,7 +41,7 @@ LunarTune follows a strict **Clean Architecture** approach. This separation of c
 
 1. **Clone the Source:**
 ```bash
-git clone https://github.com/rukamori/ArchiveTune.git
+git clone https://github.com/cognitiveshadows03/ArchiveTune.git
 cd LunarTune
 
 ```

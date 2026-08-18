@@ -699,7 +699,7 @@
     <string name="target_language">目標語言</string>
     <string name="close_dialog">關閉</string>
     <string name="support_development_title">支持開發者</string>
-    <string name="support_development_message">嗨！我是 LunarTune 的開發者 rukamori。如果 LunarTune 已經成為你日常聆聽體驗的一部分，歡迎透過捐款或在 GitHub 上為專案點讚（Star）來支持它的持續發展。感謝你對這款應用程式背後工作的支持。</string>
+    <string name="support_development_message">嗨！我是 LunarTune 的開發者 cognitiveshadows03。如果 LunarTune 已經成為你日常聆聽體驗的一部分，歡迎透過捐款或在 GitHub 上為專案點讚（Star）來支持它的持續發展。感謝你對這款應用程式背後工作的支持。</string>
     <string name="support_development_donate">捐贈以支持開發</string>
     <string name="support_development_star">在 GitHub 上給個星</string>
     <string name="later">以後再說</string>
@@ -1036,7 +1036,7 @@
     <string name="eq_decibels">%1$+.1f dB</string>
     <string name="eq_percent">%1$d%%</string>
     <string name="eq_frequency_hertz">%1$d Hz</string>
-    <string name="gatekeeper_connection_blocked">連線被 LunarTune Remote 阻止。該應用程式無法被驗證為 LunarTune 官方版本。請從 https://github.com/rukamori/ArchiveTune 或 https://t.me/ArchiveTuneGC 安裝官方版本。</string>
+    <string name="gatekeeper_connection_blocked">連線被 LunarTune Remote 阻止。該應用程式無法被驗證為 LunarTune 官方版本。請從 https://github.com/cognitiveshadows03/ArchiveTune 或 https://t.me/LunarTuneGC 安裝官方版本。</string>
     <string name="eq_frequency_kilohertz">%1$.1f kHz</string>
     <string name="ai_content_filter">AI 內容過濾器</string>
     <string name="ai_content_filter_hide">隱藏AI生成的內容</string>

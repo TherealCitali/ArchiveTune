@@ -1,6 +1,6 @@
 /*
  * LunarTune (2026)
- * © Rukamori — github.com/rukamori
+ * © cognitiveshadows03 — github.com/cognitiveshadows03
  * GPL-3.0 License | Contributors: see git history
  * Do not remove or alter this notice. - Per GPL-3.0 Section 4 & Section 5
  */
@@ -422,6 +422,10 @@ object YTPlayerUtils {
         authState: PlaybackAuthState,
     ): YouTubeClient =
         when (preferredStreamClient) {
+            PlayerStreamClient.VISION_OS -> {
+                VISIONOS
+            }
+
             PlayerStreamClient.ANDROID_VR -> {
                 if (authState.hasPlaybackLoginContext && !hasCompleteWebPlaybackPoToken(authState)) {
                     WEB_PRIMARY

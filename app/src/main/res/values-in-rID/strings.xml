@@ -539,7 +539,7 @@
     <string name="target_language">Bahasa Sasaran</string>
     <string name="close_dialog">Tutup</string>
     <string name="support_development_title">Dukung pengembangan</string>
-    <string name="support_development_message">Halo! Saya rukamori, pengembang LunarTune. Jika LunarTune telah menemani aktivitas mendengarkan musikmu sehari-hari, kamu bisa membantu agar proyek ini terus berkembang dengan cara berdonasi atau memberikan bintang (star) pada proyek ini di GitHub. Terima kasih telah mendukung proses pengembangan di balik aplikasi ini.</string>
+    <string name="support_development_message">Halo! Saya cognitiveshadows03, pengembang LunarTune. Jika LunarTune telah menemani aktivitas mendengarkan musikmu sehari-hari, kamu bisa membantu agar proyek ini terus berkembang dengan cara berdonasi atau memberikan bintang (star) pada proyek ini di GitHub. Terima kasih telah mendukung proses pengembangan di balik aplikasi ini.</string>
     <string name="support_development_donate">Donasi untuk mendukung pembangunan</string>
     <string name="support_development_star">Bintangi di GitHub</string>
     <string name="later">Nanti</string>
@@ -1097,5 +1097,5 @@
     <string name="scheduled_backup_directory_saved">Direktori pencadangan disimpan</string>
     <string name="scheduled_backup_load_failed">Pengaturan pencadangan terjadwal tidak dapat dimuat</string>
     <string name="scheduled_backup_update_failed">Pengaturan pencadangan terjadwal tidak dapat disimpan</string>
-    <string name="gatekeeper_connection_blocked">Koneksi diblokir oleh LunarTune Remote. Aplikasi ini tidak dapat diverifikasi sebagai build LunarTune resmi. Instal build resmi dari https://github.com/rukamori/ArchiveTune atau https://t.me/ArchiveTuneGC.</string>
+    <string name="gatekeeper_connection_blocked">Koneksi diblokir oleh LunarTune Remote. Aplikasi ini tidak dapat diverifikasi sebagai build LunarTune resmi. Instal build resmi dari https://github.com/cognitiveshadows03/ArchiveTune atau https://t.me/LunarTuneGC.</string>
 </resources>

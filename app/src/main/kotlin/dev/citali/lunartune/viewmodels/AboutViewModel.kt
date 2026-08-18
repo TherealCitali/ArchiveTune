@@ -1,6 +1,6 @@
 /*
  * LunarTune (2026)
- * © Rukamori — github.com/rukamori
+ * © cognitiveshadows03 — github.com/cognitiveshadows03
  * GPL-3.0 License | Contributors: see git history
  * Do not remove or alter this notice. - Per GPL-3.0 Section 4 & Section 5
  */
@@ -428,7 +428,7 @@ class AboutViewModel
                             id = "telegram",
                             iconResId = R.drawable.telegram,
                             labelResId = R.string.about_content_desc_telegram,
-                            url = "https://t.me/ArchiveTuneGC",
+                            url = "https://t.me/LunarTuneGC",
                         ),
                         AboutLinkUiModel(
                             id = "donate",
@@ -471,14 +471,14 @@ class AboutViewModel
                             avatarUrl = "https://avatars.githubusercontent.com/u/107134739?v=4",
                             name = "ArchiveTune",
                             positionResId = R.string.about_position_original,
-                            profileUrl = "https://github.com/rukamori/ArchiveTune",
+                            profileUrl = "https://github.com/cognitiveshadows03/ArchiveTune",
                             links =
                                 AboutLinkCollection.of(
                                     AboutLinkUiModel(
                                         id = "github",
                                         iconResId = R.drawable.github,
                                         labelResId = R.string.about_content_desc_github,
-                                        url = "https://github.com/rukamori/ArchiveTune",
+                                        url = "https://github.com/cognitiveshadows03/ArchiveTune",
                                     ),
                                 ),
                         ),

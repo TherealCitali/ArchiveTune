@@ -1,6 +1,6 @@
 /*
  * LunarTune (2026)
- * © Rukamori — github.com/rukamori
+ * © cognitiveshadows03 — github.com/cognitiveshadows03
  * GPL-3.0 License | Contributors: see git history
  * Do not remove or alter this notice. - Per GPL-3.0 Section 4 & Section 5
  */
@@ -288,15 +288,41 @@ enum class AudioQuality {
 }
 
 val PlayerStreamClientKey = stringPreferencesKey("playerStreamClient")
+val StreamSourcesOrderKey = stringPreferencesKey("streamSourcesOrder")
+val StreamSourcesEnabledKey = stringSetPreferencesKey("streamSourcesEnabled")
 
 enum class PlayerStreamClient {
+    VISION_OS,
     ANDROID_VR,
     WEB_REMIX,
+    TVHTML5,
+    WEB_CREATOR,
     ARCHIVETUNE_EXTRACTOR,
     HI_RES_LOSSLESS,
     IOS,
-    TVHTML5,
     ANDROID_MUSIC,
+}
+
+val DefaultStreamSources =
+    listOf(
+        PlayerStreamClient.VISION_OS,
+        PlayerStreamClient.ANDROID_VR,
+        PlayerStreamClient.WEB_REMIX,
+        PlayerStreamClient.TVHTML5,
+        PlayerStreamClient.WEB_CREATOR,
+    )
+
+fun PlayerStreamClient.isSelectableStreamSource(): Boolean = this in DefaultStreamSources
+
+fun deserializeStreamSourcesOrder(orderStr: String?): List<PlayerStreamClient> {
+    val parsed =
+        orderStr
+            .orEmpty()
+            .split(",")
+            .mapNotNull { name ->
+                PlayerStreamClient.entries.find { it.name == name.trim() }?.takeIf { it.isSelectableStreamSource() }
+            }.distinct()
+    return parsed + DefaultStreamSources.filterNot { it in parsed }
 }
 
 val PersistentQueueKey = booleanPreferencesKey("persistentQueue")
