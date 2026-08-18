@@ -62,7 +62,6 @@ import dev.citali.lunartune.ui.component.ArtistSeparatorsDialog
 import dev.citali.lunartune.ui.component.CrossfadeSliderPreference
 import dev.citali.lunartune.ui.component.EnumListPreference
 import dev.citali.lunartune.ui.component.IconButton
-import dev.citali.lunartune.ui.component.ListPreference
 import dev.citali.lunartune.ui.component.NumberPickerPreference
 import dev.citali.lunartune.ui.component.PreferenceEntry
 import dev.citali.lunartune.ui.component.PreferenceGroup
@@ -199,41 +198,14 @@ fun PlayerSettings(navController: NavController) {
             WakelockKey,
             defaultValue = false,
         )
-    val isLunarTuneExtractorEnabled = false
-    val playerStreamClients =
-        remember {
-            listOf(
-                PlayerStreamClient.WEB_REMIX,
-                PlayerStreamClient.ARCHIVETUNE_EXTRACTOR,
-            )
-        }
-    val selectedPlayerStreamClient =
-        if (playerStreamClient in playerStreamClients) {
-            playerStreamClient
-        } else {
-            PlayerStreamClient.WEB_REMIX
-        }
-    val audioQualityEnabled = selectedPlayerStreamClient != PlayerStreamClient.ARCHIVETUNE_EXTRACTOR
-    val isPlayerStreamClientEnabled =
-        remember(isLunarTuneExtractorEnabled) {
-            { client: PlayerStreamClient ->
-                client != PlayerStreamClient.ARCHIVETUNE_EXTRACTOR ||
-                    isLunarTuneExtractorEnabled
-            }
-        }
+    val audioQualityEnabled = playerStreamClient != PlayerStreamClient.ARCHIVETUNE_EXTRACTOR
 
     var showArtistSeparatorsDialog by remember { mutableStateOf(false) }
     var showExternalDownloaderPackageDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(playerStreamClient, isLunarTuneExtractorEnabled) {
-        if (
-            playerStreamClient !in playerStreamClients ||
-            (
-                playerStreamClient == PlayerStreamClient.ARCHIVETUNE_EXTRACTOR &&
-                    !isLunarTuneExtractorEnabled
-            )
-        ) {
-            onPlayerStreamClientChange(PlayerStreamClient.WEB_REMIX)
+    LaunchedEffect(playerStreamClient) {
+        if (playerStreamClient == PlayerStreamClient.ARCHIVETUNE_EXTRACTOR) {
+            onPlayerStreamClientChange(PlayerStreamClient.VISION_OS)
         }
     }
 
@@ -310,54 +282,11 @@ fun PlayerSettings(navController: NavController) {
                 }
 
                 item {
-                    ListPreference(
+                    PreferenceEntry(
                         title = { Text(stringResource(R.string.player_stream_client)) },
                         description = stringResource(R.string.player_stream_client_desc),
                         icon = { Icon(painterResource(R.drawable.integration), null) },
-                        selectedValue = selectedPlayerStreamClient,
-                        values = playerStreamClients,
-                        onValueSelected = onPlayerStreamClientChange,
-                        isValueEnabled = isPlayerStreamClientEnabled,
-                        valueText = {
-                            when (it) {
-                                PlayerStreamClient.WEB_REMIX -> {
-                                    stringResource(R.string.player_stream_client_web_remix)
-                                }
-
-                                PlayerStreamClient.ARCHIVETUNE_EXTRACTOR -> {
-                                    stringResource(
-                                        R.string.player_stream_client_lunartune_extractor,
-                                    )
-                                }
-
-                                else -> {
-                                    stringResource(R.string.player_stream_client_web_remix)
-                                }
-                            }
-                        },
-                        valueDescription = {
-                            when (it) {
-                                PlayerStreamClient.WEB_REMIX -> {
-                                    stringResource(R.string.player_stream_client_web_remix_desc)
-                                }
-
-                                PlayerStreamClient.ARCHIVETUNE_EXTRACTOR -> {
-                                    if (isLunarTuneExtractorEnabled) {
-                                        stringResource(
-                                            R.string.player_stream_client_lunartune_extractor_desc,
-                                        )
-                                    } else {
-                                        stringResource(
-                                            R.string.player_stream_client_lunartune_extractor_login_required,
-                                        )
-                                    }
-                                }
-
-                                else -> {
-                                    stringResource(R.string.player_stream_client_web_remix_desc)
-                                }
-                            }
-                        },
+                        onClick = { navController.navigate("settings/player/stream_sources") },
                     )
                 }
 

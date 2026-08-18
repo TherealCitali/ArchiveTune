@@ -422,6 +422,10 @@ object YTPlayerUtils {
         authState: PlaybackAuthState,
     ): YouTubeClient =
         when (preferredStreamClient) {
+            PlayerStreamClient.VISION_OS -> {
+                VISIONOS
+            }
+
             PlayerStreamClient.ANDROID_VR -> {
                 if (authState.hasPlaybackLoginContext && !hasCompleteWebPlaybackPoToken(authState)) {
                     WEB_PRIMARY
