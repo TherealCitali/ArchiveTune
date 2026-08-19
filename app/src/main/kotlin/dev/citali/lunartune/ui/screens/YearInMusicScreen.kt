@@ -1239,9 +1239,13 @@ private fun LunarTuneBrand(
         horizontalArrangement = Arrangement.spacedBy(7.dp),
     ) {
         Image(
-            painter = painterResource(R.drawable.app_icon_small),
+            painter = painterResource(R.drawable.lunartune_brand_round),
             contentDescription = null,
-            modifier = Modifier.size(20.dp),
+            contentScale = ContentScale.Crop,
+            modifier =
+                Modifier
+                    .size(28.dp)
+                    .clip(CircleShape),
         )
         Text(
             text = stringResource(R.string.app_name),
