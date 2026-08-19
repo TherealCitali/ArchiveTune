@@ -12,6 +12,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.focusable
@@ -264,25 +265,56 @@ fun QuickPicksSection(
 
     when (displayMode) {
         QuickPicksDisplayMode.CARD -> {
-            val cardWidth = 196.dp
-            val artSize = 168.dp
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                modifier = modifier.fillMaxWidth(),
-            ) {
-                items(
-                    items = distinctQuickPicks,
-                    key = { it.id },
-                ) { song ->
+            BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+                val heroHeight =
+                    when {
+                        maxWidth >= 840.dp -> 380.dp
+                        maxWidth >= 600.dp -> 356.dp
+                        else -> 332.dp
+                    }
+                val heroMaxWidth =
+                    (maxWidth - 48.dp)
+                        .coerceAtLeast(232.dp)
+                        .coerceAtMost(440.dp)
+                val density = LocalDensity.current
+                val requestWidthPx = with(density) { heroMaxWidth.roundToPx().coerceAtLeast(1) }
+                val requestHeightPx = with(density) { heroHeight.roundToPx().coerceAtLeast(1) }
+
+                HorizontalCenteredHeroCarousel(
+                    state = rememberCarouselState { distinctQuickPicks.size },
+                    maxItemWidth = heroMaxWidth,
+                    itemSpacing = 10.dp,
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(heroHeight),
+                ) { index ->
+                    val song = distinctQuickPicks[index]
                     val isActive = song.id == mediaMetadata?.id
-                    Surface(
-                        shape = RoundedCornerShape(24.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        tonalElevation = 1.dp,
+                    val context = LocalContext.current
+                    val imageRequest =
+                        remember(song.song.thumbnailUrl, requestWidthPx, requestHeightPx) {
+                            ImageRequest
+                                .Builder(context)
+                                .data(song.song.thumbnailUrl)
+                                .size(Size(requestWidthPx, requestHeightPx))
+                                .crossfade(true)
+                                .build()
+                        }
+
+                    Box(
                         modifier =
                             Modifier
-                                .width(cardWidth)
+                                .fillMaxSize()
+                                .clip(MaterialTheme.shapes.extraLarge)
+                                .border(
+                                    BorderStroke(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.72f),
+                                    ),
+                                    MaterialTheme.shapes.extraLarge,
+                                ).focusable()
                                 .combinedClickable(
                                     onClick = {
                                         if (isActive) {
@@ -309,28 +341,66 @@ fun QuickPicksSection(
                                     },
                                 ),
                     ) {
-                        Column(modifier = Modifier.padding(10.dp)) {
-                            AsyncImage(
-                                model = song.song.thumbnailUrl,
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
+                        AsyncImage(
+                            model = imageRequest,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+
+                        Box(
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .background(
+                                        Brush.verticalGradient(
+                                            0f to Color.Transparent,
+                                            0.48f to Color.Black.copy(alpha = 0.08f),
+                                            1f to Color.Black.copy(alpha = 0.84f),
+                                        ),
+                                    ),
+                        )
+
+                        if (isActive && isPlaying) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                                shape = CircleShape,
+                                tonalElevation = 2.dp,
                                 modifier =
                                     Modifier
-                                        .size(artSize)
-                                        .clip(RoundedCornerShape(18.dp)),
-                            )
-                            Spacer(Modifier.height(10.dp))
+                                        .align(Alignment.TopEnd)
+                                        .padding(14.dp)
+                                        .size(36.dp),
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.volume_up),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(19.dp),
+                                    )
+                                }
+                            }
+                        }
+
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                            modifier =
+                                Modifier
+                                    .align(Alignment.BottomStart)
+                                    .padding(20.dp),
+                        ) {
                             Text(
                                 text = song.song.title,
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.SemiBold,
+                                style = MaterialTheme.typography.titleLargeEmphasized,
+                                color = Color.White,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
                             )
                             Text(
                                 text = song.artists.joinToString { it.name },
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = Color.White.copy(alpha = 0.78f),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )

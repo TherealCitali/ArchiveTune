@@ -322,3 +322,8 @@ See the [`LICENSE`](LICENSE) file for the complete GPLv3 terms.
   <br />
   <img src="https://raw.githubusercontent.com/cognitiveshadows03/ArchiveTune/refs/heads/dev/assets/badge_part.png" alt="LunarTune Banner" style="width: 180px">
 </div>
+
+## Credits
+
+- [ArchiveTune](https://github.com/rukamori/ArchiveTune) — base app
+- [Vivi Music](https://github.com/vivizzz007/vivi-music) — Dolby and Dirac equalizer presets

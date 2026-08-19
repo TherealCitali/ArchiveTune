@@ -19,10 +19,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -33,6 +35,8 @@ import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -111,6 +115,24 @@ fun SettingsScreen(
             Updater.isUpdateAvailable(latestVersionName, BuildConfig.VERSION_NAME)
     var isUpdateDismissed by remember { mutableStateOf(false) }
     val settingsGroups = buildSettingsGroups(navController, isAndroid12OrLater, hasUpdate, context)
+    var searchQuery by remember { mutableStateOf("") }
+    val visibleGroups =
+        remember(searchQuery, settingsGroups) {
+            val query = searchQuery.trim().lowercase()
+            if (query.isEmpty()) {
+                settingsGroups
+            } else {
+                settingsGroups.mapNotNull { group ->
+                    val items =
+                        group.items.filter { item ->
+                            item.title.lowercase().contains(query) ||
+                                item.subtitle.orEmpty().lowercase().contains(query) ||
+                                item.key.lowercase().contains(query)
+                        }
+                    if (items.isEmpty()) null else group.copy(items = items)
+                }
+            }
+        }
 
     Scaffold(
         modifier =
@@ -200,7 +222,44 @@ fun SettingsScreen(
                 }
             }
 
-            settingsGroups.forEachIndexed { groupIndex, group ->
+            item(key = "search_bar", contentType = "search_bar") {
+                TextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = {
+                        Text(
+                            text = stringResource(R.string.search_settings),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.search),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                    singleLine = true,
+                    shape = RoundedCornerShape(28.dp),
+                    colors =
+                        TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                            unfocusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+                        ),
+                    modifier =
+                        Modifier
+                            .padding(horizontal = SettingsDimensions.SegmentedGroupHorizontalPadding)
+                            .fillMaxWidth(),
+                )
+            }
+
+            item(key = "search_spacing", contentType = "spacing") {
+                Spacer(modifier = Modifier.height(SettingsDimensions.SectionSpacing))
+            }
+
+            visibleGroups.forEachIndexed { groupIndex, group ->
                 if (groupIndex > 0) {
                     item(
                         key = "settings_group_spacing_$groupIndex",

@@ -22,15 +22,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
-import dev.citali.lunartune.constants.LowDataModeKey
-import dev.citali.lunartune.constants.PreloadQueueLyricsEnabledKey
 import dev.citali.lunartune.constants.QueueLyricsPreloadCountKey
 import dev.citali.lunartune.db.MusicDatabase
 import dev.citali.lunartune.db.entities.LyricsEntity
 import dev.citali.lunartune.models.MediaMetadata
 import dev.citali.lunartune.utils.NetworkConnectivityObserver
 import dev.citali.lunartune.utils.dataStore
-import dev.citali.lunartune.utils.isLowDataModeActive
 import dev.citali.lunartune.utils.reportException
 import javax.inject.Inject
 
@@ -67,10 +64,9 @@ class LyricsPreloadManager
                 scope.launch {
                     try {
                         val preferences = context.dataStore.data.first()
-                        val isEnabled = preferences[PreloadQueueLyricsEnabledKey] ?: true
-
-                        if (!isEnabled) {
-                            Log.d(TAG, "Queue lyrics pre-load is disabled")
+                        val preloadCount = preferences[QueueLyricsPreloadCountKey] ?: DEFAULT_PRELOAD_COUNT
+                        if (preloadCount <= 0) {
+                            Log.d(TAG, "Queue lyrics pre-load is off (count = 0)")
                             return@launch
                         }
 
@@ -85,13 +81,6 @@ class LyricsPreloadManager
                             Log.w(TAG, "Network unavailable, skipping lyrics pre-load")
                             return@launch
                         }
-
-                        if (context.isLowDataModeActive(preferences[LowDataModeKey] ?: true)) {
-                            Log.d(TAG, "Low Data Mode active, skipping lyrics pre-load")
-                            return@launch
-                        }
-
-                        val preloadCount = preferences[QueueLyricsPreloadCountKey] ?: DEFAULT_PRELOAD_COUNT
                         val nextSongs = getNextSongs(queue, currentIndex, preloadCount)
 
                         if (nextSongs.isEmpty()) {
