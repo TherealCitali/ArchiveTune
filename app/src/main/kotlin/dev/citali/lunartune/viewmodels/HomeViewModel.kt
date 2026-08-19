@@ -524,51 +524,51 @@ class HomeViewModel
                         keepListening.value = (keepListeningSongs + keepListeningAlbums + keepListeningArtists).shuffled()
                     }
 
+                    launch {
+                        YouTube
+                            .home()
+                            .onSuccess { page ->
+                                val filteredPage =
+                                    page.copy(
+                                        chips = filterHomeChips(page.chips),
+                                        sections =
+                                            page.sections.map { section ->
+                                                section.copy(
+                                                    items =
+                                                        filterAiContent(
+                                                            section.items
+                                                                .filterExplicit(hideExplicit)
+                                                                .filterVideo(hideVideo)
+                                                                .filterBlockedArtists(blockedArtistIds),
+                                                            aiContentFilterPolicy,
+                                                        ),
+                                                )
+                                            },
+                                    )
+                                val (pageWithoutQuickPicks, quickPicksSection) = filteredPage.extractQuickPicks()
+                                remoteQuickPicks.value = quickPicksSection
+                                homePage.value = pageWithoutQuickPicks
+                            }.onFailure {
+                                reportException(it)
+                                loadError.value = R.string.error_unknown
+                            }
+                    }
                 }
 
                 updateAllLocalItems()
-                isInitialLoadComplete.value = true
 
                 viewModelScope.launch(Dispatchers.IO) {
-                    YouTube
-                        .home()
-                        .onSuccess { page ->
-                            val filteredPage =
-                                page.copy(
-                                    chips = filterHomeChips(page.chips),
-                                    sections =
-                                        page.sections.map { section ->
-                                            section.copy(
-                                                items =
-                                                    filterAiContent(
-                                                        section.items
-                                                            .filterExplicit(hideExplicit)
-                                                            .filterVideo(hideVideo)
-                                                            .filterBlockedArtists(blockedArtistIds),
-                                                        aiContentFilterPolicy,
-                                                    ),
-                                            )
-                                        },
-                                )
-                            val (pageWithoutQuickPicks, quickPicksSection) = filteredPage.extractQuickPicks()
-                            remoteQuickPicks.value = quickPicksSection
-                            homePage.value = pageWithoutQuickPicks
-                            _allYtItems.value =
-                                similarRecommendations.value?.flatMap { it.items }.orEmpty() +
-                                    quickPicksSection?.items.orEmpty() +
-                                    pageWithoutQuickPicks.sections.flatMap { it.items }
-                        }.onFailure {
-                            reportException(it)
-                            loadError.value = R.string.error_unknown
-                        }
                     loadSimilarRecommendations()
-                    _allYtItems.value = similarRecommendations.value?.flatMap { it.items }.orEmpty() +
-                        remoteQuickPicks.value?.items.orEmpty() +
-                        homePage.value
-                            ?.sections
-                            ?.flatMap { it.items }
-                            .orEmpty()
                 }
+
+                _allYtItems.value = similarRecommendations.value?.flatMap { it.items }.orEmpty() +
+                    remoteQuickPicks.value?.items.orEmpty() +
+                    homePage.value
+                        ?.sections
+                        ?.flatMap { it.items }
+                        .orEmpty()
+
+                isInitialLoadComplete.value = true
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
