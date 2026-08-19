@@ -364,7 +364,7 @@ class MusicService :
     private val preferredStreamClient by enumPreference(
         this,
         PlayerStreamClientKey,
-        PlayerStreamClient.VISION_OS,
+        PlayerStreamClient.WEB_REMIX,
     )
     private val playbackUrlCache = ConcurrentHashMap<String, AuthScopedCacheValue>()
     private var nextMediaItemPrefetchJob: Job? = null
