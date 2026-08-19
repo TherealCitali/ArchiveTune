@@ -11,7 +11,7 @@ package dev.citali.lunartune.equalizer
  * 10-band millibel curves from Vivi Music (vivizzz007/vivi-music).
  */
 object ViviEqualizerPresets {
-    val chips =
+    val chips: List<Pair<String, String>> =
         listOf(
             "dolby_open" to "Dolby Open",
             "dolby_rich" to "Dolby Rich",

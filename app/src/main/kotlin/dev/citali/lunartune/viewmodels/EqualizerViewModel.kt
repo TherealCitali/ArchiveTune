@@ -34,6 +34,7 @@ import dev.citali.lunartune.equalizer.EqualizerTone
 import dev.citali.lunartune.equalizer.ManageEqualizerProfilesUseCase
 import dev.citali.lunartune.equalizer.ObserveEqualizerUseCase
 import dev.citali.lunartune.equalizer.UpdateEqualizerUseCase
+import dev.citali.lunartune.equalizer.ViviEqualizerPresets
 import dev.citali.lunartune.equalizer.equalizerToneIndices
 import dev.citali.lunartune.equalizer.resampleLevels
 import dev.citali.lunartune.playback.EqProfile
