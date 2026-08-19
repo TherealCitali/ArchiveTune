@@ -105,6 +105,7 @@ fun FloatingNavigationToolbar(
     style: NavigationBarStyle = NavigationBarStyle.DEFAULT,
     isSelected: (Screens) -> Boolean,
     onItemClick: (Screens, Boolean) -> Unit,
+    onItemLongClick: ((Screens) -> Unit)? = null,
     onSearchItemDoubleClick: (() -> Unit)? = null,
 ) {
     val isFloating = style == NavigationBarStyle.FLOATING
@@ -293,7 +294,7 @@ fun FloatingNavigationToolbar(
                                                     currentTime - lastClickTime.longValue <= ViewConfiguration.getDoubleTapTimeout()
                                             lastClickTime.longValue = if (isDoubleClick) 0L else currentTime
                                             if (isDoubleClick) {
-                                                onDoubleClick?.invoke()
+                                                onDoubleClick.invoke()
                                             } else {
                                                 onItemClick(screen, selected)
                                             }

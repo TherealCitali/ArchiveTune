@@ -2078,13 +2078,55 @@ class MainActivity : ComponentActivity() {
                                                 onItemClick = { screen, isSelected ->
                                                     handlePrimaryNavigationClick(screen, isSelected)
                                                 },
-                                                onItemLongClick = { screen ->
-                                                    when (screen) {
-                                                        Screens.Home -> playRandomHistorySong()
-                                                        Screens.Search -> navController.navigate(MusicRecognitionRoute)
-                                                        else -> Unit
-                                                    }
-                                                },
+                                                onItemLongClick =
+                                                    if (navBarLongPressActions) {
+                                                        { screen ->
+                                                            when (screen) {
+                                                                Screens.Home -> {
+                                                                    coroutineScope.launch {
+                                                                        val song =
+                                                                            withContext(Dispatchers.IO) {
+                                                                                val from =
+                                                                                    System.currentTimeMillis() -
+                                                                                        90L * 24 * 60 * 60 * 1000
+                                                                                val history =
+                                                                                    database
+                                                                                        .mostPlayedSongs(from, limit = 80)
+                                                                                        .first()
+                                                                                        .ifEmpty { database.recentSongs(80).first() }
+                                                                                history
+                                                                                    .filter { candidate ->
+                                                                                        candidate.artists.none { it.blockedAt != null }
+                                                                                    }.randomOrNull()
+                                                                                    ?: allLocalItems.filterIsInstance<Song>().randomOrNull()
+                                                                            }
+                                                                        if (song == null) {
+                                                                            Toast
+                                                                                .makeText(
+                                                                                    this@MainActivity,
+                                                                                    getString(R.string.navbar_long_press_no_history),
+                                                                                    Toast.LENGTH_SHORT,
+                                                                                ).show()
+                                                                            return@launch
+                                                                        }
+                                                                        playerConnection?.playQueue(
+                                                                            if (song.song.isLocal) {
+                                                                                ListQueue(items = listOf(song.toMediaItem()))
+                                                                            } else {
+                                                                                YouTubeQueue.radio(song.toMediaMetadata())
+                                                                            },
+                                                                        )
+                                                                    }
+                                                                }
+
+                                                                Screens.Search -> navController.navigate(MusicRecognitionRoute)
+
+                                                                else -> Unit
+                                                            }
+                                                        }
+                                                    } else {
+                                                        null
+                                                    },
                                                 onSearchItemDoubleClick = {
                                                     searchSource = SearchSource.ONLINE
                                                     openSearch()
@@ -2972,129 +3014,6 @@ private fun HomeOverflowFab(
                         iconRes = R.drawable.shuffle,
                         contentDescription = stringResource(R.string.shuffle),
                         pureBlack = pureBlack,
-                    )
-                },
-                colors = menuItemColors,
-            )
-        }
-    }
-}
-
-@Composable
-private fun HomeOverflowMenuIcon(
-    @DrawableRes iconRes: Int,
-    contentDescription: String?,
-    pureBlack: Boolean,
-) {
-    Surface(
-        modifier = Modifier.size(HomeOverflowMenuIconSize),
-        shape = CircleShape,
-        color =
-            if (pureBlack) {
-                Color.White.copy(alpha = 0.12f)
-            } else {
-                MaterialTheme.colorScheme.secondaryContainer
-            },
-        contentColor = if (pureBlack) Color.White else MaterialTheme.colorScheme.onSecondaryContainer,
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Icon(
-                painter = painterResource(iconRes),
-                contentDescription = contentDescription,
-            )
-        }
-    }
-}
-
-private const val TopAppBarIconButtonContainerAlpha = 0.48f
-
-@Composable
-private fun TranslucentTopAppBarIconButton(
-    onClick: () -> Unit,
-    content: @Composable () -> Unit,
-) {
-    IconButton(
-        onClick = onClick,
-        colors =
-            IconButtonDefaults.iconButtonColors(
-                containerColor =
-                    MaterialTheme.colorScheme.surfaceContainerHighest.copy(
-                        alpha = TopAppBarIconButtonContainerAlpha,
-                    ),
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            ),
-        content = content,
-    )
-}
-
-@Composable
-private fun OnlineSearchSortMenu(
-    selectedSort: OnlineSearchSort,
-    onSortSelected: (OnlineSearchSort) -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val options =
-        remember {
-            listOf(
-                OnlineSearchSort.DEFAULT,
-                OnlineSearchSort.VIEWS,
-            )
-        }
-
-    Box {
-        IconButton(onClick = { expanded = true }) {
-            Icon(
-                painter = painterResource(R.drawable.filter_alt),
-                contentDescription = null,
-            )
-        }
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) {
-            options.forEach { sort ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text =
-                                stringResource(
-                                    when (sort) {
-                                        OnlineSearchSort.DEFAULT -> R.string.default_style
-                                        OnlineSearchSort.VIEWS -> R.string.views
-                                    },
-                                ),
-                        )
-                    },
-                    onClick = {
-                        expanded = false
-                        onSortSelected(sort)
-                    },
-                    leadingIcon = {
-                        if (sort == selectedSort) {
-                            Icon(
-                                painter = painterResource(R.drawable.done),
-                                contentDescription = null,
-                            )
-                        } else {
-                            Spacer(Modifier.size(24.dp))
-                        }
-                    },
-                )
-            }
-        }
-    }
-}
-
-private fun Context.isTvDevice(): Boolean {
-    val isTelevisionUiMode =
-        (resources.configuration.uiMode and Configuration.UI_MODE_TYPE_MASK) ==
-            Configuration.UI_MODE_TYPE_TELEVISION
-    return isTelevisionUiMode ||
-        packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK) ||
-        packageManager.hasSystemFeature(PackageManager.FEATURE_TELEVISION)
-}
-ck = pureBlack,
                     )
                 },
                 colors = menuItemColors,
