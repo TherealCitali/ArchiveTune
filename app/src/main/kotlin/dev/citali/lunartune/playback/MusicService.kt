@@ -6756,6 +6756,7 @@ class MusicService :
                         }
                     result.onSuccess { playbackData ->
                         if (lowData) return@onSuccess
+                        persistResolvedPlaybackFormat(mediaId, playbackData)
                         playbackUrlCache[mediaId] =
                             AuthScopedCacheValue(
                                 url = playbackData.streamUrl,
@@ -7592,7 +7593,8 @@ class MusicService :
                     authFingerprint = authFingerprint,
                     minimumRemainingMs = YTPlayerUtils.STREAM_URL_EXPIRY_SAFETY_MS,
                 )
-            }?.let {
+            }?.takeIf { storedFormat.hasDisplayablePlaybackDetails() }
+            ?.let {
                 scope.launch(Dispatchers.IO) { recoverSong(mediaId) }
                 val resolvedDataSpec = dataSpec.withUri(it.url.toUri())
                 val length =
@@ -7701,8 +7703,51 @@ class MusicService :
             ?.remotePlaybackTrackingUrl()
             ?.let { remotePlaybackTrackingUrlCache[mediaId] = it }
         val format = nonNullPlayback.format
-        val loudnessDb = nonNullPlayback.audioConfig?.loudnessDb
-        val perceptualLoudnessDb = nonNullPlayback.audioConfig?.perceptualLoudnessDb
+        persistResolvedPlaybackFormat(mediaId, nonNullPlayback)
+        scope.launch(Dispatchers.IO) { recoverSong(mediaId, nonNullPlayback) }
+
+        val streamUrl = nonNullPlayback.streamUrl
+
+        val trackingExpiryMs = System.currentTimeMillis() + (nonNullPlayback.streamExpiresInSeconds * 1000L)
+
+        if (!lowDataModeActive) {
+            playbackUrlCache[mediaId] =
+                AuthScopedCacheValue(
+                    url = streamUrl,
+                    expiresAtMs = trackingExpiryMs,
+                    authFingerprint = nonNullPlayback.authFingerprint,
+                )
+        }
+        val resolvedDataSpec = dataSpec.withUri(streamUrl.toUri())
+        val length =
+            resolveStreamChunkLength(
+                requestedLength = dataSpec.length,
+                position = dataSpec.position,
+                knownContentLength = format.contentLength,
+                chunkLength = CHUNK_LENGTH,
+                mimeType = format.mimeType,
+            )
+        return length?.let { nonNullLength ->
+            resolvedDataSpec.subrange(0L, nonNullLength)
+        } ?: resolvedDataSpec
+    }
+
+
+    private fun FormatEntity?.hasDisplayablePlaybackDetails(): Boolean {
+        val format = this ?: return false
+        return format.bitrate > 0 ||
+            format.codecs.isNotBlank() ||
+            format.mimeType.isNotBlank() ||
+            format.contentLength > 0L
+    }
+
+    private fun persistResolvedPlaybackFormat(
+        mediaId: String,
+        playbackData: YTPlayerUtils.PlaybackData,
+    ) {
+        val format = playbackData.format
+        val loudnessDb = playbackData.audioConfig?.loudnessDb
+        val perceptualLoudnessDb = playbackData.audioConfig?.perceptualLoudnessDb
         val resolvedContentLength = format.contentLength ?: 0L
         val resolvedCodecs =
             format.mimeType
@@ -7730,7 +7775,7 @@ class MusicService :
                 contentLength = resolvedContentLength,
                 loudnessDb = loudnessDb,
                 perceptualLoudnessDb = perceptualLoudnessDb,
-                playbackUrl = nonNullPlayback.playbackTracking?.videostatsPlaybackUrl?.baseUrl,
+                playbackUrl = playbackData.playbackTracking?.videostatsPlaybackUrl?.baseUrl,
             )
         val resolvedNormalizationFactor = calculateAudioNormalizationFactor(formatEntity, normalizeAudio = true)
         audioNormalizationFactorCache[mediaId] = resolvedNormalizationFactor
@@ -7743,36 +7788,8 @@ class MusicService :
         }
 
         database.query {
-            upsert(
-                formatEntity,
-            )
+            upsert(formatEntity)
         }
-        scope.launch(Dispatchers.IO) { recoverSong(mediaId, nonNullPlayback) }
-
-        val streamUrl = nonNullPlayback.streamUrl
-
-        val trackingExpiryMs = System.currentTimeMillis() + (nonNullPlayback.streamExpiresInSeconds * 1000L)
-
-        if (!lowDataModeActive) {
-            playbackUrlCache[mediaId] =
-                AuthScopedCacheValue(
-                    url = streamUrl,
-                    expiresAtMs = trackingExpiryMs,
-                    authFingerprint = nonNullPlayback.authFingerprint,
-                )
-        }
-        val resolvedDataSpec = dataSpec.withUri(streamUrl.toUri())
-        val length =
-            resolveStreamChunkLength(
-                requestedLength = dataSpec.length,
-                position = dataSpec.position,
-                knownContentLength = format.contentLength,
-                chunkLength = CHUNK_LENGTH,
-                mimeType = format.mimeType,
-            )
-        return length?.let { nonNullLength ->
-            resolvedDataSpec.subrange(0L, nonNullLength)
-        } ?: resolvedDataSpec
     }
 
     private fun resolveLunarTuneExtractorDataSpec(
