@@ -244,14 +244,6 @@ class EqualizerViewModel
 
         fun applyPreset(presetId: String) {
             draft.value = EqualizerDraft()
-            if (presetId.startsWith("vivi:")) {
-                val curve = ViviEqualizerPresets.levelsMb(presetId.removePrefix("vivi:")) ?: return
-                val count = configuration?.capabilities?.bandCount ?: curve.size
-                launchUpdate {
-                    updateEqualizer.updateBandLevels(resampleLevels(curve, count))
-                }
-                return
-            }
             if (!applyPreset.invoke(presetId)) {
                 effectsFlow.tryEmit(EqualizerEffect.ShowMessage(R.string.eq_waiting_for_audio_session))
             }
@@ -456,9 +448,6 @@ private fun EqualizerConfiguration.toUiModel(
             capabilities.systemPresets.mapIndexed { index, name ->
                 val id = "system:$index"
                 EqualizerPresetUiModel(id, name, selectedProfileId == id)
-            } +
-            ViviEqualizerPresets.chips.map { (id, name) ->
-                EqualizerPresetUiModel("vivi:$id", name, selectedProfileId == "vivi:$id")
             }
     return EqualizerUiModel(
         enabled = settings.enabled,
