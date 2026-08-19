@@ -25,6 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -99,6 +100,13 @@ object PreferenceStore {
         }
     }
 
+    suspend fun awaitReady(timeoutMs: Long = 1_500L): Preferences? =
+        withTimeoutOrNull(timeoutMs) {
+            _prefs.filterNotNull().first()
+        }
+
+    fun snapshot(): Preferences? = _prefs.value
+
     fun <T> get(key: Preferences.Key<T>): T? = _prefs.value?.get(key)
 
     fun launchEdit(
@@ -166,12 +174,13 @@ fun <T> rememberPreference(
 ): MutableState<T> {
     val context = LocalContext.current
 
+    val initialValue = PreferenceStore.get(key) ?: defaultValue
     val state =
         remember {
             context.dataStore.data
                 .map { it[key] ?: defaultValue }
                 .distinctUntilChanged()
-        }.collectAsState(defaultValue)
+        }.collectAsState(initialValue)
 
     return remember {
         object : MutableState<T> {

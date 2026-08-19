@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import dev.citali.lunartune.canvas.LunarTuneCanvas
 import dev.citali.lunartune.constants.*
 import dev.citali.lunartune.extensions.*
@@ -116,6 +117,9 @@ class App :
         }
         BotGuardTokenGenerator.initialize(this)
         PreferenceStore.start(this)
+        runBlocking {
+            PreferenceStore.awaitReady()
+        }
         Timber.plant(Timber.DebugTree())
         try {
             Timber.plant(
