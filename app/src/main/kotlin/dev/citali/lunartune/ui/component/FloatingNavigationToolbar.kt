@@ -333,12 +333,17 @@ fun FloatingNavigationToolbar(
                                         }
                                     }
                                 },
-                                label = {
-                                    Text(
-                                        text = stringResource(screen.titleId),
-                                        maxLines = 1,
-                                    )
-                                },
+                                label =
+                                    if (hideNavigationLabels) {
+                                        null
+                                    } else {
+                                        {
+                                            Text(
+                                                text = stringResource(screen.titleId),
+                                                maxLines = 1,
+                                            )
+                                        }
+                                    },
                             )
                         }
                     }

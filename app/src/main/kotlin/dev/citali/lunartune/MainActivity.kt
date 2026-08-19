@@ -1051,10 +1051,7 @@ class MainActivity : ComponentActivity() {
                             expandedBound = maxHeight,
                         )
                     var homeOverflowMenuExpanded by rememberSaveable { mutableStateOf(false) }
-                    val showHomeOverflowFab =
-                        shouldShowHomeShuffleButton &&
-                            !useRail &&
-                            (playerBottomSheetState.isDismissed || playerBottomSheetState.isCollapsed)
+                    val showHomeOverflowFab = false
 
                     LaunchedEffect(showHomeOverflowFab) {
                         if (!showHomeOverflowFab) {

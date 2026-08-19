@@ -301,15 +301,6 @@ fun LibraryMixScreen(
                     }
                 }
 
-                if (supportLunarTuneAvailable) {
-                    item(key = "support_archive_tune", contentType = "support_ad") {
-                        SupportLunarTuneSection(
-                            onMessage = showMessage,
-                            modifier = Modifier.padding(horizontal = 24.dp),
-                        )
-                    }
-                }
-
                 // 3. Recently Played Horizontal Row
                 if (recentSongs.isNotEmpty()) {
                     item(key = "recently_played") {
