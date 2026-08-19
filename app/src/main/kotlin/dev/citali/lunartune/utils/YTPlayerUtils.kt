@@ -454,6 +454,14 @@ object YTPlayerUtils {
         return expiresAtMs <= nowMs + STREAM_URL_EXPIRY_SAFETY_MS
     }
 
+    private val androidVrClientKeys =
+        listOf(
+            ANDROID_VR_NO_AUTH,
+            ANDROID_VR_1_65_10,
+            ANDROID_VR_1_61_48,
+            ANDROID_VR_1_43_32,
+        ).map { StreamClientUtils.buildClientKey(it) }
+
     fun markStreamClientFailed(
         videoId: String,
         clientKey: String?,
@@ -463,8 +471,17 @@ object YTPlayerUtils {
         if (httpStatusCode != null && httpStatusCode !in RETRYABLE_STREAM_RESPONSE_CODES) return
         val normalizedClientKey = normalizeStreamClientKey(clientKey)
         if (normalizedClientKey.isEmpty()) return
-        failedStreamClientsUntil[buildFailedClientKey(videoId, normalizedClientKey, authFingerprint)] =
-            System.currentTimeMillis() + FAILED_CLIENT_BACKOFF_MS
+        val until = System.currentTimeMillis() + FAILED_CLIENT_BACKOFF_MS
+        val keysToBlock = linkedSetOf(normalizedClientKey)
+        if (httpStatusCode == 403 && normalizedClientKey.substringBefore("@").startsWith("ANDROID_VR")) {
+            keysToBlock += androidVrClientKeys
+        }
+        for (key in keysToBlock) {
+            failedStreamClientsUntil[buildFailedClientKey(videoId, key, authFingerprint)] = until
+        }
+        if (lastSuccessfulClientKey != null && keysToBlock.contains(lastSuccessfulClientKey)) {
+            lastSuccessfulClientKey = null
+        }
     }
 
     fun markPreferredClientFailed(
