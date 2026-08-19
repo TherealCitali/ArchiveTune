@@ -263,16 +263,12 @@ object DiscordPresenceManager {
 
     fun stop(clearActivity: Boolean = true) {
         if (!started.getAndSet(false)) return
+        startedState.value = false
 
         DiscordSocialPresenceClient.setOnTransportInvalidated(null)
         updateGeneration.incrementAndGet()
         scope?.cancel()
         scope = null
-
-        lifecycleObserver?.let { observer ->
-            removeLifecycleObserverOnMain(observer)
-        }
-        lifecycleObserver = null
 
         val rpcToClose = rpcInstance
         rpcInstance = null
