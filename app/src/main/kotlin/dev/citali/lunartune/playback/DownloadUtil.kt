@@ -24,6 +24,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
@@ -32,6 +33,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import dev.citali.lunartune.constants.AudioQuality
 import dev.citali.lunartune.constants.AudioQualityKey
 import dev.citali.lunartune.db.MusicDatabase
@@ -69,7 +72,8 @@ class DownloadUtil
         private val audioQuality by enumPreference(context, AudioQualityKey, AudioQuality.AUTO)
         private val downloadScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         private val songUrlCache = ConcurrentHashMap<String, AuthScopedCacheValue>()
-        private val downloadExecutor = Executors.newFixedThreadPool(DEFAULT_MAX_PARALLEL_DOWNLOADS)
+        private val streamResolveMutex = Mutex()
+        private val downloadExecutor = Executors.newFixedThreadPool(MAX_PARALLEL_DOWNLOADS)
 
         private val mediaOkHttpClient: OkHttpClient by lazy {
             OkHttpClient
@@ -79,11 +83,11 @@ class DownloadUtil
                 .followSslRedirects(true)
                 .retryOnConnectionFailure(true)
                 .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(DOWNLOAD_READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
                 .dispatcher(
                     okhttp3.Dispatcher().apply {
                         maxRequests = MAX_DOWNLOAD_HTTP_REQUESTS
-                        maxRequestsPerHost = DEFAULT_MAX_PARALLEL_DOWNLOADS
+                        maxRequestsPerHost = MAX_DOWNLOAD_HTTP_REQUESTS
                     },
                 ).connectionPool(
                     ConnectionPool(
@@ -104,13 +108,18 @@ class DownloadUtil
                     if (!isYouTubeMediaHost) return@addInterceptor chain.proceed(request)
 
                     val requestProfile = StreamClientUtils.resolveRequestProfile(request.url)
-                    chain.proceed(
-                        StreamClientUtils
-                            .applyRequestProfile(
-                                request.newBuilder(),
-                                requestProfile,
-                            ).build(),
-                    )
+                    val response =
+                        chain.proceed(
+                            StreamClientUtils
+                                .applyRequestProfile(
+                                    request.newBuilder(),
+                                    requestProfile,
+                                ).build(),
+                        )
+                    if (response.code in STREAM_REFRESH_RESPONSE_CODES) {
+                        invalidateResolvedStreamUrl(request.url.toString())
+                    }
+                    response
                 }.build()
         }
 
@@ -182,7 +191,7 @@ class DownloadUtil
                 dataSourceFactory,
                 downloadExecutor,
             ).apply {
-                maxParallelDownloads = DEFAULT_MAX_PARALLEL_DOWNLOADS
+                maxParallelDownloads = MAX_PARALLEL_DOWNLOADS
                 addListener(
                     object : DownloadManager.Listener {
                         override fun onDownloadChanged(
@@ -190,6 +199,10 @@ class DownloadUtil
                             download: Download,
                             finalException: Exception?,
                         ) {
+                            if (finalException != null || download.state == Download.STATE_FAILED) {
+                                songUrlCache.keys.removeIf { it.startsWith("${download.request.id}:") }
+                                YTPlayerUtils.invalidateCachedStreamUrls(download.request.id)
+                            }
                             downloads.update { map ->
                                 map.toMutableMap().apply {
                                     set(download.request.id, download)
@@ -231,6 +244,14 @@ class DownloadUtil
         }
 
         fun getDownload(songId: String): Flow<Download?> = downloads.map { it[songId] }
+
+        private fun invalidateResolvedStreamUrl(url: String) {
+            songUrlCache.entries.forEach { (cacheKey, cached) ->
+                if (cached.url == url && songUrlCache.remove(cacheKey, cached)) {
+                    YTPlayerUtils.invalidateCachedStreamUrls(cacheKey.substringBefore(':'))
+                }
+            }
+        }
 
         private fun resolveDownloadAudioQuality(lowDataModeActive: Boolean): AudioQuality =
             if (lowDataModeActive) AudioQuality.LOW else audioQuality
@@ -303,10 +324,14 @@ class DownloadUtil
         }
 
         companion object {
-            private const val DEFAULT_MAX_PARALLEL_DOWNLOADS = 6
+            private const val MAX_PARALLEL_DOWNLOADS = 2
             private const val MAX_IDLE_DOWNLOAD_CONNECTIONS = 12
-            private const val MAX_DOWNLOAD_HTTP_REQUESTS = 24
+            private const val MAX_DOWNLOAD_HTTP_REQUESTS = 2
+            private const val DOWNLOAD_READ_TIMEOUT_SECONDS = 90L
+            private const val DOWNLOAD_STREAM_RESOLVE_ATTEMPTS = 3
+            private const val DOWNLOAD_STREAM_RESOLVE_RETRY_MS = 750L
             private const val DOWNLOAD_CONNECTION_KEEP_ALIVE_MINUTES = 5L
             private const val DOWNLOAD_WRITE_BUFFER_SIZE = 256 * 1024
+            private val STREAM_REFRESH_RESPONSE_CODES = setOf(403, 404, 410, 416)
         }
     }

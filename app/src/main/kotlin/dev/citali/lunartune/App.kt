@@ -116,6 +116,9 @@ class App :
         }
         BotGuardTokenGenerator.initialize(this)
         PreferenceStore.start(this)
+        runBlocking {
+            PreferenceStore.awaitReady()
+        }
         Timber.plant(Timber.DebugTree())
         try {
             Timber.plant(
