@@ -445,6 +445,7 @@ class MusicService :
     @Volatile
     private var suppressAutoPlayback = false
     private var lastPresenceToken: String? = null
+    private var discordKeepAliveJob: Job? = null
 
     @Volatile
     private var pausedPresenceGate = PausedPresenceGate.FollowPreference
@@ -2192,12 +2193,10 @@ class MusicService :
     }
 
     private fun ensurePresenceManager() {
-        if (DiscordPresenceManager.isRunning() && lastPresenceToken != null) return
-
-        // Launch in scope to avoid blocking
         scope.launch {
-            // Don't start if Discord RPC is disabled in settings
             if (!dataStore.get(EnableDiscordRPCKey, true)) {
+                discordKeepAliveJob?.cancel()
+                discordKeepAliveJob = null
                 if (DiscordPresenceManager.isRunning()) {
                     Timber.tag("MusicService").d("Discord RPC disabled → stopping presence manager")
                     try {
@@ -2211,6 +2210,8 @@ class MusicService :
 
             val key: String = dataStore.get(DiscordTokenKey, "")
             if (key.isNullOrBlank()) {
+                discordKeepAliveJob?.cancel()
+                discordKeepAliveJob = null
                 if (DiscordPresenceManager.isRunning()) {
                     Timber.tag("MusicService").d("No Discord OAuth session -> stopping presence manager")
                     try {
@@ -2222,12 +2223,16 @@ class MusicService :
                 return@launch
             }
 
+            startDiscordKeepAlive()
+
             if (DiscordPresenceManager.isRunning() && lastPresenceToken == key) {
                 return@launch
             }
 
             try {
-                DiscordPresenceManager.stop()
+                if (DiscordPresenceManager.isRunning() && lastPresenceToken != key) {
+                    DiscordPresenceManager.stop()
+                }
                 DiscordPresenceManager.start(
                     context = this@MusicService,
                     token = key,
@@ -2237,6 +2242,7 @@ class MusicService :
                         "transport invalidated reason=%s; requesting forced sync",
                         reason,
                     )
+                    ensurePresenceManager()
                     requestDiscordSync(
                         reason = "transport_invalidated:$reason",
                         force = true,
@@ -2252,6 +2258,28 @@ class MusicService :
                 Timber.tag("MusicService").e(ex, "Failed to start presence manager")
             }
         }
+    }
+
+    private fun startDiscordKeepAlive() {
+        if (discordKeepAliveJob?.isActive == true) return
+        discordKeepAliveJob =
+            scope.launch(SilentHandler) {
+                while (isActive) {
+                    delay(DISCORD_KEEP_ALIVE_MS)
+                    if (discordServiceStopping) return@launch
+                    if (!dataStore.get(EnableDiscordRPCKey, true)) return@launch
+                    if (dataStore.get(DiscordTokenKey, "").isBlank()) return@launch
+                    if (!::player.isInitialized || player.currentMediaItem == null) continue
+                    if (!DiscordPresenceManager.isRunning()) {
+                        Timber.tag(DISCORD_SYNC_TAG).w("keep-alive found manager stopped; restarting")
+                        ensurePresenceManager()
+                    }
+                    requestDiscordSync(
+                        reason = "discord_keep_alive",
+                        force = true,
+                    )
+                }
+            }
     }
 
     private fun setupAudioFocusRequest() {
@@ -8529,6 +8557,8 @@ class MusicService :
     override fun onDestroy() {
         equalizerPlaybackController.detach(this)
         discordServiceStopping = true
+        discordKeepAliveJob?.cancel()
+        discordKeepAliveJob = null
         requestDiscordSync(
             reason = "service_destroy",
             force = true,
@@ -8802,6 +8832,7 @@ class MusicService :
         private const val INFINITE_QUEUE_MAX_BOOTSTRAP_PAGES = 3
         private const val DISCORD_SYNC_TAG = "DiscordSync"
         private const val DISCORD_HOLD_TIMEOUT_MS = 7_000L
+        private const val DISCORD_KEEP_ALIVE_MS = 3 * 60 * 1000L
         const val CHANNEL_ID = "music_channel_01"
         const val ACTION_MEDIA_NOTIFICATION_DISMISSED =
             "dev.citali.lunartune.action.MEDIA_NOTIFICATION_DISMISSED"
