@@ -12,6 +12,7 @@ package dev.citali.lunartune.ui.component
 import android.os.SystemClock
 import android.view.ViewConfiguration
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -59,6 +60,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
@@ -103,6 +105,7 @@ fun FloatingNavigationToolbar(
     style: NavigationBarStyle = NavigationBarStyle.DEFAULT,
     isSelected: (Screens) -> Boolean,
     onItemClick: (Screens, Boolean) -> Unit,
+    onItemLongClick: ((Screens) -> Unit)? = null,
     onSearchItemDoubleClick: (() -> Unit)? = null,
 ) {
     val isFloating = style == NavigationBarStyle.FLOATING
@@ -278,19 +281,23 @@ fun FloatingNavigationToolbar(
                                     if (screen == Screens.Search) onSearchItemDoubleClick else null
                                 }
                             val lastClickTime = remember(screen) { mutableLongStateOf(0L) }
+                            var ignoreNextClick by remember(screen) { mutableStateOf(false) }
                             val onClick =
                                 remember(screen, selected, onItemClick, onDoubleClick) {
                                     {
-                                        val currentTime = SystemClock.uptimeMillis()
-                                        val isDoubleClick =
-                                            onDoubleClick != null &&
-                                                currentTime - lastClickTime.longValue <= ViewConfiguration.getDoubleTapTimeout()
-                                        lastClickTime.longValue = if (isDoubleClick) 0L else currentTime
-                                        if (isDoubleClick) {
-                                            onDoubleClick?.invoke()
-                                            Unit
+                                        if (ignoreNextClick) {
+                                            ignoreNextClick = false
                                         } else {
-                                            onItemClick(screen, selected)
+                                            val currentTime = SystemClock.uptimeMillis()
+                                            val isDoubleClick =
+                                                onDoubleClick != null &&
+                                                    currentTime - lastClickTime.longValue <= ViewConfiguration.getDoubleTapTimeout()
+                                            lastClickTime.longValue = if (isDoubleClick) 0L else currentTime
+                                            if (isDoubleClick) {
+                                                onDoubleClick.invoke()
+                                            } else {
+                                                onItemClick(screen, selected)
+                                            }
                                         }
                                     }
                                 }
@@ -299,7 +306,18 @@ fun FloatingNavigationToolbar(
                                 selected = selected,
                                 onClick = onClick,
                                 colors = itemColors,
-                                modifier = Modifier.weight(1f),
+                                modifier =
+                                    Modifier
+                                        .weight(1f)
+                                        .pointerInput(screen, onItemLongClick) {
+                                            if (onItemLongClick == null) return@pointerInput
+                                            detectTapGestures(
+                                                onLongPress = {
+                                                    ignoreNextClick = true
+                                                    onItemLongClick(screen)
+                                                },
+                                            )
+                                        },
                                 icon = {
                                     Box(
                                         modifier =

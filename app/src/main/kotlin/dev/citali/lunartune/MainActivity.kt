@@ -215,6 +215,7 @@ import dev.citali.lunartune.constants.NAVIGATION_BAR_HEIGHT_DEFAULT
 import dev.citali.lunartune.constants.NavigationBarHeight
 import dev.citali.lunartune.constants.NavigationBarHeightKey
 import dev.citali.lunartune.constants.NavigationBarHorizontalPadding
+import dev.citali.lunartune.constants.NavBarLongPressActionsKey
 import dev.citali.lunartune.constants.NavigationBarStyle
 import dev.citali.lunartune.constants.NavigationBarStyleKey
 import dev.citali.lunartune.constants.PauseSearchHistoryKey
@@ -1478,6 +1479,7 @@ class MainActivity : ComponentActivity() {
                                 else -> null
                             }
                         }
+                    val (navBarLongPressActions) = rememberPreference(NavBarLongPressActionsKey, defaultValue = true)
                     val haptic = LocalHapticFeedback.current
                     val (enableHapticFeedback) = rememberPreference(EnableHapticFeedbackKey, true)
                     val customHaptic =
@@ -2084,6 +2086,55 @@ class MainActivity : ComponentActivity() {
                                                 onItemClick = { screen, isSelected ->
                                                     handlePrimaryNavigationClick(screen, isSelected)
                                                 },
+                                                onItemLongClick =
+                                                    if (navBarLongPressActions) {
+                                                        { screen ->
+                                                            when (screen) {
+                                                                Screens.Home -> {
+                                                                    coroutineScope.launch {
+                                                                        val song =
+                                                                            withContext(Dispatchers.IO) {
+                                                                                val from =
+                                                                                    System.currentTimeMillis() -
+                                                                                        90L * 24 * 60 * 60 * 1000
+                                                                                val history =
+                                                                                    database
+                                                                                        .mostPlayedSongs(from, limit = 80)
+                                                                                        .first()
+                                                                                        .ifEmpty { database.recentSongs(80).first() }
+                                                                                history
+                                                                                    .filter { candidate ->
+                                                                                        candidate.artists.none { it.blockedAt != null }
+                                                                                    }.randomOrNull()
+                                                                                    ?: allLocalItems.filterIsInstance<Song>().randomOrNull()
+                                                                            }
+                                                                        if (song == null) {
+                                                                            Toast
+                                                                                .makeText(
+                                                                                    this@MainActivity,
+                                                                                    getString(R.string.navbar_long_press_no_history),
+                                                                                    Toast.LENGTH_SHORT,
+                                                                                ).show()
+                                                                            return@launch
+                                                                        }
+                                                                        playerConnection?.playQueue(
+                                                                            if (song.song.isLocal) {
+                                                                                ListQueue(items = listOf(song.toMediaItem()))
+                                                                            } else {
+                                                                                YouTubeQueue.radio(song.toMediaMetadata())
+                                                                            },
+                                                                        )
+                                                                    }
+                                                                }
+
+                                                                Screens.Search -> navController.navigate(MusicRecognitionRoute)
+
+                                                                else -> Unit
+                                                            }
+                                                        }
+                                                    } else {
+                                                        null
+                                                    },
                                                 onSearchItemDoubleClick = {
                                                     searchSource = SearchSource.ONLINE
                                                     openSearch()

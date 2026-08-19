@@ -1003,7 +1003,7 @@ fun PlayerPlaybackControls(
                                         },
                                     ),
                                 contentDescription = null,
-                                modifier = Modifier.size(42.dp),
+                                modifier = Modifier.size(30.dp),
                             )
                         }
                     }
@@ -1029,7 +1029,7 @@ fun PlayerPlaybackControls(
                         Icon(
                             painter = painterResource(R.drawable.skip_next),
                             contentDescription = null,
-                            modifier = Modifier.size(32.dp),
+                            modifier = Modifier.size(26.dp),
                         )
                     }
                 }
