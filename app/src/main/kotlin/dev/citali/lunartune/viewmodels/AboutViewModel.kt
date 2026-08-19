@@ -492,6 +492,21 @@ class AboutViewModel
                                     ),
                                 ),
                         ),
+                        TeamMember(
+                            avatarUrl = "https://avatars.githubusercontent.com/vivizzz007?v=4",
+                            name = "Vivi Music",
+                            positionResId = R.string.about_position_vivi,
+                            profileUrl = "https://github.com/vivizzz007/vivi-music",
+                            links =
+                                AboutLinkCollection.of(
+                                    AboutLinkUiModel(
+                                        id = "github",
+                                        iconResId = R.drawable.github,
+                                        labelResId = R.string.about_content_desc_github,
+                                        url = "https://github.com/vivizzz007/vivi-music",
+                                    ),
+                                ),
+                        ),
                     ),
                 contributorsState = contributorsState,
                 contributorsReadMoreUrl = ContributorsReadMoreUrl,

@@ -391,7 +391,7 @@ class MusicTogetherViewModel
                 updatePreferences.setLastJoinLink(trimmed)
             }
             sessionActions.joinSession(
-                mode = if (model.join.onlineMode) MusicTogetherConnectionMode.ONLINE else MusicTogetherConnectionMode.LAN,
+                mode = MusicTogetherConnectionMode.LAN,
                 rawInput = trimmed,
                 displayName = model.host.displayName,
             )

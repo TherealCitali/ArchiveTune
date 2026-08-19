@@ -1744,6 +1744,14 @@ class MainActivity : ComponentActivity() {
                                                         )
                                                     }
                                                     TranslucentTopAppBarIconButton(
+                                                        onClick = { navController.navigate("settings/music_together") },
+                                                    ) {
+                                                        Icon(
+                                                            painter = painterResource(R.drawable.multi_user),
+                                                            contentDescription = stringResource(R.string.music_together),
+                                                        )
+                                                    }
+                                                    TranslucentTopAppBarIconButton(
                                                         onClick = { navController.navigate("new_release") },
                                                     ) {
                                                         Icon(
