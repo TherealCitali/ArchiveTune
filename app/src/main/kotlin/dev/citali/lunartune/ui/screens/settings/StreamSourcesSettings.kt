@@ -62,7 +62,7 @@ fun StreamSourcesSettings(navController: NavController) {
     val (orderRaw, onOrderRawChange) = rememberPreference(StreamSourcesOrderKey, defaultValue = "")
     val (enabledRaw, onEnabledRawChange) = rememberPreference(StreamSourcesEnabledKey, defaultValue = defaultEnabled)
     val (preferred, onPreferredChange) =
-        rememberEnumPreference(PlayerStreamClientKey, defaultValue = PlayerStreamClient.VISION_OS)
+        rememberEnumPreference(PlayerStreamClientKey, defaultValue = PlayerStreamClient.WEB_REMIX)
 
     val order = deserializeStreamSourcesOrder(orderRaw)
     val enabled =

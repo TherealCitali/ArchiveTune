@@ -305,11 +305,11 @@ enum class PlayerStreamClient {
 
 val DefaultStreamSources =
     listOf(
-        PlayerStreamClient.VISION_OS,
-        PlayerStreamClient.ANDROID_VR,
         PlayerStreamClient.WEB_REMIX,
+        PlayerStreamClient.ANDROID_VR,
         PlayerStreamClient.TVHTML5,
         PlayerStreamClient.WEB_CREATOR,
+        PlayerStreamClient.VISION_OS,
     )
 
 fun PlayerStreamClient.isSelectableStreamSource(): Boolean = this in DefaultStreamSources

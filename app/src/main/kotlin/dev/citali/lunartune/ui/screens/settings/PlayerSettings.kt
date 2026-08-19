@@ -205,7 +205,7 @@ fun PlayerSettings(navController: NavController) {
 
     LaunchedEffect(playerStreamClient) {
         if (playerStreamClient == PlayerStreamClient.ARCHIVETUNE_EXTRACTOR) {
-            onPlayerStreamClientChange(PlayerStreamClient.VISION_OS)
+            onPlayerStreamClientChange(PlayerStreamClient.WEB_REMIX)
         }
     }
 
