@@ -1003,7 +1003,7 @@ fun PlayerPlaybackControls(
                                         },
                                     ),
                                 contentDescription = null,
-                                modifier = Modifier.size(42.dp),
+                                modifier = Modifier.size(30.dp),
                             )
                         }
                     }

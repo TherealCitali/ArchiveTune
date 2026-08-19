@@ -59,6 +59,7 @@ import androidx.navigation.NavController
 import dev.citali.lunartune.LocalPlayerAwareWindowInsets
 import dev.citali.lunartune.R
 import dev.citali.lunartune.constants.HideNavigationBarLabelsKey
+import dev.citali.lunartune.constants.NavBarLongPressActionsKey
 import dev.citali.lunartune.constants.NAVIGATION_BAR_CORNER_RADIUS_DEFAULT
 import dev.citali.lunartune.constants.NAVIGATION_BAR_HEIGHT_DEFAULT
 import dev.citali.lunartune.constants.NAVIGATION_BAR_LABEL_SPACING_DEFAULT
@@ -95,6 +96,8 @@ fun NavigationBarSettings(navController: NavController) {
         )
     val (hideNavigationBarLabels, onHideNavigationBarLabelsChange) =
         rememberPreference(HideNavigationBarLabelsKey, defaultValue = false)
+    val (navBarLongPressActions, onNavBarLongPressActionsChange) =
+        rememberPreference(NavBarLongPressActionsKey, defaultValue = true)
     val (navigationBarWidth, onNavigationBarWidthChange) =
         rememberPreference(NavigationBarWidthKey, defaultValue = NAVIGATION_BAR_WIDTH_DEFAULT)
     val (navigationBarHeight, onNavigationBarHeightChange) =
@@ -178,6 +181,16 @@ fun NavigationBarSettings(navController: NavController) {
                         icon = { Icon(painterResource(R.drawable.nav_bar), null) },
                         checked = hideNavigationBarLabels,
                         onCheckedChange = onHideNavigationBarLabelsChange,
+                    )
+                }
+
+                item {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.navbar_long_press_actions)) },
+                        description = stringResource(R.string.navbar_long_press_actions_desc),
+                        icon = { Icon(painterResource(R.drawable.shuffle), null) },
+                        checked = navBarLongPressActions,
+                        onCheckedChange = onNavBarLongPressActionsChange,
                     )
                 }
             }

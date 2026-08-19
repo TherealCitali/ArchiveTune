@@ -215,6 +215,7 @@ import dev.citali.lunartune.constants.NAVIGATION_BAR_HEIGHT_DEFAULT
 import dev.citali.lunartune.constants.NavigationBarHeight
 import dev.citali.lunartune.constants.NavigationBarHeightKey
 import dev.citali.lunartune.constants.NavigationBarHorizontalPadding
+import dev.citali.lunartune.constants.NavBarLongPressActionsKey
 import dev.citali.lunartune.constants.NavigationBarStyle
 import dev.citali.lunartune.constants.NavigationBarStyleKey
 import dev.citali.lunartune.constants.PauseSearchHistoryKey
@@ -1478,6 +1479,7 @@ class MainActivity : ComponentActivity() {
                                 else -> null
                             }
                         }
+                    val (navBarLongPressActions) = rememberPreference(NavBarLongPressActionsKey, defaultValue = true)
                     val haptic = LocalHapticFeedback.current
                     val (enableHapticFeedback) = rememberPreference(EnableHapticFeedbackKey, true)
                     val customHaptic =
@@ -2075,6 +2077,13 @@ class MainActivity : ComponentActivity() {
                                                 },
                                                 onItemClick = { screen, isSelected ->
                                                     handlePrimaryNavigationClick(screen, isSelected)
+                                                },
+                                                onItemLongClick = { screen ->
+                                                    when (screen) {
+                                                        Screens.Home -> playRandomHistorySong()
+                                                        Screens.Search -> navController.navigate(MusicRecognitionRoute)
+                                                        else -> Unit
+                                                    }
                                                 },
                                                 onSearchItemDoubleClick = {
                                                     searchSource = SearchSource.ONLINE
@@ -2963,6 +2972,129 @@ private fun HomeOverflowFab(
                         iconRes = R.drawable.shuffle,
                         contentDescription = stringResource(R.string.shuffle),
                         pureBlack = pureBlack,
+                    )
+                },
+                colors = menuItemColors,
+            )
+        }
+    }
+}
+
+@Composable
+private fun HomeOverflowMenuIcon(
+    @DrawableRes iconRes: Int,
+    contentDescription: String?,
+    pureBlack: Boolean,
+) {
+    Surface(
+        modifier = Modifier.size(HomeOverflowMenuIconSize),
+        shape = CircleShape,
+        color =
+            if (pureBlack) {
+                Color.White.copy(alpha = 0.12f)
+            } else {
+                MaterialTheme.colorScheme.secondaryContainer
+            },
+        contentColor = if (pureBlack) Color.White else MaterialTheme.colorScheme.onSecondaryContainer,
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = contentDescription,
+            )
+        }
+    }
+}
+
+private const val TopAppBarIconButtonContainerAlpha = 0.48f
+
+@Composable
+private fun TranslucentTopAppBarIconButton(
+    onClick: () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    IconButton(
+        onClick = onClick,
+        colors =
+            IconButtonDefaults.iconButtonColors(
+                containerColor =
+                    MaterialTheme.colorScheme.surfaceContainerHighest.copy(
+                        alpha = TopAppBarIconButtonContainerAlpha,
+                    ),
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
+        content = content,
+    )
+}
+
+@Composable
+private fun OnlineSearchSortMenu(
+    selectedSort: OnlineSearchSort,
+    onSortSelected: (OnlineSearchSort) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val options =
+        remember {
+            listOf(
+                OnlineSearchSort.DEFAULT,
+                OnlineSearchSort.VIEWS,
+            )
+        }
+
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(
+                painter = painterResource(R.drawable.filter_alt),
+                contentDescription = null,
+            )
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            options.forEach { sort ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text =
+                                stringResource(
+                                    when (sort) {
+                                        OnlineSearchSort.DEFAULT -> R.string.default_style
+                                        OnlineSearchSort.VIEWS -> R.string.views
+                                    },
+                                ),
+                        )
+                    },
+                    onClick = {
+                        expanded = false
+                        onSortSelected(sort)
+                    },
+                    leadingIcon = {
+                        if (sort == selectedSort) {
+                            Icon(
+                                painter = painterResource(R.drawable.done),
+                                contentDescription = null,
+                            )
+                        } else {
+                            Spacer(Modifier.size(24.dp))
+                        }
+                    },
+                )
+            }
+        }
+    }
+}
+
+private fun Context.isTvDevice(): Boolean {
+    val isTelevisionUiMode =
+        (resources.configuration.uiMode and Configuration.UI_MODE_TYPE_MASK) ==
+            Configuration.UI_MODE_TYPE_TELEVISION
+    return isTelevisionUiMode ||
+        packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK) ||
+        packageManager.hasSystemFeature(PackageManager.FEATURE_TELEVISION)
+}
+ck = pureBlack,
                     )
                 },
                 colors = menuItemColors,

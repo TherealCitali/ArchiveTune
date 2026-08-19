@@ -1116,6 +1116,9 @@
     <string name="navigation_bar_settings_subtitle">Style, labels, and dimensions</string>
     <string name="hide_navigation_bar_labels">Hide labels in navigation bar</string>
     <string name="hide_navigation_bar_labels_desc">Show only icons in the bottom navigation bar</string>
+    <string name="navbar_long_press_actions">Navigation bar long-press</string>
+    <string name="navbar_long_press_actions_desc">Long-press Home to play a random song from listening history, or Search to open music recognition</string>
+    <string name="navbar_long_press_no_history">No listening history yet</string>
     <string name="navigation_bar_dimensions">Dimensions</string>
     <string name="navigation_bar_width">Width</string>
     <string name="navigation_bar_width_desc">Fraction of screen width used by the floating bar</string>

@@ -954,6 +954,7 @@ enum class NavigationBarStyle {
 val NavigationBarStyleKey = stringPreferencesKey("navigationBarStyle")
 
 val HideNavigationBarLabelsKey = booleanPreferencesKey("hideNavigationBarLabels")
+val NavBarLongPressActionsKey = booleanPreferencesKey("navBarLongPressActions")
 
 val NavigationBarWidthKey = floatPreferencesKey("navigationBarWidth")
 const val NAVIGATION_BAR_WIDTH_DEFAULT = 0.8f
