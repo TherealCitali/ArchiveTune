@@ -61,8 +61,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.carousel.HorizontalCenteredHeroCarousel
-import androidx.compose.material3.carousel.maskBorder
-import androidx.compose.material3.carousel.maskClip
 import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -308,8 +306,8 @@ fun QuickPicksSection(
                         modifier =
                             Modifier
                                 .fillMaxSize()
-                                .maskClip(MaterialTheme.shapes.extraLarge)
-                                .maskBorder(
+                                .clip(MaterialTheme.shapes.extraLarge)
+                                .border(
                                     BorderStroke(
                                         1.dp,
                                         MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.72f),
