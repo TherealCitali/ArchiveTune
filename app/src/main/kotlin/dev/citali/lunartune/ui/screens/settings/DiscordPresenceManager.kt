@@ -8,11 +8,6 @@
 package dev.citali.lunartune.ui.screens.settings
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.ProcessLifecycleOwner
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -40,12 +35,13 @@ object DiscordPresenceManager {
     private const val STOP_TIMEOUT_MS = 5_000L
 
     private val started = AtomicBoolean(false)
+    private val startedState = MutableStateFlow(false)
+    val isRunningFlow = startedState.asStateFlow()
     private val updateGeneration = AtomicLong(0L)
     private val rpcMutex = Mutex()
     private val cleanupScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private var scope: CoroutineScope? = null
-    private var lifecycleObserver: LifecycleEventObserver? = null
     private var rpcInstance: DiscordRPC? = null
     private var rpcToken: String? = null
 
@@ -65,26 +61,6 @@ object DiscordPresenceManager {
     ) {
         lastRpcStartTimeState.value = start
         lastRpcEndTimeState.value = end
-    }
-
-    private fun addLifecycleObserverOnMain(observer: LifecycleEventObserver) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            ProcessLifecycleOwner.get().lifecycle.addObserver(observer)
-        } else {
-            Handler(Looper.getMainLooper()).post {
-                ProcessLifecycleOwner.get().lifecycle.addObserver(observer)
-            }
-        }
-    }
-
-    private fun removeLifecycleObserverOnMain(observer: LifecycleEventObserver) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            ProcessLifecycleOwner.get().lifecycle.removeObserver(observer)
-        } else {
-            Handler(Looper.getMainLooper()).post {
-                ProcessLifecycleOwner.get().lifecycle.removeObserver(observer)
-            }
-        }
     }
 
     private suspend fun getOrCreateRpc(
@@ -228,13 +204,7 @@ object DiscordPresenceManager {
         if (!started.getAndSet(true)) {
             consecutiveFailures = 0
             scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-            lifecycleObserver =
-                LifecycleEventObserver { _, event ->
-                    if (event == Lifecycle.Event.ON_DESTROY) {
-                        stop()
-                    }
-                }
-            addLifecycleObserverOnMain(lifecycleObserver!!)
+            startedState.value = true
         }
 
         if (token.isNotBlank()) {
@@ -293,16 +263,12 @@ object DiscordPresenceManager {
 
     fun stop(clearActivity: Boolean = true) {
         if (!started.getAndSet(false)) return
+        startedState.value = false
 
         DiscordSocialPresenceClient.setOnTransportInvalidated(null)
         updateGeneration.incrementAndGet()
         scope?.cancel()
         scope = null
-
-        lifecycleObserver?.let { observer ->
-            removeLifecycleObserverOnMain(observer)
-        }
-        lifecycleObserver = null
 
         val rpcToClose = rpcInstance
         rpcInstance = null

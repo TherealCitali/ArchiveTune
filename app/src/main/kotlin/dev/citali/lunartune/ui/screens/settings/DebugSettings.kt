@@ -231,7 +231,7 @@ private fun DiscordDebugSection() {
     val lastEndTs: Long? by DiscordPresenceManager.lastRpcEndTimeFlow.collectAsState(initial = null)
     val lastStart: String = lastStartTs?.let { makeTimeString(it) } ?: "—"
     val lastEnd: String = lastEndTs?.let { makeTimeString(it) } ?: "—"
-    val isRunning = DiscordPresenceManager.isRunning()
+    val isRunning by DiscordPresenceManager.isRunningFlow.collectAsState(initial = DiscordPresenceManager.isRunning())
 
     Card(
         modifier = Modifier.fillMaxWidth(),
