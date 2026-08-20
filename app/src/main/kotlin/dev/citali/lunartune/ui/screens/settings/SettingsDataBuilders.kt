@@ -35,6 +35,13 @@ fun buildSettingsGroups(
             title = stringResource(R.string.account),
             subtitle = stringResource(R.string.settings_account_subtitle),
             accentColor = MaterialTheme.colorScheme.primary,
+            keywords =
+                listOf(
+                    stringResource(R.string.login),
+                    stringResource(R.string.account_integrations_summary),
+                    stringResource(R.string.hidden_playlists),
+                    stringResource(R.string.settings_po_token_subtitle),
+                ),
             onClick = { navController.navigate("settings/account") },
         )
     val stats =
@@ -53,6 +60,14 @@ fun buildSettingsGroups(
             title = stringResource(R.string.appearance),
             subtitle = stringResource(R.string.settings_appearance_subtitle),
             accentColor = MaterialTheme.colorScheme.secondary,
+            keywords =
+                listOf(
+                    stringResource(R.string.theme),
+                    stringResource(R.string.dark_theme),
+                    stringResource(R.string.navbar_long_press_actions),
+                    stringResource(R.string.player),
+                    stringResource(R.string.custom_background_subtitle),
+                ),
             onClick = { navController.navigate("settings/appearance") },
         )
     val playback =
@@ -62,6 +77,15 @@ fun buildSettingsGroups(
             title = stringResource(R.string.settings_playback_title),
             subtitle = stringResource(R.string.settings_playback_subtitle),
             accentColor = MaterialTheme.colorScheme.tertiary,
+            keywords =
+                listOf(
+                    stringResource(R.string.audio_quality),
+                    stringResource(R.string.skip_silence),
+                    stringResource(R.string.audio_normalization),
+                    stringResource(R.string.equalizer),
+                    stringResource(R.string.codecs),
+                    stringResource(R.string.download),
+                ),
             onClick = { navController.navigate("settings/player") },
         )
     val lyrics =
@@ -71,6 +95,12 @@ fun buildSettingsGroups(
             title = stringResource(R.string.lyrics),
             subtitle = stringResource(R.string.settings_lyrics_subtitle),
             accentColor = MaterialTheme.colorScheme.secondary,
+            keywords =
+                listOf(
+                    stringResource(R.string.lyrics_mode),
+                    stringResource(R.string.lyrics_animation_style),
+                    stringResource(R.string.search_lyrics),
+                ),
             onClick = { navController.navigate("settings/lyrics") },
         )
     val content =
@@ -98,6 +128,11 @@ fun buildSettingsGroups(
             title = stringResource(R.string.integration),
             subtitle = stringResource(R.string.settings_integration_subtitle),
             accentColor = MaterialTheme.colorScheme.secondary,
+            keywords =
+                listOf(
+                    stringResource(R.string.discord_integration),
+                    stringResource(R.string.discord_login_description),
+                ),
             onClick = { navController.navigate("settings/integration") },
         )
     val aiIntegration =
@@ -116,6 +151,12 @@ fun buildSettingsGroups(
             title = stringResource(R.string.internet),
             subtitle = stringResource(R.string.settings_internet_subtitle),
             accentColor = MaterialTheme.colorScheme.tertiary,
+            keywords =
+                listOf(
+                    stringResource(R.string.enable_proxy),
+                    stringResource(R.string.proxy_host),
+                    stringResource(R.string.proxy_port),
+                ),
             onClick = { navController.navigate("settings/internet") },
         )
     val storage =
@@ -143,6 +184,12 @@ fun buildSettingsGroups(
             title = stringResource(R.string.settings_developer_options_title),
             subtitle = stringResource(R.string.settings_developer_options_subtitle),
             accentColor = MaterialTheme.colorScheme.tertiary,
+            keywords =
+                listOf(
+                    stringResource(R.string.debug_logs),
+                    stringResource(R.string.display_codec_on_player),
+                    stringResource(R.string.experiment_settings),
+                ),
             onClick = { navController.navigate("settings/misc") },
         )
     val defaultLinks =

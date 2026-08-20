@@ -12,7 +12,10 @@ package dev.citali.lunartune.ui.component
 import android.os.SystemClock
 import android.view.ViewConfiguration
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -311,12 +314,18 @@ fun FloatingNavigationToolbar(
                                         .weight(1f)
                                         .pointerInput(screen, onItemLongClick) {
                                             if (onItemLongClick == null) return@pointerInput
-                                            detectTapGestures(
-                                                onLongPress = {
+                                            awaitEachGesture {
+                                                awaitFirstDown(requireUnconsumed = false)
+                                                val longPressed =
+                                                    withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis.toLong()) {
+                                                        waitForUpOrCancellation()
+                                                        false
+                                                    } == null
+                                                if (longPressed) {
                                                     ignoreNextClick = true
                                                     onItemLongClick(screen)
-                                                },
-                                            )
+                                                }
+                                            }
                                         },
                                 icon = {
                                     Box(
