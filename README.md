@@ -20,15 +20,14 @@
     <a href="#features"><b>Features</b></a> •
     <a href="#download-now"><b>Download</b></a> •
     <a href="#screenshots"><b>Screenshots</b></a> •
-    <a href="https://github.com/cognitiveshadows03/LunarTune
-/issues/new/choose"><b>Support</b></a>
+    <a href="https://github.com/cognitiveshadows03/LunarTune/issues/new/choose"><b>Support</b></a>
   </p>
 
   <div align="center">
-    <img src="https://img.shields.io/github/v/release/cognitiveshadows03/ArchiveTune?style=for-the-badge&color=6366f1&labelColor=1e1e2e&logo=github" alt="Latest Version" />
-    <img src="https://img.shields.io/github/downloads/cognitiveshadows03/ArchiveTune/total?style=for-the-badge&color=6366f1&labelColor=1e1e2e&logo=github" alt="Downloads" />
-    <img src="https://img.shields.io/github/stars/cognitiveshadows03/ArchiveTune?style=for-the-badge&color=6366f1&labelColor=1e1e2e&logo=github" alt="Stars" />
-    <img src="https://img.shields.io/github/license/cognitiveshadows03/ArchiveTune?style=for-the-badge&color=6366f1&labelColor=1e1e2e" alt="License" />
+    <img src="https://img.shields.io/github/v/release/cognitiveshadows03/LunarTune?style=for-the-badge&color=6366f1&labelColor=1e1e2e&logo=github" alt="Latest Version" />
+    <img src="https://img.shields.io/github/downloads/cognitiveshadows03/LunarTune/total?style=for-the-badge&color=6366f1&labelColor=1e1e2e&logo=github" alt="Downloads" />
+    <img src="https://img.shields.io/github/stars/cognitiveshadows03/LunarTune?style=for-the-badge&color=6366f1&labelColor=1e1e2e&logo=github" alt="Stars" />
+    <img src="https://img.shields.io/github/license/cognitiveshadows03/LunarTune?style=for-the-badge&color=6366f1&labelColor=1e1e2e" alt="License" />
     <img src="https://img.shields.io/badge/Architecture-MVVM-6366f1?style=for-the-badge&labelColor=1e1e2e&logo=kotlin" alt="MVVM Architecture" />
     <img src="https://img.shields.io/badge/Language-Kotlin-7f52ff?style=for-the-badge&logo=kotlin&color=6366f1&labelColor=1e1e2e" alt="Kotlin Language" />
     <img src="https://img.shields.io/badge/Toolkit-Jetpack_Compose-4285f4?style=for-the-badge&logo=jetpack-compose&color=6366f1&labelColor=1e1e2e" alt="Jetpack Compose Toolkit" />
@@ -58,24 +57,15 @@
 
 <div align="center">
 
-<img src="https://github.com/cognitiveshadows03/LunarTune
-/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_1.jpg" alt="Browse" width="30%" />
-<img src="https://github.com/cognitiveshadows03/LunarTune
-/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_2.jpg" alt="Live Lyrics" width="30%" />
-<img src="https://github.com/cognitiveshadows03/LunarTune
-/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_3.jpg" alt="Theme Customization" width="30%" />
-<img src="https://github.com/cognitiveshadows03/LunarTune
-/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_4.jpg" alt="Live Statistics" width="30%" />
-<img src="https://github.com/cognitiveshadows03/LunarTune
-/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_5.jpg" alt="Artist" width="30%" />
-<img src="https://github.com/cognitiveshadows03/LunarTune
-/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_6.jpg" alt="Album" width="30%" />
-<img src="https://github.com/cognitiveshadows03/LunarTune
-/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_7.jpg" alt="Player" width="30%" />
-<img src="https://github.com/cognitiveshadows03/LunarTune
-/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_8.jpg" alt="Settings" width="30%" />
-<img src="https://github.com/cognitiveshadows03/LunarTune
-/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_9.jpg" alt="Settings" width="30%" />
+<img src="https://github.com/cognitiveshadows03/LunarTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_1.jpg" alt="Browse" width="30%" />
+<img src="https://github.com/cognitiveshadows03/LunarTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_2.jpg" alt="Live Lyrics" width="30%" />
+<img src="https://github.com/cognitiveshadows03/LunarTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_3.jpg" alt="Theme Customization" width="30%" />
+<img src="https://github.com/cognitiveshadows03/LunarTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_4.jpg" alt="Live Statistics" width="30%" />
+<img src="https://github.com/cognitiveshadows03/LunarTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_5.jpg" alt="Artist" width="30%" />
+<img src="https://github.com/cognitiveshadows03/LunarTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_6.jpg" alt="Album" width="30%" />
+<img src="https://github.com/cognitiveshadows03/LunarTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_7.jpg" alt="Player" width="30%" />
+<img src="https://github.com/cognitiveshadows03/LunarTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_8.jpg" alt="Settings" width="30%" />
+<img src="https://github.com/cognitiveshadows03/LunarTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_9.jpg" alt="Settings" width="30%" />
 
 </div>
 
@@ -180,9 +170,8 @@
   <thead>
     <tr>
       <td align="center" colspan="2">
-        <a href="https://github.com/cognitiveshadows03/LunarTune
-/releases/latest">
-          <img src="https://raw.githubusercontent.com/cognitiveshadows03/ArchiveTune/refs/heads/main/assets/badge_github.png" height="50" alt="Get LunarTune on GitHub">
+        <a href="https://github.com/cognitiveshadows03/LunarTune/releases/latest">
+          <img src="https://raw.githubusercontent.com/cognitiveshadows03/LunarTune/refs/heads/main/assets/badge_github.png" height="50" alt="Get LunarTune on GitHub">
         </a>
       </td>
     </tr>
@@ -197,8 +186,7 @@ Join Our Telegram Channels or Discord Servers for Support and Discussion.
 ---
 
 ### ✨ Project Contributors
-<a href="https://github.com/cognitiveshadows03/LunarTune
-/graphs/contributors">
+<a href="https://github.com/cognitiveshadows03/LunarTune/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=cognitiveshadows03/LunarTune&columns=6" />
 </a>
 

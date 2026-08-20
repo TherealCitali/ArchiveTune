@@ -1109,7 +1109,7 @@
     <string name="scheduled_backup_directory_saved">Backup directory saved</string>
     <string name="scheduled_backup_load_failed">Scheduled backup settings could not be loaded</string>
     <string name="scheduled_backup_update_failed">Scheduled backup settings could not be saved</string>
-    <string name="gatekeeper_connection_blocked">Connection blocked by LunarTune Remote. This app could not be verified as an official LunarTune build. Install an official build from https://github.com/cognitiveshadows03/ArchiveTune or https://t.me/LunarTuneGC.</string>
+    <string name="gatekeeper_connection_blocked">Connection blocked by LunarTune Remote. This app could not be verified as an official LunarTune build. Install an official build from https://github.com/cognitiveshadows03/LunarTune or https://t.me/LunarTuneGC.</string>
     <string name="navigation_bar_style">Navigation bar style</string>
     <string name="navigation_bar_style_default">Docked</string>
     <string name="navigation_bar_style_floating">Floating</string>

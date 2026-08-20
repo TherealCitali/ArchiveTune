@@ -134,7 +134,7 @@ object DiscordImageResolver {
             }
 
             "appicon" -> {
-                "https://raw.githubusercontent.com/cognitiveshadows03/ArchiveTune/main/fastlane/metadata/android/en-US/images/icon.png"
+                "https://raw.githubusercontent.com/cognitiveshadows03/LunarTune/main/fastlane/metadata/android/en-US/images/icon.png"
             }
 
             "custom" -> {

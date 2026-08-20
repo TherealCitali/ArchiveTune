@@ -195,6 +195,6 @@ class AboutContributorsRepository
         private companion object {
             const val ContributorsLimit = 20
             const val GitHubOwner = "cognitiveshadows03"
-            const val GitHubRepo = "ArchiveTune"
+            const val GitHubRepo = "LunarTune"
         }
     }

@@ -88,7 +88,7 @@ fun DiscordExperimental(navController: NavController) {
     val (button2CustomUrl, onButton2CustomUrlChange) =
         rememberPreference(
             key = DiscordActivityButton2CustomUrlKey,
-            defaultValue = "https://github.com/cognitiveshadows03/ArchiveTune",
+            defaultValue = "https://github.com/cognitiveshadows03/LunarTune",
         )
 
     Scaffold { inner ->

@@ -416,7 +416,7 @@ class AboutViewModel
                             id = "github",
                             iconResId = R.drawable.github,
                             labelResId = R.string.about_content_desc_github,
-                            url = "https://github.com/cognitiveshadows03/ArchiveTune",
+                            url = "https://github.com/cognitiveshadows03/LunarTune",
                         ),
                         AboutLinkUiModel(
                             id = "telegram",
@@ -562,6 +562,6 @@ class AboutViewModel
         private companion object {
             const val MaxDisplayedContributors = 20
             const val DebugBuildBadge = "DEBUG"
-            const val ContributorsReadMoreUrl = "https://github.com/cognitiveshadows03/ArchiveTune/graphs/contributors"
+            const val ContributorsReadMoreUrl = "https://github.com/cognitiveshadows03/LunarTune/graphs/contributors"
         }
     }

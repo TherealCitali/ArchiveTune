@@ -198,7 +198,7 @@ class BuildOnboardingUiStateUseCase
                         titleResId = R.string.support_development_star,
                         descriptionResId = R.string.onboarding_community_github_desc,
                         iconResId = R.drawable.github,
-                        url = "https://github.com/cognitiveshadows03/ArchiveTune",
+                        url = "https://github.com/cognitiveshadows03/LunarTune",
                     ),
                     OnboardingCommunityActionUiModel(
                         id = "telegram",

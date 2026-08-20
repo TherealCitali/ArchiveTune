@@ -1116,7 +1116,7 @@
     <string name="scheduled_backup_directory_saved">Directorio de copia de seguridad guardado</string>
     <string name="scheduled_backup_load_failed">No se pudieron cargar los ajustes de copia de seguridad programada</string>
     <string name="scheduled_backup_update_failed">No se pudieron guardar los ajustes de copia de seguridad programada</string>
-    <string name="gatekeeper_connection_blocked">Conexión bloqueada por ArchiveTune Remote. Esta aplicación no se ha podido verificar como una compilación oficial de ArchiveTune. Instale una compilación oficial desde https://github.com/cognitiveshadows03/ArchiveTune o https://t.me/LunarTuneGC.</string>
+    <string name="gatekeeper_connection_blocked">Conexión bloqueada por ArchiveTune Remote. Esta aplicación no se ha podido verificar como una compilación oficial de ArchiveTune. Instale una compilación oficial desde https://github.com/cognitiveshadows03/LunarTune o https://t.me/LunarTuneGC.</string>
     <string name="enable_megalobiz_lyrics">Activar las letras de Megalobiz</string>
     <string name="enable_betterlyrics_portato">Activar BetterLyrics Portato</string>
 </resources>
