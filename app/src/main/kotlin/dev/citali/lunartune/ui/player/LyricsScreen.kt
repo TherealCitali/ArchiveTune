@@ -820,7 +820,7 @@ private fun AppleMusicLyricsPane(
         modifier =
             modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = 20.dp),
         textColor = foregroundColor,
     )
 }
