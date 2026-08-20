@@ -591,8 +591,8 @@ fun LyricsV2(
                             Modifier
                                 .fillMaxWidth()
                                 .padding(
-                                    start = 12.dp,
-                                    end = 12.dp,
+                                    start = 24.dp,
+                                    end = 24.dp,
                                     top =
                                         if (index == 0 || (index == 1 && entriesWithWords[0] == HEAD_LYRICS_ENTRY)) {
                                             0.dp
@@ -775,8 +775,8 @@ fun LyricsV2(
                                         },
                                     shape = RoundedCornerShape(8.dp),
                                 ).padding(
-                                    start = if (isAllBackground) 24.dp else 12.dp,
-                                    end = 12.dp,
+                                    start = if (isAllBackground) 28.dp else 24.dp,
+                                    end = 24.dp,
                                     top =
                                         if (index == 0 ||
                                             (index == 1 && entriesWithWords[0] == HEAD_LYRICS_ENTRY)
@@ -1352,10 +1352,16 @@ private fun AnimatedWordV2(
             Modifier
                 .layout { measurable, constraints ->
                     val glowPaddingPx = glowPadding.roundToPx()
+                    val boundedMaxWidth =
+                        if (constraints.hasBoundedWidth) {
+                            constraints.maxWidth
+                        } else {
+                            constraints.maxWidth.coerceAtMost(Int.MAX_VALUE / 8)
+                        }
                     val looseConstraints =
                         constraints.copy(
                             minWidth = 0,
-                            maxWidth = constraints.maxWidth,
+                            maxWidth = boundedMaxWidth,
                             minHeight = 0,
                             maxHeight = Constraints.Infinity,
                         )

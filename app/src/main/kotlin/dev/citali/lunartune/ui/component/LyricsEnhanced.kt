@@ -947,7 +947,7 @@ private fun PlainLyricLineItem(
                 .combinedClickable(
                     onClick = { onLineClicked(line.selectionId) },
                     onLongClick = { onLinePressed(line.selectionId) },
-                ).padding(horizontal = 12.dp, vertical = 8.dp),
+                ).padding(horizontal = 24.dp, vertical = 8.dp),
     )
 }
 

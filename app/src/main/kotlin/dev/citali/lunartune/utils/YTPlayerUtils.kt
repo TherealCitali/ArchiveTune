@@ -148,29 +148,29 @@ object YTPlayerUtils {
      */
     private val STREAM_FALLBACK_CLIENTS: Array<YouTubeClient> =
         arrayOf(
+            VISIONOS,
+            IOS,
+            IOS_MUSIC,
+            TVHTML5,
+            TVHTML5_DOWNGRADED,
+            ANDROID_MUSIC,
+            WEB_REMIX,
+            WEB_CREATOR,
+            WEB_EMBEDDED,
+            MWEB,
+            WEB,
+            WEB_PRIMARY,
+            TVHTML5_SIMPLY,
+            MOBILE,
+            IPADOS,
+            ANDROID_CREATOR,
+            ANDROID_TESTSUITE,
+            ANDROID_UNPLUGGED,
+            TVHTML5_SIMPLY_EMBEDDED_PLAYER,
             ANDROID_VR_NO_AUTH,
             ANDROID_VR_1_65_10,
             ANDROID_VR_1_61_48,
             ANDROID_VR_1_43_32,
-            TVHTML5_DOWNGRADED,
-            WEB_EMBEDDED,
-            WEB_CREATOR,
-            WEB_REMIX,
-            MWEB,
-            WEB,
-            WEB_PRIMARY,
-            TVHTML5,
-            TVHTML5_SIMPLY,
-            IOS,
-            MOBILE,
-            ANDROID_MUSIC,
-            IOS_MUSIC,
-            ANDROID_CREATOR,
-            ANDROID_TESTSUITE,
-            ANDROID_UNPLUGGED,
-            IPADOS,
-            VISIONOS,
-            TVHTML5_SIMPLY_EMBEDDED_PLAYER,
         )
 
     private data class CachedStreamUrl(
@@ -523,7 +523,7 @@ object YTPlayerUtils {
     ): YouTubeClient =
         when (preferredStreamClient) {
             PlayerStreamClient.VISION_OS -> {
-                WEB_REMIX
+                VISIONOS
             }
 
             PlayerStreamClient.ANDROID_VR -> {
@@ -772,12 +772,17 @@ object YTPlayerUtils {
         audioQuality: AudioQuality,
         connectivityManager: ConnectivityManager,
         networkMetered: Boolean? = null,
+        preferredStreamClient: PlayerStreamClient = PlayerStreamClient.WEB_REMIX,
     ): Result<PlaybackData> =
         runCatching {
             Timber.tag(logTag).i("Fetching download response for videoId: $videoId, playlistId: $playlistId")
             var lastError: Throwable? = null
 
-            for (preferredStreamClient in downloadPreferredStreamClientAttempts) {
+            val downloadClients =
+                listOf(preferredStreamClient) +
+                    downloadPreferredStreamClientAttempts.filterNot { it == preferredStreamClient }
+
+            for (preferredStreamClient in downloadClients) {
                 val attemptResult =
                     playerResponseForPlayback(
                         videoId = videoId,
@@ -804,11 +809,13 @@ object YTPlayerUtils {
 
     private val downloadPreferredStreamClientAttempts: List<PlayerStreamClient> =
         listOf(
-            PlayerStreamClient.WEB_REMIX,
-            PlayerStreamClient.HI_RES_LOSSLESS,
+            PlayerStreamClient.VISION_OS,
             PlayerStreamClient.IOS,
             PlayerStreamClient.TVHTML5,
+            PlayerStreamClient.WEB_REMIX,
             PlayerStreamClient.ANDROID_MUSIC,
+            PlayerStreamClient.HI_RES_LOSSLESS,
+            PlayerStreamClient.ANDROID_VR,
         )
 
     private suspend fun refreshIpRotationForBotDetection(
