@@ -2097,16 +2097,18 @@ class MainActivity : ComponentActivity() {
                                                                                 val from =
                                                                                     System.currentTimeMillis() -
                                                                                         90L * 24 * 60 * 60 * 1000
-                                                                                val history =
+                                                                                val favorites =
                                                                                     database
-                                                                                        .mostPlayedSongs(from, limit = 80)
+                                                                                        .mostPlayedSongs(from, limit = 24)
                                                                                         .first()
-                                                                                        .ifEmpty { database.recentSongs(80).first() }
-                                                                                history
-                                                                                    .filter { candidate ->
-                                                                                        candidate.artists.none { it.blockedAt != null }
-                                                                                    }.randomOrNull()
-                                                                                    ?: allLocalItems.filterIsInstance<Song>().randomOrNull()
+                                                                                        .filter { candidate ->
+                                                                                            candidate.artists.none { it.blockedAt != null }
+                                                                                        }
+                                                                                favorites.randomOrNull()
+                                                                                    ?: database.recentSongs(40).first()
+                                                                                        .filter { candidate ->
+                                                                                            candidate.artists.none { it.blockedAt != null }
+                                                                                        }.randomOrNull()
                                                                             }
                                                                         if (song == null) {
                                                                             Toast
@@ -2121,7 +2123,13 @@ class MainActivity : ComponentActivity() {
                                                                             if (song.song.isLocal) {
                                                                                 ListQueue(items = listOf(song.toMediaItem()))
                                                                             } else {
-                                                                                YouTubeQueue.radio(song.toMediaMetadata())
+                                                                                YouTubeQueue(
+                                                                                    endpoint =
+                                                                                        moe.rukamori.archivetune.innertube.models
+                                                                                            .WatchEndpoint(videoId = song.id),
+                                                                                    preloadItem = null,
+                                                                                    followAutomixPreview = true,
+                                                                                )
                                                                             },
                                                                         )
                                                                     }

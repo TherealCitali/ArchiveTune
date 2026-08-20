@@ -1985,9 +1985,9 @@ private fun MikoLyricsTransition(
     val progress by animateFloatAsState(
         targetValue = if (visible) 1f else 0f,
         animationSpec =
-            spring(
-                dampingRatio = 0.82f,
-                stiffness = Spring.StiffnessMediumLow,
+            tween(
+                durationMillis = 320,
+                easing = androidx.compose.animation.core.FastOutSlowInEasing,
             ),
         label = "mikoLyricsTransition",
     )
@@ -1995,28 +1995,23 @@ private fun MikoLyricsTransition(
     val boundedProgress = progress.coerceIn(0f, 1f)
 
     if (visible || boundedProgress > 0.001f) {
-        val scaleX = 0.92f + (0.08f * boundedProgress)
-        val scaleY = 0.78f + (0.22f * boundedProgress)
-        val alpha = (0.2f + (0.8f * boundedProgress)).coerceIn(0f, 1f)
-        val cornerRadius = 32.dp * (1f - boundedProgress)
+        val alpha = boundedProgress
+        val cornerRadius = 20.dp * (1f - boundedProgress)
 
         Box(
             modifier =
                 modifier
                     .fillMaxSize()
                     .graphicsLayer { this.alpha = boundedProgress }
-                    .background(Color.Black.copy(alpha = 0.24f * boundedProgress)),
+                    .background(Color.Black.copy(alpha = 0.28f * boundedProgress)),
         ) {
             Box(
                 modifier =
                     Modifier
                         .fillMaxSize()
                         .graphicsLayer {
-                            transformOrigin = TransformOrigin(0.5f, 1f)
-                            this.scaleX = scaleX
-                            this.scaleY = scaleY
                             this.alpha = alpha
-                            translationY = size.height * 0.16f * (1f - boundedProgress)
+                            translationY = size.height * 0.10f * (1f - boundedProgress)
                         }.clip(RoundedCornerShape(cornerRadius))
                         .background(MaterialTheme.colorScheme.surface),
             ) {

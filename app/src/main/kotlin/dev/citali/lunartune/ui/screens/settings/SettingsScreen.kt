@@ -123,11 +123,14 @@ fun SettingsScreen(
                 settingsGroups
             } else {
                 settingsGroups.mapNotNull { group ->
+                    val groupTitleMatches = group.title.lowercase().contains(query)
                     val items =
                         group.items.filter { item ->
-                            item.title.lowercase().contains(query) ||
+                            groupTitleMatches ||
+                                item.title.lowercase().contains(query) ||
                                 item.subtitle.orEmpty().lowercase().contains(query) ||
-                                item.key.lowercase().contains(query)
+                                item.key.lowercase().contains(query) ||
+                                item.keywords.any { keyword -> keyword.lowercase().contains(query) }
                         }
                     if (items.isEmpty()) null else group.copy(items = items)
                 }
