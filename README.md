@@ -8,24 +8,20 @@
     <a href="README.md">
       <img src="https://img.shields.io/badge/🇺🇸%20English-6366f1?style=for-the-badge&labelColor=1e1e2e" />
     </a>
-    <a href="README_JA.md">
-      <img src="https://img.shields.io/badge/🇯🇵%20日本語-6366f1?style=for-the-badge&labelColor=1e1e2e" />
-    </a>
   </p>
 
   <p align="center">
-    <strong>Redefining the YouTube Music Experience on Android.</strong>
+    <strong>Revamped YouTube Music Experience on Android.</strong>
     <br />
     <em>It’s high-performance, privacy-focused, and packed with features for people who really care about their experience.</em>
   </p>
 
   <p align="center">
-    <a href="https://lunartune.koiiverse.cloud"><b>Official Website</b></a> •
     <a href="#features"><b>Features</b></a> •
-    <a href="https://lunartune.koiiverse.cloud/privacy"><b>Privacy</b></a> •
     <a href="#download-now"><b>Download</b></a> •
     <a href="#screenshots"><b>Screenshots</b></a> •
-    <a href="https://github.com/cognitiveshadows03/ArchiveTune/issues/new/choose"><b>Support</b></a>
+    <a href="https://github.com/cognitiveshadows03/LunarTune
+/issues/new/choose"><b>Support</b></a>
   </p>
 
   <div align="center">
@@ -39,24 +35,17 @@
     <img src="https://img.shields.io/badge/Design-Material_3-000000?style=for-the-badge&logo=material-design&color=6366f1&labelColor=1e1e2e" alt="Material Design 3" />
     <a href="https://www.virustotal.com/gui/file/176bea37aff02a606d04ff0a61478fabdb0bd079f9e97319645452af420e5d84/detection/f-176bea37aff02a606d04ff0a61478fabdb0bd079f9e97319645452af420e5d84-1778840479" target="_blank"><img src="https://img.shields.io/badge/VirusTotal-SAFE-green?style=for-the-badge&logo=virustotal&logoColor=white&labelColor=1e1e2e&color=5865F2" alt="VirusTotal" /></a>
     <a href="https://t.me/LunarTuneGC"><img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram" /></a>
-    <a href="https://discord.gg/XF2fpb9rTq"><img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord" /></a>
   </div>
   
   <br />
-
-  <a href="https://trendshift.io/repositories/17521" target="_blank">
-    <img src="https://trendshift.io/api/badge/repositories/17521" alt="LunarTune | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/>
-  </a>
 </div>
 
 <hr />
 
-> [!WARNING]
-**Forks are not supported in any way.**  
-We do not provide support, maintenance, troubleshooting, or assistance for any forked version of this project.
-If you choose to use a fork, you do so at your own risk.
+> [!NOTE]  
+> LunarTune is a Custom Vibecoded(currently) fork of Archivetune
 
-**LunarTune** isn’t just another generic YouTube Music wrapper. It’s a fully custom-built player made from the ground up, because we think your music should stay private, look clean, and work exactly the way you expect. If you care about sound quality and want something that actually feels good to use, this is it.
+
 
 ---
 
@@ -69,15 +58,24 @@ If you choose to use a fork, you do so at your own risk.
 
 <div align="center">
 
-<img src="https://github.com/cognitiveshadows03/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_1.jpg" alt="Browse" width="30%" />
-<img src="https://github.com/cognitiveshadows03/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_2.jpg" alt="Live Lyrics" width="30%" />
-<img src="https://github.com/cognitiveshadows03/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_3.jpg" alt="Theme Customization" width="30%" />
-<img src="https://github.com/cognitiveshadows03/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_4.jpg" alt="Live Statistics" width="30%" />
-<img src="https://github.com/cognitiveshadows03/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_5.jpg" alt="Artist" width="30%" />
-<img src="https://github.com/cognitiveshadows03/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_6.jpg" alt="Album" width="30%" />
-<img src="https://github.com/cognitiveshadows03/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_7.jpg" alt="Player" width="30%" />
-<img src="https://github.com/cognitiveshadows03/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_8.jpg" alt="Settings" width="30%" />
-<img src="https://github.com/cognitiveshadows03/ArchiveTune/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_9.jpg" alt="Settings" width="30%" />
+<img src="https://github.com/cognitiveshadows03/LunarTune
+/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_1.jpg" alt="Browse" width="30%" />
+<img src="https://github.com/cognitiveshadows03/LunarTune
+/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_2.jpg" alt="Live Lyrics" width="30%" />
+<img src="https://github.com/cognitiveshadows03/LunarTune
+/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_3.jpg" alt="Theme Customization" width="30%" />
+<img src="https://github.com/cognitiveshadows03/LunarTune
+/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_4.jpg" alt="Live Statistics" width="30%" />
+<img src="https://github.com/cognitiveshadows03/LunarTune
+/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_5.jpg" alt="Artist" width="30%" />
+<img src="https://github.com/cognitiveshadows03/LunarTune
+/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_6.jpg" alt="Album" width="30%" />
+<img src="https://github.com/cognitiveshadows03/LunarTune
+/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_7.jpg" alt="Player" width="30%" />
+<img src="https://github.com/cognitiveshadows03/LunarTune
+/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_8.jpg" alt="Settings" width="30%" />
+<img src="https://github.com/cognitiveshadows03/LunarTune
+/blob/main/fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot_9.jpg" alt="Settings" width="30%" />
 
 </div>
 
@@ -181,72 +179,13 @@ If you choose to use a fork, you do so at your own risk.
 <table>
   <thead>
     <tr>
-      <th align="center">Obtainium</th>
-      <th align="center">IzzyOnDroid</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="center">
-        <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/cognitiveshadows03/ArchiveTune/">
-          <img src="https://github.com/ImranR98/Obtainium/blob/main/assets/graphics/badge_obtainium.png" height="50" alt="Get LunarTune on Obtainium">
-        </a>
-      </td>
-      <td align="center">
-        <a href="https://apt.izzysoft.de/fdroid/index/apk/dev.citali.lunartune">
-          <img src="https://raw.githubusercontent.com/cognitiveshadows03/ArchiveTune/757d5932832e1da27ced56de98c5ad1275cf0db1/assets/IzzyOnDroidButtonBorder.svg" height="50" alt="Get LunarTune on IzzyOnDroid">
-        </a>
-      </td>
-    </tr>
-    <tr>
-      <th align="center" colspan="2">GitHub</th>
-    </tr>
-    <tr>
       <td align="center" colspan="2">
-        <a href="https://github.com/cognitiveshadows03/ArchiveTune/releases/latest">
+        <a href="https://github.com/cognitiveshadows03/LunarTune
+/releases/latest">
           <img src="https://raw.githubusercontent.com/cognitiveshadows03/ArchiveTune/refs/heads/main/assets/badge_github.png" height="50" alt="Get LunarTune on GitHub">
         </a>
       </td>
     </tr>
-    <tr>
-      <th align="center">OpenAPK</th>
-      <th align="center">Unclouded</th>
-    </tr>
-    <tr>
-      <td align="center">
-        <a href="https://www.openapk.net/lunartune/dev.citali.lunartune/">
-          <img src="https://www.openapk.net/images/openapk-badge.png" height="75" alt="Get LunarTune on OpenAPK">
-        </a>
-      </td>
-      <td align="center">
-        <a href="https://unclouded.app/apps/lunartune/">
-          <img src="https://raw.githubusercontent.com/cognitiveshadows03/ArchiveTune/refs/heads/dev/assets/badge_unclouded.png" height="50" alt="Get LunarTune on Unclouded">
-        </a>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-<h2>Nightly Build</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th align="center">GitHub Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="center">
-        <a href="https://nightly.link/cognitiveshadows03/ArchiveTune/workflows/build/dev/app-gms-mobile-universal-release">
-          <img src="https://raw.githubusercontent.com/cognitiveshadows03/ArchiveTune/refs/heads/main/assets/badge_github.png" height="50" alt="Download the latest LunarTune nightly build">
-        </a>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
 > [!WARNING]  
 > **Notes:** The trusted download source is listed above; we are not responsible for any risks you may encounter from downloading from other sources.
 
@@ -254,25 +193,13 @@ If you choose to use a fork, you do so at your own risk.
 Join Our Telegram Channels or Discord Servers for Support and Discussion.
 
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/LunarTuneGC)
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/XF2fpb9rTq)
 
 ---
 
-## 🌍 Globalization
-
-LunarTune belongs to everyone. Help us localize the experience for your region.
-
-[![Static Badge](https://img.shields.io/badge/translate-help?style=for-the-badge&logo=weblate&labelColor=grey)](https://translate.codeberg.org/engage/lunartune/)
-
-<div align="center">
-  <a href="https://translate.codeberg.org/engage/lunartune/">
-    <img src="https://translate.codeberg.org/widget/lunartune/horizontal-blue.svg" alt="Translation status" />
-  </a>
-</div>
-
 ### ✨ Project Contributors
-<a href="https://github.com/cognitiveshadows03/ArchiveTune/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=cognitiveshadows03/ArchiveTune&columns=6" />
+<a href="https://github.com/cognitiveshadows03/LunarTune
+/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=cognitiveshadows03/LunarTune&columns=6" />
 </a>
 
 ### 🛠️ Development & Engineering
@@ -284,8 +211,9 @@ Interested in building the project or contributing? LunarTune is built on a high
 ### Open-Source Acknowledgments
 
 LunarTune is made possible by the work of many open-source projects and communities:
-
-- **Metrolist** by [Mostafa Alagamy](https://github.com/mostafaalagamy/Metrolist) for the base framework.
+- **ArchiveTune** by [Rukamori](https://github.com/rukamori/ArchiveTune) for base framework.
+- **Vivi Music** by [vivizzz007](https://github.com/vivizzz007/vivi-music) for Dolby and Dirac equalizer presets
+- **Metrolist** by [Mostafa Alagamy](https://github.com/mostafaalagamy/Metrolist) for Playback client fallback order.
 - **SimpMusic** by [maxrave-dev](https://github.com/maxrave-dev/SimpMusic) for the lyrics API provider.
 - [BetterLyrics](https://better-lyrics.boidu.dev/) for word-by-word lyrics, unison and artwork provider support.
 - [Material Color Utilities](https://github.com/material-foundation/material-color-utilities)
@@ -317,13 +245,6 @@ See the [`LICENSE`](LICENSE) file for the complete GPLv3 terms.
 ---
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/cognitiveshadows03/ArchiveTune/refs/heads/dev/fastlane/metadata/android/en-US/images/ArchiveTuneFull.png" alt="LunarTune Banner" style="width: 100%; max-width: 500px;">
-  <p><b>If LunarTune elevated your music experience, please consider giving us a ⭐</b></p>
+ <p>
+ <b>If LunarTune Improved your music experience, please consider giving us a ⭐</b></p>
   <br />
-  <img src="https://raw.githubusercontent.com/cognitiveshadows03/ArchiveTune/refs/heads/dev/assets/badge_part.png" alt="LunarTune Banner" style="width: 180px">
-</div>
-
-## Credits
-
-- [ArchiveTune](https://github.com/rukamori/ArchiveTune) — base app
-- [Vivi Music](https://github.com/vivizzz007/vivi-music) — Dolby and Dirac equalizer presets
