@@ -615,26 +615,25 @@ class MainActivity : ComponentActivity() {
                     dev.citali.lunartune.utils.reportException(e)
                 }
 
-                if (
-                    BuildConfig.UPDATER_AVAILABLE &&
-                    System.currentTimeMillis() - Updater.lastCheckTime > 1.days.inWholeMilliseconds
-                ) {
-                    val channelString = withContext(Dispatchers.IO) { dataStore.data.first()[UpdateChannelKey] }
-                    val actualChannel = UpdateChannel.fromStoredName(channelString, defaultUpdateChannel)
-                    val versionResult =
-                        when (actualChannel) {
-                            UpdateChannel.CANARY -> Updater.getLatestCanaryVersionName()
-                            UpdateChannel.STABLE -> Updater.getLatestVersionName()
-                        }
-                    versionResult.onSuccess {
-                        if (Updater.isUpdateAvailable(it, BuildConfig.VERSION_NAME)) {
-                            latestUpdateChannel = actualChannel
-                            latestVersionName = it
+                if (BuildConfig.UPDATER_AVAILABLE) {
+                    if (System.currentTimeMillis() - Updater.lastCheckTime > 1.days.inWholeMilliseconds) {
+                        val channelString = withContext(Dispatchers.IO) { dataStore.data.first()[UpdateChannelKey] }
+                        val actualChannel = UpdateChannel.fromStoredName(channelString, defaultUpdateChannel)
+                        val versionResult =
+                            when (actualChannel) {
+                                UpdateChannel.CANARY -> Updater.getLatestCanaryVersionName()
+                                UpdateChannel.STABLE -> Updater.getLatestVersionName()
+                            }
+                        versionResult.onSuccess {
+                            if (Updater.isUpdateAvailable(it, BuildConfig.VERSION_NAME)) {
+                                latestUpdateChannel = actualChannel
+                                latestVersionName = it
+                            }
                         }
                     }
+                    dev.citali.lunartune.utils.UpdateNotificationManager
+                        .checkForUpdates(this@MainActivity)
                 }
-                dev.citali.lunartune.utils.UpdateNotificationManager
-                    .checkForUpdates(this@MainActivity)
             }
 
             // Use remembered instances so the same state object is used everywhere

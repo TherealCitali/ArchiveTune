@@ -113,8 +113,8 @@ This file should be reviewed whenever LunarTune changes its permissions, storage
 
 For questions or corrections, use the project repository and issue tracker.
 
-- Repository: [https://github.com/cognitiveshadows03/ArchiveTune](https://github.com/cognitiveshadows03/ArchiveTune)
-- Issues: [https://github.com/cognitiveshadows03/ArchiveTune/issues](https://github.com/cognitiveshadows03/ArchiveTune/issues)
+- Repository: [https://github.com/cognitiveshadows03/LunarTune](https://github.com/cognitiveshadows03/LunarTune)
+- Issues: [https://github.com/cognitiveshadows03/LunarTune/issues](https://github.com/cognitiveshadows03/LunarTune/issues)
 
 ## Technical Appendix
 

@@ -84,7 +84,7 @@ fun StarDialog(
 
             FilledTonalButton(
                 onClick = {
-                    uriHandler.openUri("https://github.com/cognitiveshadows03/ArchiveTune")
+                    uriHandler.openUri("https://github.com/cognitiveshadows03/LunarTune")
                     onSupport()
                 },
                 modifier = Modifier.fillMaxWidth(),

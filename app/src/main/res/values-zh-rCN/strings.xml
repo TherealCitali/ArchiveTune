@@ -1091,7 +1091,7 @@
     <string name="scheduled_backup_directory_saved">备份目录已保存</string>
     <string name="scheduled_backup_load_failed">无法加载计划自动备份设置</string>
     <string name="scheduled_backup_update_failed">无法保存计划自动备份设置</string>
-    <string name="gatekeeper_connection_blocked">连接已被 LunarTune Remote 拒绝。当前应用未能通过官方 LunarTune 构建验证。请从 https://github.com/cognitiveshadows03/ArchiveTune 或 https://t.me/LunarTuneGC 获取官方构建版本</string>
+    <string name="gatekeeper_connection_blocked">连接已被 LunarTune Remote 拒绝。当前应用未能通过官方 LunarTune 构建验证。请从 https://github.com/cognitiveshadows03/LunarTune 或 https://t.me/LunarTuneGC 获取官方构建版本</string>
     <plurals name="widget_total_plays">
         <item quantity="other">%d 次播放</item>
     </plurals>

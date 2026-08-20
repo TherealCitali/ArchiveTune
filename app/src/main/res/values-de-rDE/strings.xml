@@ -1021,7 +1021,7 @@
     <string name="web_client_po_token">Webclient-PO-Token</string>
     <string name="po_token_gvs">PO-Token (GVS)</string>
     <string name="po_token_account_notice_body">Melde dich hier mit demselben Google-Konto an, dass du bereits für YouTube Music in LunarTune benutzt, bevor du ein PO-Token generierst.</string>
-    <string name="gatekeeper_connection_blocked">Verbindung durch LunarTune Remote blockiert. Diese App konnte nicht als offizieller LunarTune-Build verifiziert werden. Installiere einen offiziellen Build von https://github.com/cognitiveshadows03/ArchiveTune oder https://t.me/LunarTuneGC.</string>
+    <string name="gatekeeper_connection_blocked">Verbindung durch LunarTune Remote blockiert. Diese App konnte nicht als offizieller LunarTune-Build verifiziert werden. Installiere einen offiziellen Build von https://github.com/cognitiveshadows03/LunarTune oder https://t.me/LunarTuneGC.</string>
     <string name="scheduled_backup_disabled_description">Automatische Sicherungen sind pausiert.</string>
     <string name="scheduled_backup_enabled_description">Sicherungen laufen automatisch nach dem untenstehenden Plan.</string>
     <string name="po_token_account_notice_same_account">Wenn diese Webansicht ein anderes Konto benutzt, wird das generierte Token nicht richtig funktionieren.</string>
