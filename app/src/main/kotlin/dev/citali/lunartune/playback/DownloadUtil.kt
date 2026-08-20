@@ -37,6 +37,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import dev.citali.lunartune.constants.AudioQuality
 import dev.citali.lunartune.constants.AudioQualityKey
+import dev.citali.lunartune.constants.PlayerStreamClient
+import dev.citali.lunartune.constants.PlayerStreamClientKey
 import dev.citali.lunartune.db.MusicDatabase
 import dev.citali.lunartune.db.entities.FormatEntity
 import dev.citali.lunartune.db.entities.SongEntity
@@ -70,6 +72,11 @@ class DownloadUtil
     ) {
         private val connectivityManager = context.getSystemService<ConnectivityManager>()!!
         private val audioQuality by enumPreference(context, AudioQualityKey, AudioQuality.AUTO)
+        private val preferredStreamClient by enumPreference(
+            context,
+            PlayerStreamClientKey,
+            PlayerStreamClient.WEB_REMIX,
+        )
         private val downloadScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         private val songUrlCache = ConcurrentHashMap<String, AuthScopedCacheValue>()
         private val streamResolveMutex = Mutex()
@@ -164,6 +171,7 @@ class DownloadUtil
                                 audioQuality = requestedAudioQuality,
                                 connectivityManager = connectivityManager,
                                 networkMetered = lowDataModeActive,
+                                preferredStreamClient = preferredStreamClient,
                             )
                         }
                     }.getOrThrow()
