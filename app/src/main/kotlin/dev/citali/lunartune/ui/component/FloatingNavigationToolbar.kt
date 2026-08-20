@@ -314,12 +314,18 @@ fun FloatingNavigationToolbar(
                                         .weight(1f)
                                         .pointerInput(screen, onItemLongClick) {
                                             if (onItemLongClick == null) return@pointerInput
-                                            detectTapGestures(
-                                                onLongPress = {
+                                            awaitEachGesture {
+                                                awaitFirstDown(requireUnconsumed = false)
+                                                val longPressed =
+                                                    withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis.toLong()) {
+                                                        waitForUpOrCancellation()
+                                                        false
+                                                    } == null
+                                                if (longPressed) {
                                                     ignoreNextClick = true
                                                     onItemLongClick(screen)
-                                                },
-                                            )
+                                                }
+                                            }
                                         },
                                 icon = {
                                     Box(
