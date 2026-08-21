@@ -113,7 +113,6 @@ import dev.citali.lunartune.ui.component.IconButton
 import dev.citali.lunartune.ui.component.MarkdownText
 import dev.citali.lunartune.ui.utils.appBarScrollBehavior
 import dev.citali.lunartune.ui.utils.backToMain
-import dev.citali.lunartune.utils.AppUpdateInstaller
 import dev.citali.lunartune.utils.GitCommit
 import dev.citali.lunartune.utils.UpdateNotificationManager
 import dev.citali.lunartune.utils.Updater
@@ -187,7 +186,6 @@ fun UpdateScreen(
     var updateDownloadProgress by remember { mutableStateOf<Float?>(null) }
     var updateDownloadJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
     var showUpdateDownloadDialog by remember { mutableStateOf(false) }
-    val useInAppUpdateInstaller = BuildConfig.DISTRIBUTION == "gms"
     val snackbarHostState = remember { SnackbarHostState() }
 
     val openUpdateUrl: (String) -> Unit = { url ->
@@ -198,30 +196,7 @@ fun UpdateScreen(
     }
 
     val installUpdate: (String) -> Unit = { url ->
-        if (!useInAppUpdateInstaller) {
-            openUpdateUrl(url)
-        } else if (updateDownloadJob?.isActive != true) {
-            updateDownloadProgress = null
-            updateSheetError = null
-            showUpdateErrorDialog = false
-            showUpdateDownloadDialog = true
-            updateDownloadJob =
-                coroutineScope.launch {
-                    AppUpdateInstaller
-                        .downloadAndInstall(context, url) { progress ->
-                            updateDownloadProgress = progress.fraction
-                        }.onSuccess {
-                            showUpdateDownloadDialog = false
-                            snackbarHostState.showSnackbar(
-                                context.getString(R.string.download_complete),
-                            )
-                        }.onFailure { error ->
-                            showUpdateDownloadDialog = false
-                            updateSheetError = error.message ?: context.getString(R.string.error_unknown)
-                            showUpdateErrorDialog = true
-                        }
-                }
-        }
+        openUpdateUrl(url)
     }
 
     val updateSheetContent: @Composable ColumnScope.() -> Unit = {

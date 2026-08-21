@@ -112,7 +112,7 @@ android {
                 ).trim()
         buildConfigField("String", "NIGHTLY_BUILD_HASH", "\"$nightlyBuildHash\"")
         buildConfigField("String", "DISTRIBUTION", "\"gms\"")
-        buildConfigField("boolean", "UPDATER_AVAILABLE", "false")
+        buildConfigField("boolean", "UPDATER_AVAILABLE", "true")
     }
 
     flavorDimensions += listOf("distribution", "device", "abi")
@@ -121,7 +121,7 @@ android {
             dimension = "distribution"
             isDefault = true
             buildConfigField("String", "DISTRIBUTION", "\"gms\"")
-            buildConfigField("boolean", "UPDATER_AVAILABLE", "false")
+            buildConfigField("boolean", "UPDATER_AVAILABLE", "true")
             buildConfigField("String", "DISCORD_APPLICATION_ID", "\"$discordApplicationId\"")
             buildConfigField("long", "DISCORD_APPLICATION_ID_LONG", "${discordApplicationIdLong}L")
             buildConfigField("String", "DISCORD_REDIRECT_SCHEME", "\"$discordRedirectScheme\"")
@@ -130,7 +130,7 @@ android {
         create("foss") {
             dimension = "distribution"
             buildConfigField("String", "DISTRIBUTION", "\"foss\"")
-            buildConfigField("boolean", "UPDATER_AVAILABLE", "false")
+            buildConfigField("boolean", "UPDATER_AVAILABLE", "true")
             buildConfigField("String", "DISCORD_APPLICATION_ID", "\"$discordApplicationId\"")
             buildConfigField("long", "DISCORD_APPLICATION_ID_LONG", "${discordApplicationIdLong}L")
             buildConfigField("String", "DISCORD_REDIRECT_SCHEME", "\"$discordRedirectScheme\"")

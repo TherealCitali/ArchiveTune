@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import dev.citali.lunartune.BuildConfig
 import dev.citali.lunartune.R
 import dev.citali.lunartune.constants.AutoDownloadOnLikeKey
 import dev.citali.lunartune.constants.AudioNormalizationKey
@@ -494,6 +495,28 @@ fun buildSettingsGroups(
         } else {
             null
         }
+    val updates =
+        SettingsItem(
+            key = "updates",
+            icon = painterResource(R.drawable.update),
+            title = stringResource(R.string.updates),
+            keywords = listOf("update", "upgrade", "version", "new version", "release", "canary", "stable"),
+            subtitle =
+                if (hasUpdate) {
+                    stringResource(R.string.new_version_available)
+                } else {
+                    stringResource(R.string.settings_updates_subtitle)
+                },
+            showUpdateIndicator = hasUpdate,
+            accentColor =
+                if (hasUpdate) {
+                    MaterialTheme.colorScheme.tertiary
+                } else {
+                    MaterialTheme.colorScheme.primary
+                },
+            badge = if (hasUpdate) "v${BuildConfig.VERSION_NAME}" else BuildConfig.VERSION_NAME,
+            onClick = { navController.navigate("settings/update") },
+        )
     val about =
         SettingsItem(
             key = "about",
@@ -533,7 +556,7 @@ fun buildSettingsGroups(
                 buildList {
                     add(developerOptions)
                     defaultLinks?.let(::add)
-                    updates?.let(::add)
+                    add(updates)
                     add(about)
                 },
         ),
