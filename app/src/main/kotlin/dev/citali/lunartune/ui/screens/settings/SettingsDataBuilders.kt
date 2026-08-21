@@ -35,7 +35,6 @@ import dev.citali.lunartune.constants.DisableBlurKey
 import dev.citali.lunartune.constants.DisableScreenshotKey
 import dev.citali.lunartune.constants.DynamicThemeKey
 import dev.citali.lunartune.constants.EnableDiscordRPCKey
-import dev.citali.lunartune.constants.EnableLastFMScrobblingKey
 import dev.citali.lunartune.constants.EnableTranslatorKey
 import dev.citali.lunartune.constants.ExternalDownloaderEnabledKey
 import dev.citali.lunartune.constants.ForceHighRefreshRateKey
