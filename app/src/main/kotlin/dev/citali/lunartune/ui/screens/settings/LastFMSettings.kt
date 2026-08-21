@@ -311,7 +311,6 @@ private fun LastFmSettingsSuccess(
                     } else {
                         OutlinedButton(
                             onClick = onOpenLoginDialog,
-                            enabled = model.canLogin,
                             shapes = ButtonDefaults.shapes(),
                         ) {
                             Text(stringResource(R.string.action_login))
@@ -509,6 +508,8 @@ private fun LastFmServiceEditorDialog(
                         )
                     }
                 }
+
+                InfoLabel(text = stringResource(R.string.lastfm_api_credentials_hint))
 
                 if (editor.showCustomEndpoint) {
                     OutlinedTextField(
