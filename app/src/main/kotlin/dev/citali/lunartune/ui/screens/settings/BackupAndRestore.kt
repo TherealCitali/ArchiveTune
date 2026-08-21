@@ -651,7 +651,7 @@ private val ScheduledBackupFrequency.labelRes: Int
             ScheduledBackupFrequency.CUSTOM -> R.string.scheduled_backup_custom
         }
 
-private fun PreferenceGroupScope.spotifyAccountPreferences(
+internal fun PreferenceGroupScope.spotifyAccountPreferences(
     state: SpotifyAccountUiState,
     showPlaylists: Boolean,
     onConnectClick: () -> Unit,
@@ -792,7 +792,7 @@ private fun SpotifyAccountIcon(avatarUrl: String?) {
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-private fun SpotifyLoginSheet(
+internal fun SpotifyLoginSheet(
     onDismiss: () -> Unit,
     onCookiesCaptured: (spDc: String, spKey: String) -> Unit,
 ) {
