@@ -233,7 +233,7 @@ private fun KaraokeWord(
     modifier: Modifier = Modifier,
 ) {
     val duration = endTime - startTime
-    val glowPadding = 10.dp // Reduced to 10dp for tighter spacing
+    val glowPadding = 4.dp
 
     Box(
         modifier =
@@ -1026,8 +1026,10 @@ fun Lyrics(
                                         },
                                     shape = RoundedCornerShape(8.dp),
                                 ).padding(
-                                    horizontal = 24.dp,
-                                    vertical = 8.dp,
+                                    start = 20.dp,
+                                    end = 28.dp,
+                                    top = 8.dp,
+                                    bottom = 8.dp,
                                 ).then(
                                     if (lyricsLineBlur) {
                                         Modifier.blur(
@@ -1145,9 +1147,7 @@ fun Lyrics(
                                                         val wordEndMs = (word.endTime * 1000).toLong()
                                                         val wordDuration = wordEndMs - wordStartMs
 
-                                                        if (isCjk && word.text.length > 3) {
-                                                            // Split long CJK phrases into individual characters for FlowRow wrapping
-                                                            // Short entries (1-3 chars) are kept intact — TTML already provides granular timing
+                                                        if (isCjk && word.text.length > 8) {
                                                             val chars = word.text.toList()
                                                             chars.mapIndexed { charIdx, char ->
                                                                 val charStartMs = wordStartMs + (wordDuration * charIdx / chars.size)

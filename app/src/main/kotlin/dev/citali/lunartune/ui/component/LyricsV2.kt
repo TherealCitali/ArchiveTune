@@ -1181,13 +1181,6 @@ private fun LyricsLineV2(
     glowFactor: Float,
     fillTransitionWidth: Float,
 ) {
-    val arrangement =
-        when (textAlign) {
-            TextAlign.Center -> Arrangement.Center
-            TextAlign.End -> Arrangement.End
-            else -> Arrangement.Start
-        }
-
     // Split words into main and background
     val mainWords = words.filter { !it.isBackground }
     val bgWords = words.filter { it.isBackground }
@@ -1196,7 +1189,14 @@ private fun LyricsLineV2(
     if (mainWords.isNotEmpty()) {
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = arrangement,
+            horizontalArrangement = Arrangement.spacedBy(
+                0.dp,
+                when (textAlign) {
+                    TextAlign.Center -> Alignment.CenterHorizontally
+                    TextAlign.End -> Alignment.End
+                    else -> Alignment.Start
+                },
+            ),
         ) {
             mainWords.forEachIndexed { wordIndex, word ->
                 if (word.text == " ") {
@@ -1243,7 +1243,14 @@ private fun LyricsLineV2(
 
         FlowRow(
             modifier = Modifier.fillMaxWidth().alpha(0.85f), // Slightly dimmer overall
-            horizontalArrangement = arrangement,
+            horizontalArrangement = Arrangement.spacedBy(
+                0.dp,
+                when (textAlign) {
+                    TextAlign.Center -> Alignment.CenterHorizontally
+                    TextAlign.End -> Alignment.End
+                    else -> Alignment.Start
+                },
+            ),
         ) {
             bgWords.forEachIndexed { wordIndex, word ->
                 if (word.text == " ") {
@@ -1344,7 +1351,7 @@ private fun AnimatedWordV2(
 
     val actualFontSize = if (isBackground) fontSize * 0.85f else fontSize
     val fontWeight = if (isLineActive || isLinePast) FontWeight.ExtraBold else FontWeight.SemiBold
-    val glowPadding = 10.dp
+    val glowPadding = 4.dp
 
     // ── Two-layer rendering: dim base + liquid fill overlay ──
     Box(
@@ -1352,16 +1359,10 @@ private fun AnimatedWordV2(
             Modifier
                 .layout { measurable, constraints ->
                     val glowPaddingPx = glowPadding.roundToPx()
-                    val boundedMaxWidth =
-                        if (constraints.hasBoundedWidth) {
-                            constraints.maxWidth
-                        } else {
-                            constraints.maxWidth.coerceAtMost(Int.MAX_VALUE / 8)
-                        }
                     val looseConstraints =
                         constraints.copy(
                             minWidth = 0,
-                            maxWidth = boundedMaxWidth,
+                            maxWidth = Constraints.Infinity,
                             minHeight = 0,
                             maxHeight = Constraints.Infinity,
                         )
