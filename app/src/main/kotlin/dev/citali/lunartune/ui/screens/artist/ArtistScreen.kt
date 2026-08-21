@@ -284,20 +284,7 @@ fun ArtistScreen(
         menuState.show {
             ArtistOverflowMenu(
                 isBlocked = isArtistBlocked,
-                blockActionEnabled =
-                    blockState !is ArtistBlockState.Loading &&
-                        (
-                            artistPage
-                                ?.artist
-                                ?.title
-                                .orEmpty()
-                                .isNotBlank() ||
-                                libraryArtist
-                                    ?.artist
-                                    ?.name
-                                    .orEmpty()
-                                    .isNotBlank()
-                        ),
+                blockActionEnabled = true,
                 onAction = { action ->
                     viewModel.onAction(action)
                     menuState.dismiss()

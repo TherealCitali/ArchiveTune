@@ -109,7 +109,8 @@ data class LastFmServiceConfig(
             val endpointValid = provider != LastFmProvider.CUSTOM || normalizedCustomEndpoint != null
             val apiKey =
                 when (provider) {
-                    LastFmProvider.LASTFM -> defaultApiKey
+                    LastFmProvider.LASTFM ->
+                        apiKeyOverride.ifBlank { defaultApiKey }
 
                     LastFmProvider.LIBREFM,
                     LastFmProvider.CUSTOM,
@@ -117,7 +118,8 @@ data class LastFmServiceConfig(
                 }
             val secret =
                 when (provider) {
-                    LastFmProvider.LASTFM -> defaultSecret
+                    LastFmProvider.LASTFM ->
+                        secretOverride.ifBlank { defaultSecret }
 
                     LastFmProvider.LIBREFM,
                     LastFmProvider.CUSTOM,

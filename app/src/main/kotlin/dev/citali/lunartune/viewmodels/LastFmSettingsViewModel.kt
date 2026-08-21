@@ -100,7 +100,7 @@ data class LastFmServiceEditorUiModel(
         get() = provider == LastFmProvider.CUSTOM
 
     val showApiCredentials: Boolean
-        get() = provider != LastFmProvider.LASTFM
+        get() = true
 }
 
 enum class LastFmTimingSetting {

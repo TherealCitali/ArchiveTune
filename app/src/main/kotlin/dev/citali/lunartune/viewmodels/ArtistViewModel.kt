@@ -205,8 +205,12 @@ class ArtistViewModel
 
             val pageArtist = artistPage?.artist
             val localArtist = libraryArtist.value?.artist
-            val artistName = pageArtist?.title ?: localArtist?.name ?: return
-            val currentlyBlocked = (blockState.value as? ArtistBlockState.Success)?.isBlocked == true
+            val artistName =
+                pageArtist?.title?.takeIf { it.isNotBlank() }
+                    ?: localArtist?.name?.takeIf { it.isNotBlank() }
+                    ?: artistId
+            val currentlyBlocked =
+                (blockState.value as? ArtistBlockState.Success)?.isBlocked == true
 
             blockJob =
                 viewModelScope.launch {
