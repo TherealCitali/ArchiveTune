@@ -93,6 +93,14 @@ class EqualizerRepository
                 it[EqualizerSelectedProfileIdKey] = MANUAL_PROFILE_ID
             }
 
+        suspend fun applyNamedBandPreset(
+            profileId: String,
+            levelsMb: List<Int>,
+        ) = edit {
+            it[EqualizerBandLevelsMbKey] = EqualizerJson.json.encodeToString(levelsMb)
+            it[EqualizerSelectedProfileIdKey] = profileId
+        }
+
         suspend fun setOutputGainEnabled(enabled: Boolean) = editManual { it[EqualizerOutputGainEnabledKey] = enabled }
 
         suspend fun setOutputGainMb(gainMb: Int) = editManual { it[EqualizerOutputGainMbKey] = gainMb.coerceIn(-1500, 1500) }

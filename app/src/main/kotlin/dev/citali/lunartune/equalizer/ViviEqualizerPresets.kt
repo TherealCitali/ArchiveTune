@@ -8,14 +8,15 @@
 package dev.citali.lunartune.equalizer
 
 /**
- * 10-band millibel curves from Vivi Music (vivizzz007/vivi-music).
+ * 10-band millibel curves inspired by Vivi Music Dolby / Dirac profiles.
+ * Centers: 31, 62, 125, 250, 500, 1k, 2k, 4k, 8k, 16k Hz.
  */
 object ViviEqualizerPresets {
     val chips: List<Pair<String, String>> =
         listOf(
             "dolby_open" to "Dolby Open",
             "dolby_rich" to "Dolby Rich",
-            "dolby_focused" to "Dolby Focused",
+            "dolby_focused" to "Dolby Focus",
             "dirac_music" to "Dirac Music",
             "dirac_movie" to "Dirac Movie",
             "dirac_game" to "Dirac Game",
@@ -23,12 +24,18 @@ object ViviEqualizerPresets {
 
     fun levelsMb(id: String): List<Int>? =
         when (id) {
-            "dolby_open" -> listOf(150, 180, 220, 180, 160, 210, 250, 280, 180, 80)
-            "dolby_rich" -> listOf(100, 160, 200, 220, 280, 260, 240, 200, 150, 50)
-            "dolby_focused" -> listOf(-300, -50, 130, 180, 220, 120, 140, 100, -50, -300)
-            "dirac_music" -> listOf(200, 140, 80, 0, 30, 80, 140, 200, 280, 350)
-            "dirac_movie" -> listOf(300, 250, 150, 0, 70, 120, 180, 250, 320, 400)
-            "dirac_game" -> listOf(150, 250, 200, 0, 80, 150, 300, 450, 400, 280)
+            // Wide, airy stage: lifted extremes, open top end.
+            "dolby_open" -> listOf(350, 280, 180, 80, 40, 120, 220, 360, 450, 380)
+            // Warm body: bass + low-mids, soft air.
+            "dolby_rich" -> listOf(480, 400, 280, 180, 220, 160, 80, 140, 220, 120)
+            // Vocal pocket: cut rumble/air, boost presence.
+            "dolby_focused" -> listOf(-450, -180, 80, 260, 380, 280, 220, 80, -120, -380)
+            // Music: gentle bass, rising detail toward treble.
+            "dirac_music" -> listOf(280, 180, 80, 0, 40, 120, 220, 340, 460, 520)
+            // Movie: LFE + dialogue shelf + surround highs.
+            "dirac_movie" -> listOf(520, 400, 220, 20, 140, 200, 280, 400, 520, 480)
+            // Game: punch + footsteps/cues in upper mids and highs.
+            "dirac_game" -> listOf(320, 420, 260, 20, 80, 180, 380, 560, 500, 340)
             else -> null
         }
 }
