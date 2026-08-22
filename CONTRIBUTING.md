@@ -94,7 +94,3 @@ Before initiating a Pull Request, every contributor must run the following quali
 > **Compose Compiler:** If the build fails due to a Compose version mismatch, verify that the `kotlinCompilerExtensionVersion` in the build script matches the current Kotlin version.
 
 ---
-
-<div align="center">
-<sub>LunarTune: Engineering audio freedom. Part of the <strong>Koiverse</strong> ecosystem.</sub>
-</div>
