@@ -667,6 +667,8 @@ private fun PresetSection(
                                     preset.name.isNullOrBlank() -> stringResource(R.string.eq_preset_number, index)
                                     else -> preset.name.orEmpty()
                                 },
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     },
                     colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer),

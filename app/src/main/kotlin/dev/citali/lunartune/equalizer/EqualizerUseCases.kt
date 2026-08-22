@@ -119,6 +119,11 @@ class UpdateEqualizerUseCase
 
         suspend fun updateBandLevels(levelsMb: List<Int>) = repository.updateBandLevels(levelsMb)
 
+        suspend fun applyNamedBandPreset(
+            profileId: String,
+            levelsMb: List<Int>,
+        ) = repository.applyNamedBandPreset(profileId, levelsMb)
+
         suspend fun setOutputGainEnabled(enabled: Boolean) = repository.setOutputGainEnabled(enabled)
 
         suspend fun setOutputGainMb(value: Int) = repository.setOutputGainMb(value)

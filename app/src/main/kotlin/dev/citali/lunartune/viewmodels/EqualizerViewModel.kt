@@ -249,7 +249,7 @@ class EqualizerViewModel
                 val curve = ViviEqualizerPresets.levelsMb(presetId.removePrefix("vivi:")) ?: return
                 val count = configuration?.capabilities?.bandCount ?: curve.size
                 launchUpdate {
-                    updateEqualizer.updateBandLevels(resampleLevels(curve, count))
+                    updateEqualizer.applyNamedBandPreset(presetId, resampleLevels(curve, count))
                 }
                 return
             }
