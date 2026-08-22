@@ -20,7 +20,7 @@ def escape_parentheses(text):
 def main():
     bot_token = os.environ['BOT_TOKEN']
     chat_id = os.environ['CHAT_ID']
-    topic_id = os.environ.get('TOPIC_ID')
+    topic_id = os.environ.get('TOPIC_ID') or os.environ.get('LOGS_TOPIC_ID')
 
     commit_author, commit_message, commit_hash, commit_hash_short = get_git_commit_info()
 

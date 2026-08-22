@@ -107,7 +107,7 @@ async def send_files(file_paths):
     print(f"Sending {len(existing_files)} files to the Telegram group")
     device_names = sorted({extract_device_name(path) for path in existing_files})
     abi_names = sorted({extract_abi_name(path) for path in existing_files})
-    topic_id = os.getenv("TOPIC_ID")
+    topic_id = os.getenv("TOPIC_ID") or os.getenv("ARTIFACTS_TOPIC_ID")
 
     message = (
         f"**Commit by:** {commit_author}\n"

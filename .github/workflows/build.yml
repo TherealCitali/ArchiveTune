@@ -39,7 +39,7 @@ jobs:
         env:
           BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          TOPIC_ID: ${{ secrets.TELEGRAM_TOPIC_ID }}
+          TOPIC_ID: ${{ secrets.TELEGRAM_TOPIC_LOGS || secrets.TELEGRAM_TOPIC_ID }}
         run: |
           python ./.github/workflows/notify_telegram.py
         continue-on-error: true
@@ -251,6 +251,7 @@ jobs:
     name: Send APKs to Telegram
     runs-on: ubuntu-latest
     needs: build
+    if: success()
     steps:
       - uses: actions/checkout@v7
         with:
@@ -294,6 +295,48 @@ jobs:
           APK_PATH: app/build/outputs/apk/download/*.apk
         run: |
           python ./.github/workflows/deploy_artifacts.py
+        continue-on-error: true
+
+  notifyTelegramLogs:
+    name: Send GitHub logs to Telegram
+    runs-on: ubuntu-latest
+    needs: [build, aggregateAndSend]
+    if: always() && github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]'
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python 3
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+
+      - name: Install Dependencies
+        run: pip install requests
+
+      - name: Download this run log
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run view "${{ github.run_id }}" --log > /tmp/actions-run.log || true
+          if [ ! -s /tmp/actions-run.log ]; then
+            echo "No job log available yet. Open ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" > /tmp/actions-run.log
+          fi
+
+      - name: Send status and log to GitHub Logs topic
+        env:
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TOPIC_ID: ${{ secrets.TELEGRAM_TOPIC_LOGS || secrets.TELEGRAM_TOPIC_ID }}
+          BUILD_CONCLUSION: ${{ needs.build.result }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          RUN_ID: ${{ github.run_id }}
+          COMMIT_SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
+          BRANCH: ${{ github.ref_name }}
+          JOB_SUMMARY: "build=${{ needs.build.result }} telegram=${{ needs.aggregateAndSend.result }}"
+          LOG_FILE: /tmp/actions-run.log
+        run: python ./.github/workflows/notify_build_status.py
         continue-on-error: true
 
   build_debug:
