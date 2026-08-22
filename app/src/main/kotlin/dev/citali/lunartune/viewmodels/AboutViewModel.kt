@@ -265,7 +265,7 @@ class AboutViewModel
         private var activeDialog = AboutDialog.NONE
 
         init {
-            loadContributors()
+            updateState()
         }
 
         fun retryContributors() {
