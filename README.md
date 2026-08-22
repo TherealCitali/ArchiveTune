@@ -185,11 +185,6 @@ Join Our Telegram Channels or Discord Servers for Support and Discussion.
 
 ---
 
-### ✨ Project Contributors
-<a href="https://github.com/cognitiveshadows03/LunarTune/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=cognitiveshadows03/LunarTune&columns=6" />
-</a>
-
 ### 🛠️ Development & Engineering
 Interested in building the project or contributing? LunarTune is built on a high-performance Kotlin stack.
 <a href="CONTRIBUTING.md"><b>Read the Build & Contribution Guide →</b></a>
