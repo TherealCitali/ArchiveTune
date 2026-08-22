@@ -733,11 +733,11 @@
     <string name="about_license">LICENSE</string>
     <string name="about_license_unknown">Unknown license</string>
     <string name="about_position_lead_dev">Lead developer of LunarTune</string>
-    <string name="about_position_original">Original ArchiveTune by rukamori</string>
+    <string name="about_position_original">Base framework</string>
     <string name="about_position_bot_contributor">Contributor</string>
     <string name="about_position_developers">Developer | Team</string>
     <string name="about_position_yuki">dummy reze | Admin</string>
-    <string name="about_position_mo_agamy">Playback client</string>
+    <string name="about_position_mo_agamy">Playback client fallback</string>
     <string name="about_position_vivi">Dolby and Dirac equalizer presets</string>
     <string name="about_position_zion_huang">Creator of InnerTune · Foundation for Metrolist, LunarTune, and other forks</string>
     <string name="about_content_desc_github">GitHub</string>
