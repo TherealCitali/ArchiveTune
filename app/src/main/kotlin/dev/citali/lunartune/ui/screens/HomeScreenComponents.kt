@@ -307,7 +307,7 @@ fun QuickPicksSection(
                         modifier =
                             Modifier
                                 .fillMaxSize()
-                                .clip(MaterialTheme.shapes.extraLarge)
+                                .maskClip(MaterialTheme.shapes.extraLarge)
                                 .border(
                                     BorderStroke(
                                         1.dp,
