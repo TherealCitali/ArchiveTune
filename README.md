@@ -160,24 +160,6 @@
 
 ---
 
-## 📥 Download Now
-
-<div align="center">
-
-<h2>Stable Release</h2>
-
-<table>
-  <thead>
-    <tr>
-      <td align="center" colspan="2">
-        <a href="https://github.com/cognitiveshadows03/LunarTune/releases/latest">
-          <img src="https://raw.githubusercontent.com/cognitiveshadows03/LunarTune/refs/heads/main/assets/badge_github.png" height="50" alt="Get LunarTune on GitHub">
-        </a>
-      </td>
-    </tr>
-> [!WARNING]  
-> **Notes:** The trusted download source is listed above; we are not responsible for any risks you may encounter from downloading from other sources.
-
 ## ❓ Need Help or Have Questions?
 Join Our Telegram Channels or Discord Servers for Support and Discussion.
 
