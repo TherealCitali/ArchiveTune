@@ -2056,27 +2056,7 @@ private fun V8PlayerBackdrop(
     ) {
         if (currentUrl != null) {
             val backdropHasBlur = backdropBlurAmount > 0
-            if (backdropHasBlur && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                AsyncImage(
-                    model = backdropRequest,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .then(if (blurRadiusDp > 0.dp) Modifier.blur(blurRadiusDp) else Modifier)
-                            .graphicsLayer {
-                                scaleX = 1.16f
-                                scaleY = 1.16f
-                                alpha = 0.66f
-                            },
-                    onState = { state ->
-                        if (state is coil3.compose.AsyncImagePainter.State.Error) {
-                            getNextFallbackUrl(currentUrl)?.let { currentUrl = it }
-                        }
-                    },
-                )
-            } else if (backdropHasBlur) {
+            if (backdropHasBlur) {
                 BackdropBlurApi30(
                     model = currentUrl,
                     blurAmount = backdropBlurAmount,
@@ -2333,10 +2313,9 @@ private fun V7PlayerBackdrop(
                     arrayOf(
                         0f to Color.Transparent,
                         V7SharpStageBottomScrimStartFraction to Color.Transparent,
-                        0.60f to blendColor.copy(alpha = 0.18f),
-                        0.76f to blendColor.copy(alpha = 0.52f),
-                        0.88f to blendColor.copy(alpha = 0.82f),
-                        1f to blendColor,
+                        0.68f to blendColor.copy(alpha = 0.10f),
+                        0.84f to blendColor.copy(alpha = 0.28f),
+                        1f to blendColor.copy(alpha = 0.40f),
                     ),
             )
         }
@@ -2345,9 +2324,10 @@ private fun V7PlayerBackdrop(
             Brush.verticalGradient(
                 colorStops =
                     arrayOf(
-                        0f to backdropPalette.bottom,
-                        V7BackdropFloorBlackStartFraction to backdropPalette.bottom,
-                        1f to backdropPalette.bottom,
+                        0f to backdropPalette.bottom.copy(alpha = 0.12f),
+                        0.55f to backdropPalette.bottom.copy(alpha = 0.28f),
+                        V7BackdropFloorBlackStartFraction to backdropPalette.bottom.copy(alpha = 0.42f),
+                        1f to backdropPalette.bottom.copy(alpha = 0.55f),
                     ),
             )
         }
@@ -2397,19 +2377,7 @@ private fun V7PlayerBackdrop(
                     .background(backdropPalette.bottom),
         ) {
             if (backdropArtworkModel != null) {
-                if (needsBlur && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    AsyncImage(
-                        model = backdropArtworkRequest,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = backdropImageModifier.blur(backdropBlurRadius),
-                        onState = { state ->
-                            if (state is coil3.compose.AsyncImagePainter.State.Error) {
-                                getNextFallbackUrl(backdropArtworkModel)?.let { backdropArtworkModel = it }
-                            }
-                        },
-                    )
-                } else if (needsBlur) {
+                if (needsBlur) {
                     BackdropBlurApi30(
                         model = backdropArtworkModel,
                         blurAmount = backdropBlurAmount,
