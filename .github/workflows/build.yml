@@ -291,7 +291,7 @@ jobs:
           API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
           BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          TOPIC_ID: ${{ secrets.TELEGRAM_TOPIC_ID }}
+          TOPIC_ID: ${{ secrets.TELEGRAM_TOPIC_ARTIFACTS || secrets.TELEGRAM_TOPIC_ID }}
           APK_PATH: app/build/outputs/apk/download/*.apk
         run: |
           python ./.github/workflows/deploy_artifacts.py
