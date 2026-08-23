@@ -2060,14 +2060,14 @@ private fun V8PlayerBackdrop(
             if (backdropHasBlur) {
                 BackdropBlurApi30(
                     model = currentUrl,
-                    blurAmount = backdropBlurAmount,
+                    blurAmount = maxOf(backdropBlurAmount, 70),
                     modifier =
                         Modifier
                             .fillMaxSize()
                             .graphicsLayer {
-                                scaleX = 1.16f
-                                scaleY = 1.16f
-                                alpha = 0.66f
+                                scaleX = 1.2f
+                                scaleY = 1.2f
+                                compositingStrategy = CompositingStrategy.Offscreen
                             },
                     onError = { failedUrl ->
                         getNextFallbackUrl(failedUrl)?.let { currentUrl = it }
