@@ -879,7 +879,7 @@ fun AppearanceSettings(navController: NavController) {
                     EnumListPreference(
                         title = { Text(stringResource(R.string.player_buttons_style)) },
                         description =
-                            if (isPlayerStyleCustomizationEnabled) {
+                            if (isPlayerControlsCustomizationEnabled) {
                                 null
                             } else {
                                 stringResource(R.string.player_background_style_v8_v9_desc)
@@ -887,7 +887,7 @@ fun AppearanceSettings(navController: NavController) {
                         icon = { Icon(painterResource(R.drawable.palette), null) },
                         selectedValue = playerButtonsStyle,
                         onValueSelected = onPlayerButtonsStyleChange,
-                        isEnabled = isPlayerStyleCustomizationEnabled,
+                        isEnabled = isPlayerControlsCustomizationEnabled,
                         valueText = {
                             when (it) {
                                 PlayerButtonsStyle.DEFAULT -> stringResource(R.string.default_style)
