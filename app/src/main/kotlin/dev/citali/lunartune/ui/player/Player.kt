@@ -2888,27 +2888,3 @@ private fun Modifier.littlePlayerOverlayGestures(
             }
         }
     }
-           }
-                                onSkipPrevious()
-                            }
-                        } else {
-                            if (canSkipNext) {
-                                if (enableHapticFeedback) {
-                                    view.performHapticFeedback(
-                                        android.view.HapticFeedbackConstants.CONTEXT_CLICK,
-                                        android.view.HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
-                                    )
-                                }
-                                onSkipNext()
-                            }
-                        }
-                        lastTapUptimeMs = 0L
-                        lastTapPosition = null
-                    } else {
-                        lastTapUptimeMs = now
-                        lastTapPosition = upPosition
-                    }
-                }
-            }
-        }
-    }
