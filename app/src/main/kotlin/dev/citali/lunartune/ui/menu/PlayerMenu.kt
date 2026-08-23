@@ -482,7 +482,9 @@ fun PlayerMenu(
                                                 when (
                                                     playerConnection.refetchCanvasArtwork(
                                                         metadata = mediaMetadata,
-                                                        requireVertical = playerDesignStyle == PlayerDesignStyle.V7,
+                                                        requireVertical =
+                                                            playerDesignStyle == PlayerDesignStyle.V7 ||
+                                                                playerDesignStyle == PlayerDesignStyle.V7_LEGACY,
                                                     )
                                                 ) {
                                                     CanvasArtworkRefetchResult.Success -> onDismiss()
