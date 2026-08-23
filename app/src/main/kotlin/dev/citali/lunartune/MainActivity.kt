@@ -1157,7 +1157,13 @@ class MainActivity : ComponentActivity() {
 
                     val shouldHideStatusBars =
                         isYearInMusicScreen ||
-                            (playerBottomSheetState.isExpandedOrExpanding && playerDesignStyle == PlayerDesignStyle.V7)
+                            (
+                                playerBottomSheetState.isExpandedOrExpanding &&
+                                    (
+                                        playerDesignStyle == PlayerDesignStyle.V7 ||
+                                            playerDesignStyle == PlayerDesignStyle.V7_LEGACY
+                                    )
+                            )
 
                     LaunchedEffect(shouldHideStatusBars, aodModeEnabled) {
                         if (aodModeEnabled) return@LaunchedEffect
