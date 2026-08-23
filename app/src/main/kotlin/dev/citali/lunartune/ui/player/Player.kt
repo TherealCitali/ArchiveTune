@@ -94,11 +94,14 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
@@ -213,6 +216,7 @@ import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 private const val SeekbarSettleToleranceMs = 1_500L
+private const val V7LegacyBlurHeightFraction = 0.54f
 private const val V7BackdropMinArtworkSizePx = 1_024
 private const val V7BackdropMaxArtworkSizePx = 2_048
 private const val V7BackdropBlurDp = 44
@@ -647,7 +651,7 @@ fun BottomSheetPlayer(
     val TextBackgroundColor =
         if (playerDesignStyle == PlayerDesignStyle.V9) {
             dynamicTextColor
-        } else if (playerDesignStyle == PlayerDesignStyle.V7 || playerDesignStyle == PlayerDesignStyle.V8) {
+        } else if (playerDesignStyle == PlayerDesignStyle.V7 || playerDesignStyle == PlayerDesignStyle.V7_LEGACY || playerDesignStyle == PlayerDesignStyle.V8) {
             Color.White
         } else {
             when (playerBackground) {
@@ -665,7 +669,7 @@ fun BottomSheetPlayer(
     val icBackgroundColor =
         if (playerDesignStyle == PlayerDesignStyle.V9) {
             dynamicBgColor
-        } else if (playerDesignStyle == PlayerDesignStyle.V7 || playerDesignStyle == PlayerDesignStyle.V8) {
+        } else if (playerDesignStyle == PlayerDesignStyle.V7 || playerDesignStyle == PlayerDesignStyle.V7_LEGACY || playerDesignStyle == PlayerDesignStyle.V8) {
             Color.Black
         } else {
             when (playerBackground) {
@@ -697,7 +701,7 @@ fun BottomSheetPlayer(
                 }
             }
         }.let { (tb, ib) ->
-            if (playerDesignStyle == PlayerDesignStyle.V7 || playerDesignStyle == PlayerDesignStyle.V8) {
+            if (playerDesignStyle == PlayerDesignStyle.V7 || playerDesignStyle == PlayerDesignStyle.V7_LEGACY || playerDesignStyle == PlayerDesignStyle.V8) {
                 Pair(Color.White, Color.Black)
             } else if (playerDesignStyle == PlayerDesignStyle.V9) {
                 Pair(dynamicAccentColor, dynamicIconButtonColor)
@@ -1025,7 +1029,7 @@ fun BottomSheetPlayer(
                         0f
                     }
                 dynamicBgColor.copy(alpha = 1f - fadeProgress)
-            } else if (playerDesignStyle == PlayerDesignStyle.V7 || playerDesignStyle == PlayerDesignStyle.V8) {
+            } else if (playerDesignStyle == PlayerDesignStyle.V7 || playerDesignStyle == PlayerDesignStyle.V7_LEGACY || playerDesignStyle == PlayerDesignStyle.V8) {
                 val progress =
                     ((state.value - state.collapsedBound) / (state.expandedBound - state.collapsedBound))
                         .coerceIn(0f, 1f)
@@ -1157,7 +1161,7 @@ fun BottomSheetPlayer(
             }
         val shouldUseV7Canvas =
             archiveTuneCanvasEnabled &&
-                playerDesignStyle == PlayerDesignStyle.V7 &&
+                 (playerDesignStyle == PlayerDesignStyle.V7 || playerDesignStyle == PlayerDesignStyle.V7_LEGACY) &&
                 !aodModeEnabled
         val shouldUseArtworkCanvas =
             archiveTuneCanvasEnabled &&
@@ -1295,7 +1299,7 @@ fun BottomSheetPlayer(
                 context = context,
                 onSliderValueChange = onSliderValueChange,
                 onSliderValueChangeFinished = onSliderValueChangeFinished,
-                currentFormat = if (playerDesignStyle == PlayerDesignStyle.V7) currentFormat else null,
+                currentFormat = if (playerDesignStyle == PlayerDesignStyle.V7 || playerDesignStyle == PlayerDesignStyle.V7_LEGACY) currentFormat else null,
             )
         }
 
@@ -1303,6 +1307,7 @@ fun BottomSheetPlayer(
             !aodModeEnabled &&
             playerDesignStyle != PlayerDesignStyle.V5 &&
             playerDesignStyle != PlayerDesignStyle.V7 &&
+            playerDesignStyle != PlayerDesignStyle.V7_LEGACY &&
             playerDesignStyle != PlayerDesignStyle.V8 &&
             playerDesignStyle != PlayerDesignStyle.V9
         ) {
@@ -1399,6 +1404,68 @@ fun BottomSheetPlayer(
                                     },
                                 )
                             }
+                        }
+                    }
+                } else if (playerDesignStyle == PlayerDesignStyle.V7_LEGACY) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        val swap =
+                            rememberThumbnailSwapState(
+                                videoId = mediaMetadata?.id,
+                                ytmUrl = mediaMetadata?.thumbnailUrl,
+                                lowDataMode = lowDataModeActive,
+                                isMusicVideo = mediaMetadata?.isMusicVideo ?: false,
+                            )
+                        LegacyImmersiveBackdrop(
+                            thumbnailUrl = swap.displayUrl,
+                            canvasPrimaryUrl = v7CanvasArtwork?.animatedVertical,
+                            canvasFallbackUrl = v7CanvasArtwork?.videoUrlVertical,
+                            isPlaying = isPlaying,
+                            disableBlur = disableBlur,
+                            label = "legacyV7Landscape",
+                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier =
+                                Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(bottom = queueSheetState.collapsedBound)
+                                    .windowInsetsPadding(
+                                        WindowInsets.systemBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom),
+                                    )
+                                    .nestedScroll(state.preUpPostDownNestedScrollConnection),
+                        ) {
+                            enrichedMetadata?.let { controlsContent(it) }
+                            Spacer(Modifier.height(16.dp))
+                        }
+                    }
+                } else if (playerDesignStyle == PlayerDesignStyle.V7_LEGACY) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        val swap =
+                            rememberThumbnailSwapState(
+                                videoId = mediaMetadata?.id,
+                                ytmUrl = mediaMetadata?.thumbnailUrl,
+                                lowDataMode = lowDataModeActive,
+                                isMusicVideo = mediaMetadata?.isMusicVideo ?: false,
+                            )
+                        LegacyImmersiveBackdrop(
+                            thumbnailUrl = swap.displayUrl,
+                            canvasPrimaryUrl = v7CanvasArtwork?.animatedVertical,
+                            canvasFallbackUrl = v7CanvasArtwork?.videoUrlVertical,
+                            isPlaying = isPlaying,
+                            disableBlur = disableBlur,
+                            label = "legacyV7Portrait",
+                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier =
+                                Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(bottom = queueSheetState.collapsedBound)
+                                    .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
+                                    .nestedScroll(state.preUpPostDownNestedScrollConnection),
+                        ) {
+                            enrichedMetadata?.let { controlsContent(it) }
+                            Spacer(Modifier.height(24.dp))
                         }
                     }
                 } else if (playerDesignStyle == PlayerDesignStyle.V7) {
@@ -2026,6 +2093,183 @@ private fun MikoLyricsTransition(
                 )
             }
         }
+    }
+}
+
+
+@Composable
+private fun LegacyImmersiveBackdrop(
+    thumbnailUrl: String?,
+    canvasPrimaryUrl: String?,
+    canvasFallbackUrl: String?,
+    isPlaying: Boolean,
+    disableBlur: Boolean,
+    label: String,
+    modifier: Modifier = Modifier,
+) {
+    val configuration = LocalConfiguration.current
+    val context = LocalContext.current
+    val density = LocalDensity.current
+    val imageLoader = context.imageLoader
+    val blurMaskStart = (1f - V7LegacyBlurHeightFraction).coerceIn(0f, 0.85f)
+    val blurMaskMid = (blurMaskStart + 0.12f).coerceIn(blurMaskStart, 0.95f)
+    val blurMaskSolid = (blurMaskStart + 0.22f).coerceIn(blurMaskMid, 1f)
+    val baseArtworkScale = if (disableBlur) 1.03f else 1.06f
+    val baseArtworkAlpha = if (disableBlur) 0.72f else 0.82f
+    val surfaceTint = MaterialTheme.colorScheme.surface
+    val artworkSizePx =
+        remember(configuration.screenWidthDp, configuration.screenHeightDp, density.density) {
+            with(density) {
+                (maxOf(configuration.screenWidthDp, configuration.screenHeightDp).dp.toPx() * 1.15f)
+                    .roundToInt()
+                    .coerceIn(V7BackdropMinArtworkSizePx, V7BackdropMaxArtworkSizePx)
+            }
+        }
+    val canvasPrimary = canvasPrimaryUrl?.takeIf { it.isNotBlank() }
+    val canvasFallback = canvasFallbackUrl?.takeIf { it.isNotBlank() }
+    val cover = thumbnailUrl?.takeIf { it.isNotBlank() }
+    val hasCanvas = canvasPrimary != null || canvasFallback != null
+    var artworkModel by remember(cover, artworkSizePx) {
+        mutableStateOf(
+            cover?.resize(
+                width = artworkSizePx,
+                height = artworkSizePx,
+                maxresAllowed = true,
+                ytimgResizePolicy = YtimgResizePolicy.AllowAnyAspect,
+            ),
+        )
+    }
+    val artworkRequest = rememberOfflineArtworkImageRequest(artworkModel)
+    val frosted by produceState<Bitmap?>(null, artworkModel, disableBlur) {
+        val model = artworkModel
+        if (disableBlur || model.isNullOrBlank()) {
+            value = null
+            return@produceState
+        }
+        value =
+            withContext(Dispatchers.IO) {
+                try {
+                    val request =
+                        ImageRequest.Builder(context)
+                            .data(model)
+                            .allowHardware(false)
+                            .memoryCacheKey("$model#legacy-v7")
+                            .size(500)
+                            .build()
+                    val result = imageLoader.execute(request)
+                    if (result is SuccessResult) {
+                        ImageBlurUtils.blur(result.image.toBitmap().copy(Bitmap.Config.ARGB_8888, true), 25f)
+                    } else {
+                        null
+                    }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    null
+                }
+            }
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        AnimatedContent(
+            targetState = artworkModel to hasCanvas,
+            transitionSpec = { fadeIn(tween(900)) togetherWith fadeOut(tween(900)) },
+            label = label,
+        ) { (model, canvas) ->
+            Box(Modifier.fillMaxSize()) {
+                if (model != null) {
+                    AsyncImage(
+                        model = artworkRequest,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .graphicsLayer {
+                                    scaleX = baseArtworkScale
+                                    scaleY = baseArtworkScale
+                                    alpha = baseArtworkAlpha
+                                },
+                        onState = { state ->
+                            if (state is coil3.compose.AsyncImagePainter.State.Error) {
+                                getNextFallbackUrl(artworkModel)?.let { artworkModel = it }
+                            }
+                        },
+                    )
+                    val frost = frosted
+                    if (!disableBlur && frost != null) {
+                        Image(
+                            painter = BitmapPainter(frost.asImageBitmap()),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                                    .drawWithCache {
+                                        val blurMask =
+                                            Brush.verticalGradient(
+                                                colorStops =
+                                                    arrayOf(
+                                                        0f to Color.Transparent,
+                                                        blurMaskStart to Color.Transparent,
+                                                        blurMaskMid to Color.Black.copy(alpha = 0.6f),
+                                                        blurMaskSolid to Color.Black,
+                                                        1f to Color.Black,
+                                                    ),
+                                            )
+                                        onDrawWithContent {
+                                            drawContent()
+                                            drawRect(brush = blurMask, blendMode = BlendMode.DstIn)
+                                        }
+                                    },
+                        )
+                    }
+                }
+                if (canvas) {
+                    CanvasArtworkPlayer(
+                        primaryUrl = canvasPrimary,
+                        fallbackUrl = canvasFallback,
+                        isPlaying = isPlaying,
+                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else if (model == null) {
+                    Box(Modifier.fillMaxSize().background(Color.Black))
+                }
+            }
+        }
+        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.08f)))
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colorStops =
+                            arrayOf(
+                                0f to Color.Black.copy(alpha = 0.18f),
+                                0.34f to Color.Transparent,
+                                0.64f to Color.Black.copy(alpha = 0.22f),
+                                1f to Color.Black.copy(alpha = 0.82f),
+                            ),
+                    ),
+                ),
+        )
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colorStops =
+                            arrayOf(
+                                0f to Color.Transparent,
+                                0.56f to Color.Transparent,
+                                0.8f to surfaceTint.copy(alpha = 0.16f),
+                                1f to surfaceTint.copy(alpha = 0.3f),
+                            ),
+                    ),
+                ),
+        )
     }
 }
 
