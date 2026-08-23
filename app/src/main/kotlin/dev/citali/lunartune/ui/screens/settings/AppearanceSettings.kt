@@ -364,7 +364,7 @@ fun AppearanceSettings(navController: NavController) {
             )
         }
     val lyricsBackground = configuredLyricsBackground.resolveFor(playerBackground)
-    val isPlayerStyleCustomizationEnabled =
+    val isPlayerBackgroundCustomizationEnabled =
         when (playerDesignStyle) {
             PlayerDesignStyle.V7,
             PlayerDesignStyle.V7_LEGACY,
@@ -374,6 +374,9 @@ fun AppearanceSettings(navController: NavController) {
 
             else -> true
         }
+    // ArchiveTune 13.4.0 Immersive kept button colors + slider style available.
+    val isPlayerControlsCustomizationEnabled =
+        playerDesignStyle == PlayerDesignStyle.V7_LEGACY || isPlayerBackgroundCustomizationEnabled
     val isVolumeBarSupported =
         playerDesignStyle == PlayerDesignStyle.V7 ||
             playerDesignStyle == PlayerDesignStyle.V8
@@ -409,19 +412,19 @@ fun AppearanceSettings(navController: NavController) {
         mutableStateOf(false)
     }
 
-    LaunchedEffect(isPlayerStyleCustomizationEnabled, playerBackground) {
-        if (!isPlayerStyleCustomizationEnabled && playerBackground != PlayerBackgroundStyle.DEFAULT) {
+    LaunchedEffect(isPlayerBackgroundCustomizationEnabled, playerBackground) {
+        if (!isPlayerBackgroundCustomizationEnabled && playerBackground != PlayerBackgroundStyle.DEFAULT) {
             onPlayerBackgroundChange(PlayerBackgroundStyle.DEFAULT)
         }
     }
 
-    LaunchedEffect(isPlayerStyleCustomizationEnabled) {
-        if (!isPlayerStyleCustomizationEnabled) {
+    LaunchedEffect(isPlayerControlsCustomizationEnabled) {
+        if (!isPlayerControlsCustomizationEnabled) {
             showSliderOptionDialog = false
         }
     }
 
-    if (showSliderOptionDialog && isPlayerStyleCustomizationEnabled) {
+    if (showSliderOptionDialog && isPlayerControlsCustomizationEnabled) {
         val sliderStyles =
             remember {
                 listOf(
@@ -749,7 +752,7 @@ fun AppearanceSettings(navController: NavController) {
                     EnumListPreference(
                         title = { Text(stringResource(R.string.player_background_style)) },
                         description =
-                            if (isPlayerStyleCustomizationEnabled) {
+                            if (isPlayerBackgroundCustomizationEnabled) {
                                 null
                             } else {
                                 stringResource(R.string.player_background_style_v8_v9_desc)
@@ -768,7 +771,7 @@ fun AppearanceSettings(navController: NavController) {
                                 }
                             }
                         },
-                        isEnabled = isPlayerStyleCustomizationEnabled,
+                        isEnabled = isPlayerBackgroundCustomizationEnabled,
                         valueText = {
                             when (it) {
                                 PlayerBackgroundStyle.DEFAULT -> stringResource(R.string.follow_theme)
@@ -902,7 +905,7 @@ fun AppearanceSettings(navController: NavController) {
                         onClick = {
                             showSliderOptionDialog = true
                         },
-                        isEnabled = isPlayerStyleCustomizationEnabled,
+                        isEnabled = isPlayerControlsCustomizationEnabled,
                     )
                 }
 
