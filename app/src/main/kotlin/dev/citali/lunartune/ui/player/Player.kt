@@ -147,6 +147,7 @@ import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import coil3.request.allowHardware
+import coil3.size.Size as CoilSize
 import coil3.toBitmap
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -1161,7 +1162,7 @@ fun BottomSheetPlayer(
                 !aodModeEnabled
         val shouldUseArtworkCanvas =
             archiveTuneCanvasEnabled &&
-                (playerDesignStyle == PlayerDesignStyle.V8 || playerDesignStyle == PlayerDesignStyle.V9) &&
+                (playerDesignStyle == PlayerDesignStyle.V8 PlayerDesignStyle.V8 || playerDesignStyle == PlayerDesignStyle.V9) &&
                 !aodModeEnabled
         val shouldFetchV7Canvas = shouldUseV7Canvas && !lowDataModeActive
         val shouldFetchArtworkCanvas = shouldUseArtworkCanvas && !lowDataModeActive
@@ -2197,7 +2198,7 @@ private fun V7PlayerBackdrop(
     val configuration = LocalConfiguration.current
     val context = LocalContext.current
     val density = LocalDensity.current
-    val fallbackColor = Color.Black.toArgb()
+    val imageLoader = context.imageLoader
     val backdropArtworkSizePx =
         remember(
             configuration.screenWidthDp,
@@ -2218,73 +2219,10 @@ private fun V7PlayerBackdrop(
     val canvasStatic = canvasStaticUrl?.takeIf { it.isNotBlank() }
     val coverArtworkUrl = thumbnailUrl?.takeIf { it.isNotBlank() }
     val hasCanvas = !canvasPrimary.isNullOrBlank() || !canvasFallback.isNullOrBlank()
-    // When canvas is available, prefer its static image as the sharp-stage placeholder.
-    // This prevents the jarring YTM thumbnail → canvas video flash on expand.
     val sharpArtworkUrl = if (hasCanvas) (canvasStatic ?: coverArtworkUrl) else (coverArtworkUrl ?: canvasStatic)
     val backdropArtworkUrl = coverArtworkUrl ?: canvasStatic
-    // For palette extraction, use canvas static when canvas is active so the scrim
-    // gradient is derived from the canvas colors rather than the YTM thumbnail.
-    val paletteSourceUrl = if (hasCanvas && canvasStatic != null) canvasStatic else backdropArtworkUrl
-    var backdropPalette by remember(paletteSourceUrl, fallbackColor) {
-        mutableStateOf(V7BackdropPalette.fromColors(emptyList(), fallbackColor))
-    }
-
-    LaunchedEffect(paletteSourceUrl, hasCanvas, fallbackColor) {
-        backdropPalette = V7BackdropPalette.fromColors(emptyList(), fallbackColor)
-        if (paletteSourceUrl == null) return@LaunchedEffect
-
-        val request =
-            ImageRequest
-                .Builder(context)
-                .data(paletteSourceUrl)
-                .memoryCacheKey(paletteSourceUrl)
-                .diskCacheKey(paletteSourceUrl)
-                .diskCachePolicy(CachePolicy.ENABLED)
-                .networkCachePolicy(CachePolicy.ENABLED)
-                .size(PlayerColorExtractor.Config.IMAGE_SIZE, PlayerColorExtractor.Config.IMAGE_SIZE)
-                .allowHardware(false)
-                .build()
-
-        val extractedColors =
-            try {
-                val image =
-                    withContext(Dispatchers.IO) {
-                        context.imageLoader.execute(request)
-                    }.image
-                if (image == null) {
-                    null
-                } else {
-                    withContext(Dispatchers.Default) {
-                        val fullBitmap = image.toBitmap()
-                        // When canvas is active, extract from the bottom 30% of the static frame.
-                        // This gives us the actual colors at the canvas bottom edge, so the scrim
-                        // gradient blends seamlessly into the backdrop below.
-                        val bitmapForPalette =
-                            if (hasCanvas && fullBitmap.height > 4) {
-                                val startY = (fullBitmap.height * 0.70f).toInt().coerceAtLeast(0)
-                                val cropHeight = (fullBitmap.height - startY).coerceAtLeast(1)
-                                android.graphics.Bitmap.createBitmap(fullBitmap, 0, startY, fullBitmap.width, cropHeight)
-                            } else {
-                                fullBitmap
-                            }
-                        val palette =
-                            Palette
-                                .from(bitmapForPalette)
-                                .maximumColorCount(PlayerColorExtractor.Config.MAX_COLOR_COUNT)
-                                .resizeBitmapArea(PlayerColorExtractor.Config.BITMAP_AREA)
-                                .generate()
-                        val dominantRgb = palette.dominantSwatch?.rgb ?: palette.getDominantColor(fallbackColor)
-                        listOf(Color(dominantRgb))
-                    }
-                }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (_: Exception) {
-                null
-            }
-
-        backdropPalette = V7BackdropPalette.fromColors(extractedColors.orEmpty(), fallbackColor)
-    }
+    val needsBlur = !disableBlur && backdropBlurAmount > 0
+    val blurRadiusDp = 72.dp * (backdropBlurAmount.toFloat() / 100f).coerceIn(0.35f, 1.2f)
 
     val backdropState =
         remember(sharpArtworkUrl, canvasPrimary, canvasFallback) {
@@ -2305,55 +2243,51 @@ private fun V7PlayerBackdrop(
         )
     }
     val backdropArtworkRequest = rememberOfflineArtworkImageRequest(backdropArtworkModel)
-    val sharpStageBottomScrim =
-        remember(backdropPalette) {
-            val blendColor = backdropPalette.bottom
-            Brush.verticalGradient(
-                colorStops =
-                    arrayOf(
-                        0f to Color.Transparent,
-                        V7SharpStageBottomScrimStartFraction to Color.Transparent,
-                        0.68f to blendColor.copy(alpha = 0.10f),
-                        0.84f to blendColor.copy(alpha = 0.28f),
-                        1f to blendColor.copy(alpha = 0.40f),
-                    ),
-            )
+
+    // 4nx3b Apple Music player: frost is the cover itself. Pre-blur the bitmap so
+    // the sheet animation cannot drop live Modifier.blur, and never wash it with
+    // a palette color.
+    val preBlurredBitmap by produceState<Bitmap?>(null, backdropArtworkModel, needsBlur, backdropBlurAmount) {
+        val model = backdropArtworkModel
+        if (!needsBlur || model.isNullOrBlank()) {
+            value = null
+            return@produceState
         }
-    val backdropFloor =
-        remember(backdropPalette) {
-            Brush.verticalGradient(
-                colorStops =
-                    arrayOf(
-                        0f to backdropPalette.bottom.copy(alpha = 0.12f),
-                        0.55f to backdropPalette.bottom.copy(alpha = 0.28f),
-                        V7BackdropFloorBlackStartFraction to backdropPalette.bottom.copy(alpha = 0.42f),
-                        1f to backdropPalette.bottom.copy(alpha = 0.55f),
-                    ),
-            )
-        }
-    val backdropBlurRadius = V7BackdropBlurDp.dp * (backdropBlurAmount.toFloat() / 100f)
-    val needsBlur = !disableBlur && backdropBlurAmount > 0
-    val backdropImageModifier =
-        remember(disableBlur, needsBlur) {
-            Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    scaleX = V7BackdropBlurScale
-                    scaleY = V7BackdropBlurScale
-                    alpha = if (disableBlur || !needsBlur) 0.20f else 0.58f
+        value =
+            withContext(Dispatchers.IO) {
+                try {
+                    val request =
+                        ImageRequest
+                            .Builder(context)
+                            .data(model)
+                            .allowHardware(false)
+                            .memoryCacheKey("$model#v7-frost")
+                            .diskCacheKey("$model#v7-frost")
+                            .diskCachePolicy(CachePolicy.ENABLED)
+                            .networkCachePolicy(CachePolicy.ENABLED)
+                            .size(CoilSize(720, 720))
+                            .build()
+                    val result = imageLoader.execute(request)
+                    if (result is SuccessResult) {
+                        val bitmap = result.image.toBitmap().copy(Bitmap.Config.ARGB_8888, true)
+                        val radius = (72f * density.density * (backdropBlurAmount / 100f)).coerceIn(8f, 48f)
+                        ImageBlurUtils.blur(bitmap, radius)
+                    } else {
+                        null
+                    }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    null
                 }
-        }
-    val canvasStageModifier =
-        remember {
-            Modifier
-                .fillMaxSize()
-        }
+            }
+    }
 
     BoxWithConstraints(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(backdropPalette.top),
+                .background(Color.Black),
     ) {
         val sharpStageFraction =
             if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -2362,10 +2296,9 @@ private fun V7PlayerBackdrop(
                 V7SharpStagePortraitFraction
             }
         val sharpStageHeight = maxHeight * sharpStageFraction
-        val sharpStageTopOffset = 0.dp
-        val sharpStageBottomOffset = sharpStageTopOffset + sharpStageHeight
-        val backdropTopOffset = (sharpStageBottomOffset - V7BackdropOverlapDp.dp).coerceAtLeast(0.dp)
+        val backdropTopOffset = (sharpStageHeight - V7BackdropOverlapDp.dp).coerceAtLeast(0.dp)
         val backdropHeight = maxHeight - backdropTopOffset
+        val loadedBlur = preBlurredBitmap
 
         Box(
             modifier =
@@ -2374,44 +2307,74 @@ private fun V7PlayerBackdrop(
                     .fillMaxWidth()
                     .height(backdropHeight)
                     .clipToBounds()
-                    .background(backdropPalette.bottom),
+                    .background(Color.Black),
         ) {
-            if (backdropArtworkModel != null) {
-                if (needsBlur) {
-                    BackdropBlurApi30(
-                        model = backdropArtworkModel,
-                        blurAmount = backdropBlurAmount,
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .graphicsLayer {
-                                    scaleX = V7BackdropBlurScale
-                                    scaleY = V7BackdropBlurScale
-                                    alpha = 0.58f
-                                },
-                        onError = { failedUrl ->
-                            getNextFallbackUrl(failedUrl)?.let { backdropArtworkModel = it }
-                        },
-                    )
-                } else {
-                    AsyncImage(
-                        model = backdropArtworkRequest,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = backdropImageModifier,
-                        onState = { state ->
-                            if (state is coil3.compose.AsyncImagePainter.State.Error) {
-                                getNextFallbackUrl(backdropArtworkModel)?.let { backdropArtworkModel = it }
-                            }
-                        },
-                    )
-                }
+            if (loadedBlur != null) {
+                Image(
+                    painter = BitmapPainter(loadedBlur.asImageBitmap()),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .graphicsLayer {
+                                scaleX = 1.2f
+                                scaleY = 1.2f
+                                compositingStrategy = CompositingStrategy.Offscreen
+                            },
+                )
+            } else if (backdropArtworkModel != null && needsBlur) {
+                AsyncImage(
+                    model = backdropArtworkRequest,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .blur(blurRadiusDp)
+                            .graphicsLayer {
+                                scaleX = 1.2f
+                                scaleY = 1.2f
+                                compositingStrategy = CompositingStrategy.Offscreen
+                            },
+                    onState = { state ->
+                        if (state is coil3.compose.AsyncImagePainter.State.Error) {
+                            getNextFallbackUrl(backdropArtworkModel)?.let { backdropArtworkModel = it }
+                        }
+                    },
+                )
+            } else if (backdropArtworkModel != null) {
+                AsyncImage(
+                    model = backdropArtworkRequest,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .graphicsLayer {
+                                scaleX = 1.2f
+                                scaleY = 1.2f
+                                alpha = 0.20f
+                            },
+                    onState = { state ->
+                        if (state is coil3.compose.AsyncImagePainter.State.Error) {
+                            getNextFallbackUrl(backdropArtworkModel)?.let { backdropArtworkModel = it }
+                        }
+                    },
+                )
             }
+            // 4nx3b Apple Music scrim: black only, so the frost color stays.
             Box(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .background(backdropFloor),
+                        .background(
+                            Brush.verticalGradient(
+                                0f to Color.Black.copy(alpha = 0.25f),
+                                0.5f to Color.Black.copy(alpha = 0.40f),
+                                1f to Color.Black.copy(alpha = 0.65f),
+                            ),
+                        ),
             )
         }
 
@@ -2424,7 +2387,6 @@ private fun V7PlayerBackdrop(
             modifier =
                 Modifier
                     .align(Alignment.TopCenter)
-                    .offset(y = sharpStageTopOffset)
                     .fillMaxWidth()
                     .height(sharpStageHeight)
                     .clipToBounds(),
@@ -2445,7 +2407,7 @@ private fun V7PlayerBackdrop(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .background(backdropPalette.top),
+                        .background(Color.Black),
                 contentAlignment = Alignment.Center,
             ) {
                 if (sharpArtworkModel != null) {
@@ -2468,7 +2430,7 @@ private fun V7PlayerBackdrop(
                         fallbackUrl = backdrop.canvasFallbackUrl,
                         isPlaying = isPlaying,
                         resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM,
-                        modifier = canvasStageModifier,
+                        modifier = Modifier.fillMaxSize(),
                     )
                 }
             }
@@ -2478,10 +2440,18 @@ private fun V7PlayerBackdrop(
             modifier =
                 Modifier
                     .align(Alignment.TopCenter)
-                    .offset(y = sharpStageTopOffset)
                     .fillMaxWidth()
                     .height(sharpStageHeight)
-                    .background(sharpStageBottomScrim),
+                    .background(
+                        Brush.verticalGradient(
+                            colorStops =
+                                arrayOf(
+                                    0f to Color.Transparent,
+                                    0.72f to Color.Transparent,
+                                    1f to Color.Black.copy(alpha = 0.28f),
+                                ),
+                        ),
+                    ),
         )
     }
 }
