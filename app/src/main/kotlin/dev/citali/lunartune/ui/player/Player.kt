@@ -1438,36 +1438,6 @@ fun BottomSheetPlayer(
                             Spacer(Modifier.height(16.dp))
                         }
                     }
-                } else if (playerDesignStyle == PlayerDesignStyle.V7_LEGACY) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        val swap =
-                            rememberThumbnailSwapState(
-                                videoId = mediaMetadata?.id,
-                                ytmUrl = mediaMetadata?.thumbnailUrl,
-                                lowDataMode = lowDataModeActive,
-                                isMusicVideo = mediaMetadata?.isMusicVideo ?: false,
-                            )
-                        LegacyImmersiveBackdrop(
-                            thumbnailUrl = swap.displayUrl,
-                            canvasPrimaryUrl = v7CanvasArtwork?.animatedVertical,
-                            canvasFallbackUrl = v7CanvasArtwork?.videoUrlVertical,
-                            isPlaying = isPlaying,
-                            disableBlur = disableBlur,
-                            label = "legacyV7Portrait",
-                        )
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier =
-                                Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(bottom = queueSheetState.collapsedBound)
-                                    .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
-                                    .nestedScroll(state.preUpPostDownNestedScrollConnection),
-                        ) {
-                            enrichedMetadata?.let { controlsContent(it) }
-                            Spacer(Modifier.height(24.dp))
-                        }
-                    }
                 } else if (playerDesignStyle == PlayerDesignStyle.V7) {
                     Box(
                         modifier =
@@ -1744,6 +1714,36 @@ fun BottomSheetPlayer(
                                     )
                                 }
                             }
+                        }
+                    }
+                } else if (playerDesignStyle == PlayerDesignStyle.V7_LEGACY) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        val swap =
+                            rememberThumbnailSwapState(
+                                videoId = mediaMetadata?.id,
+                                ytmUrl = mediaMetadata?.thumbnailUrl,
+                                lowDataMode = lowDataModeActive,
+                                isMusicVideo = mediaMetadata?.isMusicVideo ?: false,
+                            )
+                        LegacyImmersiveBackdrop(
+                            thumbnailUrl = swap.displayUrl,
+                            canvasPrimaryUrl = v7CanvasArtwork?.animatedVertical,
+                            canvasFallbackUrl = v7CanvasArtwork?.videoUrlVertical,
+                            isPlaying = isPlaying,
+                            disableBlur = disableBlur,
+                            label = "legacyV7Portrait",
+                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier =
+                                Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(bottom = queueSheetState.collapsedBound)
+                                    .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
+                                    .nestedScroll(state.preUpPostDownNestedScrollConnection),
+                        ) {
+                            enrichedMetadata?.let { controlsContent(it) }
+                            Spacer(Modifier.height(24.dp))
                         }
                     }
                 } else if (playerDesignStyle == PlayerDesignStyle.V7) {
