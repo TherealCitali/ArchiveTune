@@ -2239,22 +2239,6 @@ private fun LegacyImmersiveBackdrop(
                 }
             }
         }
-        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.08f)))
-        Box(
-            Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colorStops =
-                            arrayOf(
-                                0f to Color.Black.copy(alpha = 0.18f),
-                                0.34f to Color.Transparent,
-                                0.64f to Color.Black.copy(alpha = 0.22f),
-                                1f to Color.Black.copy(alpha = 0.82f),
-                            ),
-                    ),
-                ),
-        )
         Box(
             Modifier
                 .fillMaxSize()
@@ -2263,9 +2247,9 @@ private fun LegacyImmersiveBackdrop(
                         colorStops =
                             arrayOf(
                                 0f to Color.Transparent,
-                                0.56f to Color.Transparent,
-                                0.8f to surfaceTint.copy(alpha = 0.16f),
-                                1f to surfaceTint.copy(alpha = 0.3f),
+                                0.52f to Color.Transparent,
+                                0.72f to Color.Black.copy(alpha = 0.12f),
+                                1f to Color.Black.copy(alpha = 0.58f),
                             ),
                     ),
                 ),
