@@ -95,6 +95,7 @@ import dev.citali.lunartune.constants.ExternalDownloaderEnabledKey
 import dev.citali.lunartune.constants.ExternalDownloaderPackageKey
 import dev.citali.lunartune.constants.PlayerDesignStyle
 import dev.citali.lunartune.constants.PlayerDesignStyleKey
+import dev.citali.lunartune.constants.PlayerDesignStyleOverridesKey
 import dev.citali.lunartune.constants.SpeedDialSongIdsKey
 import dev.citali.lunartune.models.MediaMetadata
 import dev.citali.lunartune.playback.CanvasArtworkRefetchResult
@@ -110,11 +111,14 @@ import dev.citali.lunartune.utils.SpeedDialPin
 import dev.citali.lunartune.utils.SpeedDialPinType
 import dev.citali.lunartune.utils.isLocalMediaId
 import dev.citali.lunartune.utils.openExternalDownloader
+import dev.citali.lunartune.utils.parsePlayerDesignStyleOverrides
 import dev.citali.lunartune.utils.parseSpeedDialPins
 import dev.citali.lunartune.utils.rememberEnumPreference
 import dev.citali.lunartune.utils.rememberLowDataModeActive
 import dev.citali.lunartune.utils.rememberPreference
+import dev.citali.lunartune.utils.resolvePlayerDesignStyle
 import dev.citali.lunartune.utils.serializeSpeedDialPins
+import dev.citali.lunartune.utils.setPlayerDesignStyleOverride
 import dev.citali.lunartune.utils.shareLocalAudio
 import dev.citali.lunartune.utils.toggleSpeedDialPin
 import kotlin.math.abs
@@ -162,7 +166,17 @@ fun PlayerMenu(
     val (externalDownloaderEnabled) = rememberPreference(ExternalDownloaderEnabledKey, defaultValue = false)
     val (externalDownloaderPackage) = rememberPreference(ExternalDownloaderPackageKey, defaultValue = "")
     val (archiveTuneCanvasEnabled) = rememberPreference(LunarTuneCanvasKey, defaultValue = false)
-    val playerDesignStyle by rememberEnumPreference(PlayerDesignStyleKey, defaultValue = PlayerDesignStyle.V4)
+    val settingsPlayerDesignStyle by rememberEnumPreference(PlayerDesignStyleKey, defaultValue = PlayerDesignStyle.V4)
+    val (playerStyleOverrides, onPlayerStyleOverridesChange) =
+        rememberPreference(PlayerDesignStyleOverridesKey, "")
+    val songPlayerStyleOverride =
+        remember(playerStyleOverrides, mediaMetadata.id) {
+            parsePlayerDesignStyleOverrides(playerStyleOverrides)[mediaMetadata.id]
+        }
+    val playerDesignStyle =
+        remember(settingsPlayerDesignStyle, playerStyleOverrides, mediaMetadata.id) {
+            resolvePlayerDesignStyle(mediaMetadata.id, playerStyleOverrides, settingsPlayerDesignStyle)
+        }
     val lowDataModeActive = rememberLowDataModeActive()
     val isCanvasArtworkRefetching by playerConnection.isCanvasArtworkRefetching.collectAsStateWithLifecycle()
     val (speedDialSongIds, onSpeedDialSongIdsChange) = rememberPreference(SpeedDialSongIdsKey, "")
@@ -289,6 +303,67 @@ fun PlayerMenu(
                                     playerBottomSheetState.collapseSoft()
                                     onDismiss()
                                 }
+                            },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                )
+            }
+        }
+    }
+
+    var showPlayerStyleDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    if (showPlayerStyleDialog) {
+        ListDialog(
+            onDismiss = { showPlayerStyleDialog = false },
+        ) {
+            item {
+                ListItem(
+                    headlineContent = { Text(text = stringResource(R.string.player_style_use_default)) },
+                    supportingContent = {
+                        Text(
+                            text = playerDesignStyleLabel(settingsPlayerDesignStyle),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    },
+                    leadingContent = {
+                        Icon(
+                            painter = painterResource(R.drawable.settings),
+                            contentDescription = null,
+                        )
+                    },
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                onPlayerStyleOverridesChange(
+                                    setPlayerDesignStyleOverride(playerStyleOverrides, mediaMetadata.id, null),
+                                )
+                                showPlayerStyleDialog = false
+                            },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                )
+            }
+            items(PlayerDesignStyle.entries) { style ->
+                val selected = songPlayerStyleOverride == style
+                ListItem(
+                    headlineContent = { Text(text = playerDesignStyleLabel(style)) },
+                    leadingContent = {
+                        Icon(
+                            painter = painterResource(if (selected) R.drawable.done else R.drawable.style),
+                            contentDescription = null,
+                        )
+                    },
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                onPlayerStyleOverridesChange(
+                                    setPlayerDesignStyleOverride(playerStyleOverrides, mediaMetadata.id, style),
+                                )
+                                showPlayerStyleDialog = false
                             },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 )
@@ -636,6 +711,20 @@ fun PlayerMenu(
                                     ),
                                 )
                             }
+                            add(
+                                NewAction(
+                                    icon = {
+                                        Icon(
+                                            painter = painterResource(R.drawable.style),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(28.dp),
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    },
+                                    text = stringResource(R.string.player_style_for_song),
+                                    onClick = { showPlayerStyleDialog = true },
+                                ),
+                            )
                         },
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
                 )
@@ -1398,6 +1487,21 @@ fun TempoPitchDialog(onDismiss: () -> Unit) {
         },
     )
 }
+
+@Composable
+private fun playerDesignStyleLabel(style: PlayerDesignStyle): String =
+    when (style) {
+        PlayerDesignStyle.V1 -> stringResource(R.string.player_design_v1)
+        PlayerDesignStyle.V2 -> stringResource(R.string.player_design_v2)
+        PlayerDesignStyle.V3 -> stringResource(R.string.player_design_v3)
+        PlayerDesignStyle.V4 -> stringResource(R.string.player_design_v4)
+        PlayerDesignStyle.V5 -> stringResource(R.string.player_design_v5)
+        PlayerDesignStyle.V6 -> stringResource(R.string.player_design_v6)
+        PlayerDesignStyle.V7 -> stringResource(R.string.player_design_v7)
+        PlayerDesignStyle.V7_LEGACY -> stringResource(R.string.player_design_v7_legacy)
+        PlayerDesignStyle.V8 -> stringResource(R.string.player_design_v8)
+        PlayerDesignStyle.V9 -> stringResource(R.string.player_design_v9)
+    }
 
 private enum class PitchMode {
     Semitones,

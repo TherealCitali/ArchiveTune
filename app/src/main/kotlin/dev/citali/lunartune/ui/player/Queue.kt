@@ -105,6 +105,7 @@ import dev.citali.lunartune.constants.EnableHapticFeedbackKey
 import dev.citali.lunartune.constants.ListItemHeight
 import dev.citali.lunartune.constants.PlayerDesignStyle
 import dev.citali.lunartune.constants.PlayerDesignStyleKey
+import dev.citali.lunartune.constants.PlayerDesignStyleOverridesKey
 import dev.citali.lunartune.constants.QueueEditLockKey
 import dev.citali.lunartune.db.entities.PlaylistEntity
 import dev.citali.lunartune.db.entities.PlaylistSongMap
@@ -125,6 +126,7 @@ import dev.citali.lunartune.ui.utils.ShowMediaInfo
 import dev.citali.lunartune.utils.oem.SystemMediaControlResolver
 import dev.citali.lunartune.utils.rememberEnumPreference
 import dev.citali.lunartune.utils.rememberPreference
+import dev.citali.lunartune.utils.resolvePlayerDesignStyle
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import java.time.LocalDateTime
@@ -189,10 +191,15 @@ fun Queue(
             (togetherSessionState as dev.citali.lunartune.together.TogetherSessionState.Joined).role is dev.citali.lunartune.together.TogetherRole.Guest
     val effectiveLocked = locked || togetherForcesLock
 
-    val playerDesignStyle by rememberEnumPreference(
+    val settingsPlayerDesignStyle by rememberEnumPreference(
         key = PlayerDesignStyleKey,
         defaultValue = PlayerDesignStyle.V4,
     )
+    val (playerStyleOverrides) = rememberPreference(PlayerDesignStyleOverridesKey, "")
+    val playerDesignStyle =
+        remember(settingsPlayerDesignStyle, playerStyleOverrides, mediaMetadata?.id) {
+            resolvePlayerDesignStyle(mediaMetadata?.id, playerStyleOverrides, settingsPlayerDesignStyle)
+        }
 
     val snackbarHostState = remember { SnackbarHostState() }
     var dismissJob: Job? by remember { mutableStateOf(null) }

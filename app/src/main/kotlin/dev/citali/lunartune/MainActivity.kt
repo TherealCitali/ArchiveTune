@@ -223,6 +223,7 @@ import dev.citali.lunartune.constants.PlayerBackgroundStyle
 import dev.citali.lunartune.constants.PlayerBackgroundStyleKey
 import dev.citali.lunartune.constants.PlayerDesignStyle
 import dev.citali.lunartune.constants.PlayerDesignStyleKey
+import dev.citali.lunartune.constants.PlayerDesignStyleOverridesKey
 import dev.citali.lunartune.constants.PureBlackKey
 import dev.citali.lunartune.constants.RemindAfterKey
 import dev.citali.lunartune.constants.SYSTEM_DEFAULT
@@ -333,8 +334,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var navController: NavHostController
     private var pendingIntent: Intent? = null
     private var pendingDeepLinkQueue: Queue? = null
-    private var pendingVoiceSearchQuery: String? = null
-    private var pendingAodModeRequest = false
+    private var pendingVoiceSearchQuery: String? = nullate var pendingAodModeRequest = false
     private var pendingAodModeJob: Job? = null
     private var aodModeLaunchRequestCount by mutableIntStateOf(0)
     private var pendingTogetherJoinLink: String? = null
@@ -1062,10 +1062,22 @@ class MainActivity : ComponentActivity() {
                         key = PlayerBackgroundStyleKey,
                         defaultValue = PlayerBackgroundStyle.DEFAULT,
                     )
-                    val playerDesignStyle by rememberEnumPreference(
+                    val settingsPlayerDesignStyle by rememberEnumPreference(
                         key = PlayerDesignStyleKey,
                         defaultValue = PlayerDesignStyle.V4,
                     )
+                    val (playerStyleOverrides) = rememberPreference(PlayerDesignStyleOverridesKey, "")
+                    val currentPlayerMediaMetadata by remember(playerConnection) {
+                        playerConnection?.mediaMetadata ?: MutableStateFlow(null)
+                    }.collectAsState()
+                    val playerDesignStyle =
+                        remember(settingsPlayerDesignStyle, playerStyleOverrides, currentPlayerMediaMetadata?.id) {
+                            resolvePlayerDesignStyle(
+                                currentPlayerMediaMetadata?.id,
+                                playerStyleOverrides,
+                                settingsPlayerDesignStyle,
+                            )
+                        }
 
                     val aodModeEnabled by remember(playerConnection) {
                         playerConnection?.aodModeEnabled ?: MutableStateFlow(false)
@@ -3156,4 +3168,6 @@ private fun Context.isTvDevice(): Boolean {
     return isTelevisionUiMode ||
         packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK) ||
         packageManager.hasSystemFeature(PackageManager.FEATURE_TELEVISION)
+}
+ISION)
 }

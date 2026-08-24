@@ -101,6 +101,7 @@ import dev.citali.lunartune.constants.PlayerBackgroundStyle
 import dev.citali.lunartune.constants.PlayerBackgroundStyleKey
 import dev.citali.lunartune.constants.PlayerDesignStyle
 import dev.citali.lunartune.constants.PlayerDesignStyleKey
+import dev.citali.lunartune.constants.PlayerDesignStyleOverridesKey
 import dev.citali.lunartune.constants.PlayerHorizontalPadding
 import dev.citali.lunartune.constants.SeekExtraSeconds
 import dev.citali.lunartune.constants.SwipeThumbnailKey
@@ -112,6 +113,7 @@ import dev.citali.lunartune.utils.ImageBlurUtils
 import dev.citali.lunartune.utils.rememberEnumPreference
 import dev.citali.lunartune.utils.rememberLowDataModeActive
 import dev.citali.lunartune.utils.rememberPreference
+import dev.citali.lunartune.utils.resolvePlayerDesignStyle
 import java.util.Locale
 import kotlin.math.abs
 
@@ -144,10 +146,15 @@ fun Thumbnail(
     val hidePlayerThumbnail by rememberPreference(HidePlayerThumbnailKey, false)
     val archiveTuneCanvasEnabled by rememberPreference(LunarTuneCanvasKey, false)
     val lowDataModeActive = rememberLowDataModeActive()
-    val playerDesignStyle by rememberEnumPreference(
+    val settingsPlayerDesignStyle by rememberEnumPreference(
         key = PlayerDesignStyleKey,
         defaultValue = PlayerDesignStyle.V4,
     )
+    val (playerStyleOverrides) = rememberPreference(PlayerDesignStyleOverridesKey, "")
+    val playerDesignStyle =
+        remember(settingsPlayerDesignStyle, playerStyleOverrides, mediaMetadata?.id) {
+            resolvePlayerDesignStyle(mediaMetadata?.id, playerStyleOverrides, settingsPlayerDesignStyle)
+        }
     val (maxCanvasCacheSize, _) =
         rememberPreference(
             key = MaxCanvasCacheSizeKey,
