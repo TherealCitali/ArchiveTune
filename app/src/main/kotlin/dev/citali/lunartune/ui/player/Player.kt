@@ -2115,7 +2115,7 @@ private fun LegacyImmersiveBackdrop(
     val blurMaskMid = (blurMaskStart + 0.12f).coerceIn(blurMaskStart, 0.95f)
     val blurMaskSolid = (blurMaskStart + 0.22f).coerceIn(blurMaskMid, 1f)
     val baseArtworkScale = if (disableBlur) 1.03f else 1.06f
-    val baseArtworkAlpha = if (disableBlur) 0.72f else 0.82f
+    val baseArtworkAlpha = if (disableBlur) 0.92f else 1f
     val surfaceTint = MaterialTheme.colorScheme.surface
     val artworkSizePx =
         remember(configuration.screenWidthDp, configuration.screenHeightDp, density.density) {
@@ -3164,3 +3164,4 @@ private fun Modifier.littlePlayerOverlayGestures(
             }
         }
     }
+ }
