@@ -20,12 +20,16 @@ import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import coil3.request.allowHardware
+import coil3.toBitmap
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import dev.citali.lunartune.ui.utils.YTThumbQuality
 import dev.citali.lunartune.ui.utils.buildYTThumbnailUrl
+import dev.citali.lunartune.ui.utils.resize
 import timber.log.Timber
+
+private const val HighResMinEdgePx = 480
 
 @Immutable
 data class ThumbnailSwapState(
@@ -42,23 +46,24 @@ fun rememberThumbnailSwapState(
     isMusicVideo: Boolean = false,
 ): ThumbnailSwapState {
     val context = LocalContext.current
-    val shouldAttemptYT = videoId != null && !lowDataMode && isMusicVideo
+    val shouldAttemptHighRes = videoId != null && !lowDataMode
 
     var displayUrl by remember { mutableStateOf(ytmUrl) }
     var isYTReady by remember { mutableStateOf(false) }
     var ytUrl by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(videoId, ytmUrl, shouldAttemptYT) {
+    LaunchedEffect(videoId, ytmUrl, shouldAttemptHighRes, isMusicVideo) {
         displayUrl = ytmUrl
         isYTReady = false
         ytUrl = null
 
-        if (!shouldAttemptYT || videoId == null) return@LaunchedEffect
+        if (!shouldAttemptHighRes || videoId == null) return@LaunchedEffect
 
         val imageLoader = context.imageLoader
+        val candidates = buildHighResArtworkCandidates(videoId, ytmUrl)
 
-        for (quality in YTThumbQuality.entries) {
-            val url = buildYTThumbnailUrl(videoId, quality)
+        for (url in candidates) {
+            if (url.isBlank() || url == ytmUrl) continue
             try {
                 val request =
                     ImageRequest
@@ -76,6 +81,8 @@ fun rememberThumbnailSwapState(
                         imageLoader.execute(request)
                     }
                 if (result is SuccessResult) {
+                    val bitmap = result.image.toBitmap()
+                    if (minOf(bitmap.width, bitmap.height) < HighResMinEdgePx) continue
                     ytUrl = url
                     displayUrl = url
                     isYTReady = true
@@ -84,11 +91,30 @@ fun rememberThumbnailSwapState(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                Timber.tag("ThumbnailSwap").e(e, "YT thumbnail quality=%s failed for videoId=%s", quality.value, videoId)
+                Timber.tag("ThumbnailSwap").d(e, "High-res artwork failed: %s", url)
                 continue
             }
         }
+        displayUrl = ytmUrl
     }
 
     return ThumbnailSwapState(displayUrl, isYTReady, ytUrl)
+}
+
+internal fun buildHighResArtworkCandidates(
+    videoId: String,
+    ytmUrl: String?,
+): List<String> {
+    val urls = linkedSetOf<String>()
+    urls += buildYTThumbnailUrl(videoId, YTThumbQuality.MAXRES)
+    urls += "https://i.ytimg.com/vi_webp/$videoId/maxresdefault.webp"
+    urls += buildYTThumbnailUrl(videoId, YTThumbQuality.HQ720)
+    urls += "https://i.ytimg.com/vi_webp/$videoId/hq720.webp"
+    val upscaledYtm =
+        ytmUrl
+            ?.takeIf { it.isNotBlank() }
+            ?.resize(width = 2048, height = 2048, maxresAllowed = true)
+    if (!upscaledYtm.isNullOrBlank()) urls += upscaledYtm
+    urls += buildYTThumbnailUrl(videoId, YTThumbQuality.HQ)
+    return urls.toList()
 }
