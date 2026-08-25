@@ -451,7 +451,6 @@ fun BottomSheetPlayer(
 
     val playbackState by playerConnection.playbackState.collectAsState()
     val isPlaying by playerConnection.isPlaying.collectAsState()
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val currentSong by playerConnection.currentSong.collectAsState(initial = null)
     val currentSongLiked = currentSong?.song?.liked == true
     val queueTitle by playerConnection.queueTitle.collectAsState()
@@ -1489,7 +1488,13 @@ fun BottomSheetPlayer(
                                     isLoading = isLoading,
                                     canSkipPrevious = canSkipPrevious,
                                     canSkipNext = canSkipNext,
-                                    c                   currentFormat = currentFormat,
+                                    currentSongLiked = currentSongLiked,
+                                    sliderPosition = sliderPosition,
+                                    position = position,
+                                    duration = duration,
+                                    volume = deviceMusicVolumeController.volumeFraction,
+                                    showVolumeBar = showPlayerVolumeBar,
+                                    currentFormat = currentFormat,
                                     playerConnection = playerConnection,
                                     navController = navController,
                                     state = state,
@@ -3137,20 +3142,6 @@ private fun Modifier.littlePlayerOverlayGestures(
                                         android.view.HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
                                     )
                                 }
-                                onSkipNext()
-                            }
-                        }
-                        lastTapUptimeMs = 0L
-                        lastTapPosition = null
-                    } else {
-                        lastTapUptimeMs = now
-                        lastTapPosition = upPosition
-                    }
-                }
-            }
-        }
-    }
-     }
                                 onSkipNext()
                             }
                         }

@@ -305,6 +305,7 @@ import dev.citali.lunartune.utils.get
 import dev.citali.lunartune.utils.isLowRamDevice
 import dev.citali.lunartune.utils.rememberEnumPreference
 import dev.citali.lunartune.utils.rememberPreference
+import dev.citali.lunartune.utils.resolvePlayerDesignStyle
 import dev.citali.lunartune.utils.reportException
 import dev.citali.lunartune.utils.setAppLocale
 import dev.citali.lunartune.viewmodels.BackupCategory
@@ -334,7 +335,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var navController: NavHostController
     private var pendingIntent: Intent? = null
     private var pendingDeepLinkQueue: Queue? = null
-    private var pendingVoiceSearchQuery: String? = nullate var pendingAodModeRequest = false
+    private var pendingVoiceSearchQuery: String? = null
+    private var pendingAodModeRequest = false
     private var pendingAodModeJob: Job? = null
     private var aodModeLaunchRequestCount by mutableIntStateOf(0)
     private var pendingTogetherJoinLink: String? = null
@@ -1068,7 +1070,8 @@ class MainActivity : ComponentActivity() {
                     )
                     val (playerStyleOverrides) = rememberPreference(PlayerDesignStyleOverridesKey, "")
                     val currentPlayerMediaMetadata by remember(playerConnection) {
-                        playerConnection?.mediaMetadata ?: MutableStateFlow(null)
+                        playerConnection?.mediaMetadata
+                            ?: MutableStateFlow<dev.citali.lunartune.models.MediaMetadata?>(null)
                     }.collectAsState()
                     val playerDesignStyle =
                         remember(settingsPlayerDesignStyle, playerStyleOverrides, currentPlayerMediaMetadata?.id) {
@@ -3168,6 +3171,4 @@ private fun Context.isTvDevice(): Boolean {
     return isTelevisionUiMode ||
         packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK) ||
         packageManager.hasSystemFeature(PackageManager.FEATURE_TELEVISION)
-}
-ISION)
 }
