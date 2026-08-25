@@ -339,6 +339,8 @@
     <string name="player_design_v7_legacy">Immersive Legacy</string>
     <string name="player_design_v8">Immersive Extended</string>
     <string name="player_design_v9">Material Extended</string>
+    <string name="player_style_for_song">Player style</string>
+    <string name="player_style_use_default">Use default from settings</string>
     <string name="player_background_blur">Blur</string>
     <string name="coloring">Coloring</string>
     <string name="blur_gradient">Blur Gradient</string>

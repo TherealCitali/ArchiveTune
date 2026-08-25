@@ -180,6 +180,7 @@ import dev.citali.lunartune.constants.PlayerCustomContrastKey
 import dev.citali.lunartune.constants.PlayerCustomImageUriKey
 import dev.citali.lunartune.constants.PlayerDesignStyle
 import dev.citali.lunartune.constants.PlayerDesignStyleKey
+import dev.citali.lunartune.constants.PlayerDesignStyleOverridesKey
 import dev.citali.lunartune.constants.PoTokenGvsKey
 import dev.citali.lunartune.constants.PoTokenPlayerKey
 import dev.citali.lunartune.constants.QueuePeekHeight
@@ -210,6 +211,7 @@ import dev.citali.lunartune.utils.makeTimeString
 import dev.citali.lunartune.utils.rememberEnumPreference
 import dev.citali.lunartune.utils.rememberLowDataModeActive
 import dev.citali.lunartune.utils.rememberPreference
+import dev.citali.lunartune.utils.resolvePlayerDesignStyle
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -322,6 +324,7 @@ fun BottomSheetPlayer(
     val bottomSheetPageState = LocalBottomSheetPageState.current
 
     val playerConnection = LocalPlayerConnection.current ?: return
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val playbackError by playerConnection.error.collectAsStateWithLifecycle()
     val (innerTubeCookie) = rememberPreference(InnerTubeCookieKey, defaultValue = "")
     val (poTokenGvs) = rememberPreference(PoTokenGvsKey, defaultValue = "")
@@ -364,10 +367,15 @@ fun BottomSheetPlayer(
             }
         }
 
-    val playerDesignStyle by rememberEnumPreference(
+    val settingsPlayerDesignStyle by rememberEnumPreference(
         key = PlayerDesignStyleKey,
         defaultValue = PlayerDesignStyle.V4,
     )
+    val (playerStyleOverrides) = rememberPreference(PlayerDesignStyleOverridesKey, "")
+    val playerDesignStyle =
+        remember(settingsPlayerDesignStyle, playerStyleOverrides, mediaMetadata?.id) {
+            resolvePlayerDesignStyle(mediaMetadata?.id, playerStyleOverrides, settingsPlayerDesignStyle)
+        }
     val showPlayerVolumeBar by rememberPreference(
         key = ShowPlayerVolumeBarKey,
         defaultValue = true,
@@ -443,7 +451,6 @@ fun BottomSheetPlayer(
 
     val playbackState by playerConnection.playbackState.collectAsState()
     val isPlaying by playerConnection.isPlaying.collectAsState()
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val currentSong by playerConnection.currentSong.collectAsState(initial = null)
     val currentSongLiked = currentSong?.song?.liked == true
     val queueTitle by playerConnection.queueTitle.collectAsState()

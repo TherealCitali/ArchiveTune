@@ -223,6 +223,7 @@ import dev.citali.lunartune.constants.PlayerBackgroundStyle
 import dev.citali.lunartune.constants.PlayerBackgroundStyleKey
 import dev.citali.lunartune.constants.PlayerDesignStyle
 import dev.citali.lunartune.constants.PlayerDesignStyleKey
+import dev.citali.lunartune.constants.PlayerDesignStyleOverridesKey
 import dev.citali.lunartune.constants.PureBlackKey
 import dev.citali.lunartune.constants.RemindAfterKey
 import dev.citali.lunartune.constants.SYSTEM_DEFAULT
@@ -304,6 +305,7 @@ import dev.citali.lunartune.utils.get
 import dev.citali.lunartune.utils.isLowRamDevice
 import dev.citali.lunartune.utils.rememberEnumPreference
 import dev.citali.lunartune.utils.rememberPreference
+import dev.citali.lunartune.utils.resolvePlayerDesignStyle
 import dev.citali.lunartune.utils.reportException
 import dev.citali.lunartune.utils.setAppLocale
 import dev.citali.lunartune.viewmodels.BackupCategory
@@ -1062,10 +1064,23 @@ class MainActivity : ComponentActivity() {
                         key = PlayerBackgroundStyleKey,
                         defaultValue = PlayerBackgroundStyle.DEFAULT,
                     )
-                    val playerDesignStyle by rememberEnumPreference(
+                    val settingsPlayerDesignStyle by rememberEnumPreference(
                         key = PlayerDesignStyleKey,
                         defaultValue = PlayerDesignStyle.V4,
                     )
+                    val (playerStyleOverrides) = rememberPreference(PlayerDesignStyleOverridesKey, "")
+                    val currentPlayerMediaMetadata by remember(playerConnection) {
+                        playerConnection?.mediaMetadata
+                            ?: MutableStateFlow<dev.citali.lunartune.models.MediaMetadata?>(null)
+                    }.collectAsState()
+                    val playerDesignStyle =
+                        remember(settingsPlayerDesignStyle, playerStyleOverrides, currentPlayerMediaMetadata?.id) {
+                            resolvePlayerDesignStyle(
+                                currentPlayerMediaMetadata?.id,
+                                playerStyleOverrides,
+                                settingsPlayerDesignStyle,
+                            )
+                        }
 
                     val aodModeEnabled by remember(playerConnection) {
                         playerConnection?.aodModeEnabled ?: MutableStateFlow(false)
