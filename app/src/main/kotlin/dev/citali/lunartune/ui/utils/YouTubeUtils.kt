@@ -159,6 +159,18 @@ fun String.highRes(): String =
         ytimgResizePolicy = YtimgResizePolicy.PreserveOriginal,
     )
 
+/** Upsize a stored YTM/ytimg thumb for large list cards and the mini player. */
+fun String.displayArtworkUrl(
+    width: Int,
+    height: Int = width,
+): String =
+    resize(
+        width = width.coerceAtLeast(1),
+        height = height.coerceAtLeast(1),
+        maxresAllowed = maxOf(width, height) >= 480,
+        ytimgResizePolicy = YtimgResizePolicy.AllowAnyAspect,
+    )
+
 fun getMusicVideoYTThumbnail(
     videoId: String?,
     ytmUrl: String?,
