@@ -89,6 +89,7 @@ import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.size.Size
+import dev.citali.lunartune.ui.utils.displayArtworkUrl
 import kotlinx.coroutines.CoroutineScope
 import dev.citali.lunartune.R
 import dev.citali.lunartune.constants.GridThumbnailHeight
@@ -293,11 +294,18 @@ fun QuickPicksSection(
                     val song = distinctQuickPicks[index]
                     val isActive = song.id == mediaMetadata?.id
                     val context = LocalContext.current
-                    val imageRequest =
+                    val artworkUrl =
                         remember(song.song.thumbnailUrl, requestWidthPx, requestHeightPx) {
+                            song.song.thumbnailUrl?.displayArtworkUrl(
+                                width = requestWidthPx,
+                                height = requestHeightPx,
+                            )
+                        }
+                    val imageRequest =
+                        remember(artworkUrl, requestWidthPx, requestHeightPx) {
                             ImageRequest
                                 .Builder(context)
-                                .data(song.song.thumbnailUrl)
+                                .data(artworkUrl)
                                 .size(Size(requestWidthPx, requestHeightPx))
                                 .crossfade(true)
                                 .build()
