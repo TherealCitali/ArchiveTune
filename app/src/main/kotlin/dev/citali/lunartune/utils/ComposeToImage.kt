@@ -684,26 +684,14 @@ object ComposeToImage {
         canvasHeight: Int,
         padding: Float,
         bottomPadding: Float = canvasHeight - padding,
-        circleColor: Int,
-        logoTint: Int,
         textColor: Int,
     ) {
         val baseSize = minOf(canvasWidth, canvasHeight).toFloat()
-        val logoSize = (baseSize * 0.045f).toInt()
+        val logoSize = (baseSize * 0.055f).toInt().coerceAtLeast(1)
 
-        val rawLogo = context.getDrawable(R.drawable.small_icon)?.toBitmap(logoSize, logoSize)
-        val logo =
-            rawLogo?.let { source ->
-                val colored = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
-                val canvasLogo = Canvas(colored)
-                val paint =
-                    Paint().apply {
-                        colorFilter = PorterDuffColorFilter(logoTint, PorterDuff.Mode.SRC_IN)
-                        isAntiAlias = true
-                    }
-                canvasLogo.drawBitmap(source, 0f, 0f, paint)
-                colored
-            }
+        val brand =
+            context.getDrawable(R.drawable.lunartune_brand_round)?.toBitmap(logoSize, logoSize)
+                ?: context.getDrawable(R.drawable.small_icon)?.toBitmap(logoSize, logoSize)
 
         val appName = context.getString(R.string.app_name)
         val appNamePaint =
@@ -715,26 +703,27 @@ object ComposeToImage {
                 letterSpacing = 0.02f
             }
 
-        val circleRadius = logoSize * 0.55f
-        val circleX = padding + circleRadius
-        val circleY = bottomPadding - circleRadius
-        val logoX = circleX - logoSize / 2f
-        val logoY = circleY - logoSize / 2f
-        val textX = padding + circleRadius * 2 + 10f
-        val textY = circleY + appNamePaint.textSize * 0.3f
+        val logoLeft = padding
+        val logoTop = bottomPadding - logoSize
+        val bitmapPaint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG)
 
-        val circlePaint =
-            Paint().apply {
-                color = circleColor
-                isAntiAlias = true
-                style = Paint.Style.FILL
+        brand?.let { source ->
+            val clip =
+                Path().apply {
+                    addRoundRect(
+                        RectF(logoLeft, logoTop, logoLeft + logoSize, logoTop + logoSize),
+                        logoSize / 2f,
+                        logoSize / 2f,
+                        Path.Direction.CW,
+                    )
+                }
+            canvas.withClip(clip) {
+                drawBitmap(source, null, RectF(logoLeft, logoTop, logoLeft + logoSize, logoTop + logoSize), bitmapPaint)
             }
-        canvas.drawCircle(circleX, circleY, circleRadius, circlePaint)
-
-        logo?.let {
-            canvas.drawBitmap(it, logoX, logoY, null)
         }
 
+        val textX = padding + logoSize + 10f
+        val textY = logoTop + logoSize / 2f + appNamePaint.textSize * 0.3f
         canvas.drawText(appName, textX, textY, appNamePaint)
     }
 
