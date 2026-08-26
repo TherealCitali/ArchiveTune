@@ -376,14 +376,15 @@ private fun MiniPlayerArtwork(
                 remember(albumArtOverrides, mediaMetadata?.id) {
                     mediaMetadata?.id?.let { parseTabMap(albumArtOverrides)[it] }
                 }
-            val baseThumbnailUrl = customArt ?: mediaMetadata?.thumbnailUrl
-            if (baseThumbnailUrl != null) {
+            val metadata = mediaMetadata
+            val baseThumbnailUrl = customArt ?: metadata?.thumbnailUrl
+            if (metadata != null && baseThumbnailUrl != null) {
                 val thumbnailSwapState =
                     rememberThumbnailSwapState(
-                        videoId = mediaMetadata.id,
+                        videoId = metadata.id,
                         ytmUrl = baseThumbnailUrl,
                         lowDataMode = rememberLowDataModeActive(),
-                        isMusicVideo = mediaMetadata.isMusicVideo,
+                        isMusicVideo = metadata.isMusicVideo,
                     )
                 AsyncImage(
                     model = thumbnailSwapState.displayUrl,

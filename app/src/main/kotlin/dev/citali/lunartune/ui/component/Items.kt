@@ -2324,7 +2324,3 @@ private object Icon {
         )
     }
 }
-(end = 2.dp),
-        )
-    }
-}
