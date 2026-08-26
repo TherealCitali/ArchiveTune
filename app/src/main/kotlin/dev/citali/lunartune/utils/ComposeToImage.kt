@@ -459,8 +459,6 @@ object ComposeToImage {
                 canvasHeight = canvasHeight,
                 padding = contentLeft,
                 bottomPadding = glassBottom - contentPadding,
-                circleColor = secondaryTxtColor,
-                logoTint = if (style.isDark) 0xDD000000.toInt() else 0xE6FFFFFF.toInt(),
                 textColor = secondaryTxtColor,
             )
 
