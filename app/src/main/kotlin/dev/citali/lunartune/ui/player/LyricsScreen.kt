@@ -62,10 +62,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
@@ -563,37 +562,16 @@ private fun AppleMusicBackground(
     gradientColors: List<Color>,
     modifier: Modifier = Modifier,
 ) {
-    val colors = if (gradientColors.isNotEmpty()) gradientColors else AppleMusicFallbackGradient
-    val backgroundBrush =
-        remember(colors) {
-            Brush.verticalGradient(
-                listOf(
-                    colors.getOrElse(0) { AppleMusicFallbackGradient[0] }.copy(alpha = 0.88f),
-                    colors.getOrElse(1) { AppleMusicFallbackGradient[1] }.copy(alpha = 0.76f),
-                    colors.getOrElse(2) { AppleMusicFallbackGradient[2] }.copy(alpha = 0.96f),
-                ),
-            )
-        }
-    val bottomScrim =
-        remember {
-            Brush.verticalGradient(
-                listOf(
-                    Color.Transparent,
-                    Color.Black.copy(alpha = 0.28f),
-                ),
-            )
-        }
-
     Box(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(AppleMusicFallbackGradient.last()),
+                .background(Color.Black),
     ) {
         AnimatedContent(
             targetState = mediaMetadata.thumbnailUrl,
             transitionSpec = { fadeIn(tween(700)) togetherWith fadeOut(tween(700)) },
-            label = "lyrics-apple-background",
+            label = "lyrics-lockscreen-background",
         ) { thumbnailUrl ->
             if (thumbnailUrl != null) {
                 val context = LocalContext.current
@@ -614,7 +592,7 @@ private fun AppleMusicBackground(
                                     val image = imageLoader.execute(request).image ?: return@runCatching null
                                     val bitmap = image.toBitmap().copy(Bitmap.Config.ARGB_8888, true)
                                     val density = context.resources.displayMetrics.density
-                                    ImageBlurUtils.blur(bitmap, 46f * density)
+                                    ImageBlurUtils.blur(bitmap, 72f * density)
                                 }.getOrNull()
                             }
                     }
@@ -626,7 +604,10 @@ private fun AppleMusicBackground(
                             modifier =
                                 Modifier
                                     .fillMaxSize()
-                                    .alpha(0.62f),
+                                    .graphicsLayer {
+                                        scaleX = 1.12f
+                                        scaleY = 1.12f
+                                    },
                         )
                     }
                 } else {
@@ -637,8 +618,10 @@ private fun AppleMusicBackground(
                         modifier =
                             Modifier
                                 .fillMaxSize()
-                                .blur(46.dp)
-                                .alpha(0.62f),
+                                .graphicsLayer {
+                                    scaleX = 1.12f
+                                    scaleY = 1.12f
+                                }.blur(64.dp),
                     )
                 }
             }
@@ -647,19 +630,7 @@ private fun AppleMusicBackground(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(backgroundBrush),
-        )
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.18f)),
-        )
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(bottomScrim),
+                    .background(Color.Black.copy(alpha = 0.28f)),
         )
     }
 }

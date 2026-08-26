@@ -76,6 +76,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import dev.citali.lunartune.R
 import dev.citali.lunartune.constants.EnableHapticFeedbackKey
+import dev.citali.lunartune.constants.PerSongAlbumArtOverridesKey
 import dev.citali.lunartune.constants.MiniPlayerHeight
 import dev.citali.lunartune.constants.NavigationBarHorizontalPadding
 import dev.citali.lunartune.extensions.togglePlayPause
@@ -83,6 +84,7 @@ import dev.citali.lunartune.models.MediaMetadata
 import dev.citali.lunartune.playback.PlayerConnection
 import dev.citali.lunartune.together.isConnectedToSession
 import dev.citali.lunartune.ui.utils.displayArtworkUrl
+import dev.citali.lunartune.utils.parseTabMap
 import dev.citali.lunartune.utils.rememberLowDataModeActive
 import dev.citali.lunartune.utils.rememberPreference
 import kotlin.math.absoluteValue
@@ -370,14 +372,20 @@ private fun MiniPlayerArtwork(
                         shape = CircleShape,
                     ),
         ) {
-            val baseThumbnailUrl = mediaMetadata?.thumbnailUrl
-            if (baseThumbnailUrl != null) {
+            val (albumArtOverrides) = rememberPreference(PerSongAlbumArtOverridesKey, "")
+            val customArt =
+                remember(albumArtOverrides, mediaMetadata?.id) {
+                    mediaMetadata?.id?.let { parseTabMap(albumArtOverrides)[it] }
+                }
+            val metadata = mediaMetadata
+            val baseThumbnailUrl = customArt ?: metadata?.thumbnailUrl
+            if (metadata != null && baseThumbnailUrl != null) {
                 val thumbnailSwapState =
                     rememberThumbnailSwapState(
-                        videoId = mediaMetadata.id,
+                        videoId = metadata.id,
                         ytmUrl = baseThumbnailUrl,
                         lowDataMode = rememberLowDataModeActive(),
-                        isMusicVideo = mediaMetadata.isMusicVideo,
+                        isMusicVideo = metadata.isMusicVideo,
                     )
                 AsyncImage(
                     model = thumbnailSwapState.displayUrl,

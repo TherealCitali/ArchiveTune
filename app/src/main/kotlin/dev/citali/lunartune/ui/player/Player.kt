@@ -178,6 +178,7 @@ import dev.citali.lunartune.constants.PlayerCustomBlurKey
 import dev.citali.lunartune.constants.PlayerCustomBrightnessKey
 import dev.citali.lunartune.constants.PlayerCustomContrastKey
 import dev.citali.lunartune.constants.PlayerCustomImageUriKey
+import dev.citali.lunartune.constants.PerSongAlbumArtOverridesKey
 import dev.citali.lunartune.constants.PlayerDesignStyle
 import dev.citali.lunartune.constants.PlayerDesignStyleKey
 import dev.citali.lunartune.constants.PlayerDesignStyleOverridesKey
@@ -208,6 +209,7 @@ import dev.citali.lunartune.ui.utils.getNextFallbackUrl
 import dev.citali.lunartune.ui.utils.resize
 import dev.citali.lunartune.utils.ImageBlurUtils
 import dev.citali.lunartune.utils.makeTimeString
+import dev.citali.lunartune.utils.parseTabMap
 import dev.citali.lunartune.utils.rememberEnumPreference
 import dev.citali.lunartune.utils.rememberLowDataModeActive
 import dev.citali.lunartune.utils.rememberPreference
@@ -324,7 +326,13 @@ fun BottomSheetPlayer(
     val bottomSheetPageState = LocalBottomSheetPageState.current
 
     val playerConnection = LocalPlayerConnection.current ?: return
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val rawMediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val (albumArtOverrides) = rememberPreference(PerSongAlbumArtOverridesKey, "")
+    val mediaMetadata =
+        remember(rawMediaMetadata, albumArtOverrides) {
+            val customArt = rawMediaMetadata?.id?.let { parseTabMap(albumArtOverrides)[it] }
+            if (customArt.isNullOrBlank()) rawMediaMetadata else rawMediaMetadata?.copy(thumbnailUrl = customArt)
+        }
     val playbackError by playerConnection.error.collectAsStateWithLifecycle()
     val (innerTubeCookie) = rememberPreference(InnerTubeCookieKey, defaultValue = "")
     val (poTokenGvs) = rememberPreference(PoTokenGvsKey, defaultValue = "")

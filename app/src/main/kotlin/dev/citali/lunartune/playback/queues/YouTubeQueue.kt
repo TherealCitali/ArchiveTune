@@ -11,6 +11,7 @@ import androidx.media3.common.MediaItem
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.withContext
 import dev.citali.lunartune.extensions.toMediaItem
+import dev.citali.lunartune.utils.neverRecommendIds
 import moe.rukamori.archivetune.innertube.YouTube
 import moe.rukamori.archivetune.innertube.models.WatchEndpoint
 import dev.citali.lunartune.models.MediaMetadata
@@ -58,7 +59,8 @@ class YouTubeQueue(
             }
         endpoint = nextResult.endpoint
         continuation = nextResult.continuation
-        return nextResult.items.map { it.toMediaItem() }
+        val hidden = neverRecommendIds()
+        return nextResult.items.filterNot { it.id in hidden }.map { it.toMediaItem() }
     }
 
     companion object {
