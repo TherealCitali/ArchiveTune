@@ -110,6 +110,8 @@ import dev.citali.lunartune.LocalDownloadUtil
 import dev.citali.lunartune.LocalPlayerConnection
 import dev.citali.lunartune.R
 import dev.citali.lunartune.constants.CropThumbnailToSquareKey
+import dev.citali.lunartune.constants.PerSongAlbumArtOverridesKey
+import dev.citali.lunartune.constants.PerSongTagsKey
 import dev.citali.lunartune.constants.GridThumbnailCornerRadius
 import dev.citali.lunartune.constants.GridThumbnailHeight
 import dev.citali.lunartune.constants.ListItemHeight
@@ -136,8 +138,11 @@ import dev.citali.lunartune.ui.utils.getNextFallbackUrl
 import dev.citali.lunartune.ui.utils.preferredThumbnailRatio
 import dev.citali.lunartune.ui.utils.resize
 import dev.citali.lunartune.ui.utils.thumbnailSourceRatio
+import dev.citali.lunartune.utils.formatSongTags
 import dev.citali.lunartune.utils.joinByBullet
 import dev.citali.lunartune.utils.makeTimeString
+import dev.citali.lunartune.utils.parseSongTags
+import dev.citali.lunartune.utils.parseTabMap
 import dev.citali.lunartune.utils.rememberPreference
 import dev.citali.lunartune.utils.reportException
 import kotlin.math.roundToInt
@@ -397,6 +402,16 @@ fun SongListItem(
     trailingContent: @Composable RowScope.() -> Unit = {},
 ) {
     val swipeEnabled by rememberPreference(SwipeToSongKey, defaultValue = true)
+    val (albumArtOverrides) = rememberPreference(PerSongAlbumArtOverridesKey, "")
+    val (tagsRaw) = rememberPreference(PerSongTagsKey, "")
+    val customArtUrl =
+        remember(albumArtOverrides, song.id) {
+            parseTabMap(albumArtOverrides)[song.id]
+        }
+    val songTags =
+        remember(tagsRaw, song.id) {
+            formatSongTags(parseSongTags(parseTabMap(tagsRaw)[song.id].orEmpty()))
+        }
     val resolvedSwipeContentBackgroundColor = swipeContentBackgroundColor ?: MaterialTheme.colorScheme.surface
 
     val content: @Composable () -> Unit = {
@@ -405,13 +420,14 @@ fun SongListItem(
             subtitle =
                 joinByBullet(
                     song.artists.joinToString { it.name },
+                    songTags.takeIf { it.isNotBlank() },
                     makeTimeString(song.song.duration * 1000L),
                     viewCountText,
                 ),
             badges = badges,
             thumbnailContent = {
                 ItemThumbnail(
-                    thumbnailUrl = song.song.thumbnailUrl,
+                    thumbnailUrl = customArtUrl ?: song.song.thumbnailUrl,
                     albumIndex = albumIndex,
                     isSelected = isSelected,
                     isActive = isActive,
@@ -2305,6 +2321,10 @@ private object Icon {
                 Modifier
                     .size(18.dp)
                     .padding(end = 2.dp),
+        )
+    }
+}
+(end = 2.dp),
         )
     }
 }

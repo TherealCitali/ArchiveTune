@@ -118,7 +118,6 @@ import dev.citali.lunartune.utils.rememberLowDataModeActive
 import dev.citali.lunartune.utils.rememberPreference
 import dev.citali.lunartune.utils.resolvePlayerDesignStyle
 import dev.citali.lunartune.utils.serializeSpeedDialPins
-import dev.citali.lunartune.utils.setPlayerDesignStyleOverride
 import dev.citali.lunartune.utils.shareLocalAudio
 import dev.citali.lunartune.utils.toggleSpeedDialPin
 import kotlin.math.abs
@@ -167,12 +166,8 @@ fun PlayerMenu(
     val (externalDownloaderPackage) = rememberPreference(ExternalDownloaderPackageKey, defaultValue = "")
     val (archiveTuneCanvasEnabled) = rememberPreference(LunarTuneCanvasKey, defaultValue = false)
     val settingsPlayerDesignStyle by rememberEnumPreference(PlayerDesignStyleKey, defaultValue = PlayerDesignStyle.V4)
-    val (playerStyleOverrides, onPlayerStyleOverridesChange) =
+    val (playerStyleOverrides) =
         rememberPreference(PlayerDesignStyleOverridesKey, "")
-    val songPlayerStyleOverride =
-        remember(playerStyleOverrides, mediaMetadata.id) {
-            parsePlayerDesignStyleOverrides(playerStyleOverrides)[mediaMetadata.id]
-        }
     val playerDesignStyle =
         remember(settingsPlayerDesignStyle, playerStyleOverrides, mediaMetadata.id) {
             resolvePlayerDesignStyle(mediaMetadata.id, playerStyleOverrides, settingsPlayerDesignStyle)
@@ -310,65 +305,15 @@ fun PlayerMenu(
         }
     }
 
-    var showPlayerStyleDialog by rememberSaveable {
+    var showPerSongSettings by rememberSaveable {
         mutableStateOf(false)
     }
 
-    if (showPlayerStyleDialog) {
-        ListDialog(
-            onDismiss = { showPlayerStyleDialog = false },
-        ) {
-            item {
-                ListItem(
-                    headlineContent = { Text(text = stringResource(R.string.player_style_use_default)) },
-                    supportingContent = {
-                        Text(
-                            text = playerDesignStyleLabel(settingsPlayerDesignStyle),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    },
-                    leadingContent = {
-                        Icon(
-                            painter = painterResource(R.drawable.settings),
-                            contentDescription = null,
-                        )
-                    },
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                onPlayerStyleOverridesChange(
-                                    setPlayerDesignStyleOverride(playerStyleOverrides, mediaMetadata.id, null),
-                                )
-                                showPlayerStyleDialog = false
-                            },
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                )
-            }
-            items(PlayerDesignStyle.entries) { style ->
-                val selected = songPlayerStyleOverride == style
-                ListItem(
-                    headlineContent = { Text(text = playerDesignStyleLabel(style)) },
-                    leadingContent = {
-                        Icon(
-                            painter = painterResource(if (selected) R.drawable.done else R.drawable.style),
-                            contentDescription = null,
-                        )
-                    },
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                onPlayerStyleOverridesChange(
-                                    setPlayerDesignStyleOverride(playerStyleOverrides, mediaMetadata.id, style),
-                                )
-                                showPlayerStyleDialog = false
-                            },
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                )
-            }
-        }
+    if (showPerSongSettings) {
+        PerSongSettingsDialog(
+            songId = mediaMetadata.id,
+            onDismiss = { showPerSongSettings = false },
+        )
     }
 
     var showPitchTempoDialog by rememberSaveable {
@@ -715,14 +660,14 @@ fun PlayerMenu(
                                 NewAction(
                                     icon = {
                                         Icon(
-                                            painter = painterResource(R.drawable.style),
+                                            painter = painterResource(R.drawable.tune),
                                             contentDescription = null,
                                             modifier = Modifier.size(28.dp),
                                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         )
                                     },
-                                    text = stringResource(R.string.player_style_for_song),
-                                    onClick = { showPlayerStyleDialog = true },
+                                    text = stringResource(R.string.per_song_settings),
+                                    onClick = { showPerSongSettings = true },
                                 ),
                             )
                         },
@@ -1487,21 +1432,6 @@ fun TempoPitchDialog(onDismiss: () -> Unit) {
         },
     )
 }
-
-@Composable
-private fun playerDesignStyleLabel(style: PlayerDesignStyle): String =
-    when (style) {
-        PlayerDesignStyle.V1 -> stringResource(R.string.player_design_v1)
-        PlayerDesignStyle.V2 -> stringResource(R.string.player_design_v2)
-        PlayerDesignStyle.V3 -> stringResource(R.string.player_design_v3)
-        PlayerDesignStyle.V4 -> stringResource(R.string.player_design_v4)
-        PlayerDesignStyle.V5 -> stringResource(R.string.player_design_v5)
-        PlayerDesignStyle.V6 -> stringResource(R.string.player_design_v6)
-        PlayerDesignStyle.V7 -> stringResource(R.string.player_design_v7)
-        PlayerDesignStyle.V7_LEGACY -> stringResource(R.string.player_design_v7_legacy)
-        PlayerDesignStyle.V8 -> stringResource(R.string.player_design_v8)
-        PlayerDesignStyle.V9 -> stringResource(R.string.player_design_v9)
-    }
 
 private enum class PitchMode {
     Semitones,

@@ -76,6 +76,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import dev.citali.lunartune.R
 import dev.citali.lunartune.constants.EnableHapticFeedbackKey
+import dev.citali.lunartune.constants.PerSongAlbumArtOverridesKey
 import dev.citali.lunartune.constants.MiniPlayerHeight
 import dev.citali.lunartune.constants.NavigationBarHorizontalPadding
 import dev.citali.lunartune.extensions.togglePlayPause
@@ -370,7 +371,12 @@ private fun MiniPlayerArtwork(
                         shape = CircleShape,
                     ),
         ) {
-            val baseThumbnailUrl = mediaMetadata?.thumbnailUrl
+            val (albumArtOverrides) = rememberPreference(PerSongAlbumArtOverridesKey, "")
+            val customArt =
+                remember(albumArtOverrides, mediaMetadata?.id) {
+                    mediaMetadata?.id?.let { parseTabMap(albumArtOverrides)[it] }
+                }
+            val baseThumbnailUrl = customArt ?: mediaMetadata?.thumbnailUrl
             if (baseThumbnailUrl != null) {
                 val thumbnailSwapState =
                     rememberThumbnailSwapState(
