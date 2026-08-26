@@ -84,6 +84,7 @@ import dev.citali.lunartune.models.MediaMetadata
 import dev.citali.lunartune.playback.PlayerConnection
 import dev.citali.lunartune.together.isConnectedToSession
 import dev.citali.lunartune.ui.utils.displayArtworkUrl
+import dev.citali.lunartune.utils.parseTabMap
 import dev.citali.lunartune.utils.rememberLowDataModeActive
 import dev.citali.lunartune.utils.rememberPreference
 import kotlin.math.absoluteValue
