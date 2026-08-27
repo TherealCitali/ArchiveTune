@@ -115,7 +115,6 @@ import dev.citali.lunartune.ui.component.LyricsV2
 import dev.citali.lunartune.ui.component.PlayerSliderTrack
 import dev.citali.lunartune.ui.menu.LyricsMenu
 import dev.citali.lunartune.ui.theme.PlayerColorExtractor
-import dev.citali.lunartune.utils.ImageBlurUtils
 import dev.citali.lunartune.utils.makeTimeString
 import dev.citali.lunartune.utils.rememberEnumPreference
 import dev.citali.lunartune.utils.rememberPreference
