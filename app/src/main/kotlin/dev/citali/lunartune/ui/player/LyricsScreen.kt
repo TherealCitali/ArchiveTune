@@ -576,6 +576,22 @@ private fun AppleMusicBackground(
             if (thumbnailUrl != null) {
                 val context = LocalContext.current
                 val isPreS = Build.VERSION.SDK_INT < Build.VERSION_CODES.S
+                val artModifier =
+                    Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            scaleX = 1.12f
+                            scaleY = 1.12f
+                        }
+                // Android 11 and below have no RenderEffect blur. Show the cover
+                // immediately so opening lyrics is never a black flash while
+                // RenderScript blur runs, then swap in the blurred bitmap.
+                AsyncImage(
+                    model = thumbnailUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = if (isPreS) artModifier else artModifier.blur(64.dp),
+                )
                 if (isPreS) {
                     val imageLoader = context.imageLoader
                     val blurredBitmap by produceState<Bitmap?>(null, thumbnailUrl) {
@@ -601,28 +617,9 @@ private fun AppleMusicBackground(
                             bitmap = bitmap.asImageBitmap(),
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
-                            modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .graphicsLayer {
-                                        scaleX = 1.12f
-                                        scaleY = 1.12f
-                                    },
+                            modifier = artModifier,
                         )
                     }
-                } else {
-                    AsyncImage(
-                        model = thumbnailUrl,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .graphicsLayer {
-                                    scaleX = 1.12f
-                                    scaleY = 1.12f
-                                }.blur(64.dp),
-                    )
                 }
             }
         }
@@ -630,7 +627,7 @@ private fun AppleMusicBackground(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.28f)),
+                    .background(Color.Black.copy(alpha = 0.48f)),
         )
     }
 }
