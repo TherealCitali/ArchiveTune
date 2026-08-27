@@ -14,11 +14,6 @@ import android.graphics.Bitmap
 import android.os.Build
 import android.view.HapticFeedbackConstants
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -568,69 +563,67 @@ private fun AppleMusicBackground(
                 .fillMaxSize()
                 .background(Color.Black),
     ) {
-        AnimatedContent(
-            targetState = mediaMetadata.thumbnailUrl,
-            transitionSpec = { fadeIn(tween(700)) togetherWith fadeOut(tween(700)) },
-            label = "lyrics-lockscreen-background",
-        ) { thumbnailUrl ->
-            if (thumbnailUrl != null) {
-                val context = LocalContext.current
-                val isPreS = Build.VERSION.SDK_INT < Build.VERSION_CODES.S
-                if (isPreS) {
-                    val imageLoader = context.imageLoader
-                    val blurredBitmap by produceState<Bitmap?>(null, thumbnailUrl) {
-                        value =
-                            withContext(Dispatchers.IO) {
-                                runCatching {
-                                    val request =
-                                        ImageRequest
-                                            .Builder(context)
-                                            .data(thumbnailUrl)
-                                            .allowHardware(false)
-                                            .size(Size(720, 720))
-                                            .build()
-                                    val image = imageLoader.execute(request).image ?: return@runCatching null
-                                    val bitmap = image.toBitmap().copy(Bitmap.Config.ARGB_8888, true)
-                                    val density = context.resources.displayMetrics.density
-                                    ImageBlurUtils.blur(bitmap, 72f * density)
-                                }.getOrNull()
-                            }
+        val thumbnailUrl = mediaMetadata.thumbnailUrl
+        if (thumbnailUrl != null) {
+            val context = LocalContext.current
+            val isPreS = Build.VERSION.SDK_INT < Build.VERSION_CODES.S
+            val artModifier =
+                Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        scaleX = 1.12f
+                        scaleY = 1.12f
                     }
-                    blurredBitmap?.let { bitmap ->
-                        Image(
-                            bitmap = bitmap.asImageBitmap(),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .graphicsLayer {
-                                        scaleX = 1.12f
-                                        scaleY = 1.12f
-                                    },
-                        )
-                    }
-                } else {
-                    AsyncImage(
-                        model = thumbnailUrl,
+            // Show crop art immediately so Android 11 and below never flash black
+            // while RenderScript / software blur is still working.
+            AsyncImage(
+                model = thumbnailUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = artModifier,
+            )
+            if (isPreS) {
+                val imageLoader = context.imageLoader
+                val blurredBitmap by produceState<Bitmap?>(null, thumbnailUrl) {
+                    value =
+                        withContext(Dispatchers.IO) {
+                            runCatching {
+                                val request =
+                                    ImageRequest
+                                        .Builder(context)
+                                        .data(thumbnailUrl)
+                                        .allowHardware(false)
+                                        .size(Size(720, 720))
+                                        .build()
+                                val image = imageLoader.execute(request).image ?: return@runCatching null
+                                val bitmap = image.toBitmap().copy(Bitmap.Config.ARGB_8888, true)
+                                val density = context.resources.displayMetrics.density
+                                ImageBlurUtils.blur(bitmap, 72f * density)
+                            }.getOrNull()
+                        }
+                }
+                blurredBitmap?.let { bitmap ->
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .graphicsLayer {
-                                    scaleX = 1.12f
-                                    scaleY = 1.12f
-                                }.blur(64.dp),
+                        modifier = artModifier,
                     )
                 }
+            } else {
+                AsyncImage(
+                    model = thumbnailUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = artModifier.blur(64.dp),
+                )
             }
         }
         Box(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.28f)),
+                    .background(Color.Black.copy(alpha = 0.46f)),
         )
     }
 }
