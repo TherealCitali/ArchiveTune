@@ -10,16 +10,9 @@
 package dev.citali.lunartune.ui.player
 
 import android.content.res.Configuration
-import android.graphics.Bitmap
 import android.os.Build
 import android.view.HapticFeedbackConstants
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -57,7 +50,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -66,7 +58,6 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -124,7 +115,6 @@ import dev.citali.lunartune.ui.component.LyricsV2
 import dev.citali.lunartune.ui.component.PlayerSliderTrack
 import dev.citali.lunartune.ui.menu.LyricsMenu
 import dev.citali.lunartune.ui.theme.PlayerColorExtractor
-import dev.citali.lunartune.utils.ImageBlurUtils
 import dev.citali.lunartune.utils.makeTimeString
 import dev.citali.lunartune.utils.rememberEnumPreference
 import dev.citali.lunartune.utils.rememberPreference
@@ -562,66 +552,40 @@ private fun AppleMusicBackground(
     gradientColors: List<Color>,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
+    val thumbnailUrl = mediaMetadata.thumbnailUrl
+    val isPreS = Build.VERSION.SDK_INT < Build.VERSION_CODES.S
+    // Tiny decode + stretch (and GPU blur on S+) is instant and lockscreen-like.
+    // Skip RenderScript so Android 11 never waits on a 720px software blur.
+    val blurRequest =
+        remember(thumbnailUrl, context) {
+            thumbnailUrl?.let { url ->
+                ImageRequest
+                    .Builder(context)
+                    .data(url)
+                    .size(Size(48, 48))
+                    .build()
+            }
+        }
     Box(
         modifier =
             modifier
                 .fillMaxSize()
                 .background(Color.Black),
     ) {
-        AnimatedContent(
-            targetState = mediaMetadata.thumbnailUrl,
-            transitionSpec = { fadeIn(tween(700)) togetherWith fadeOut(tween(700)) },
-            label = "lyrics-lockscreen-background",
-        ) { thumbnailUrl ->
-            if (thumbnailUrl != null) {
-                val context = LocalContext.current
-                val isPreS = Build.VERSION.SDK_INT < Build.VERSION_CODES.S
-                val artModifier =
+        if (blurRequest != null) {
+            AsyncImage(
+                model = blurRequest,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier =
                     Modifier
                         .fillMaxSize()
                         .graphicsLayer {
                             scaleX = 1.12f
                             scaleY = 1.12f
-                        }
-                // Android 11 and below have no RenderEffect blur. Show the cover
-                // immediately so opening lyrics is never a black flash while
-                // RenderScript blur runs, then swap in the blurred bitmap.
-                AsyncImage(
-                    model = thumbnailUrl,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = if (isPreS) artModifier else artModifier.blur(64.dp),
-                )
-                if (isPreS) {
-                    val imageLoader = context.imageLoader
-                    val blurredBitmap by produceState<Bitmap?>(null, thumbnailUrl) {
-                        value =
-                            withContext(Dispatchers.IO) {
-                                runCatching {
-                                    val request =
-                                        ImageRequest
-                                            .Builder(context)
-                                            .data(thumbnailUrl)
-                                            .allowHardware(false)
-                                            .size(Size(720, 720))
-                                            .build()
-                                    val image = imageLoader.execute(request).image ?: return@runCatching null
-                                    val bitmap = image.toBitmap().copy(Bitmap.Config.ARGB_8888, true)
-                                    val density = context.resources.displayMetrics.density
-                                    ImageBlurUtils.blur(bitmap, 72f * density)
-                                }.getOrNull()
-                            }
-                    }
-                    blurredBitmap?.let { bitmap ->
-                        Image(
-                            bitmap = bitmap.asImageBitmap(),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = artModifier,
-                        )
-                    }
-                }
-            }
+                        }.then(if (isPreS) Modifier else Modifier.blur(64.dp)),
+            )
         }
         Box(
             modifier =

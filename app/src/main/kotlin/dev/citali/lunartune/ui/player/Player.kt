@@ -9,15 +9,16 @@
 
 package dev.citali.lunartune.ui.player
 
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.content.res.Configuration
+import android.database.ContentObserver
 import android.graphics.Bitmap
 import android.media.AudioManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -293,26 +294,17 @@ internal fun rememberDeviceMusicVolumeController(): DeviceMusicVolumeController 
         }
 
     DisposableEffect(context, controller) {
-        val appContext = context.applicationContext
-        val receiver =
-            object : BroadcastReceiver() {
-                override fun onReceive(
-                    ctx: Context?,
-                    intent: Intent?,
-                ) {
+        val observer =
+            object : ContentObserver(Handler(Looper.getMainLooper())) {
+                override fun onChange(selfChange: Boolean) {
                     controller.refresh()
                 }
             }
-        val filter = IntentFilter("android.media.VOLUME_CHANGED_ACTION")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            appContext.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
-        } else {
-            @Suppress("UnspecifiedRegisterReceiverFlag")
-            appContext.registerReceiver(receiver, filter)
-        }
+        val contentResolver = context.applicationContext.contentResolver
+        contentResolver.registerContentObserver(Settings.System.CONTENT_URI, true, observer)
         controller.refresh()
         onDispose {
-            runCatching { appContext.unregisterReceiver(receiver) }
+            contentResolver.unregisterContentObserver(observer)
         }
     }
 
@@ -836,17 +828,11 @@ fun BottomSheetPlayer(
         mutableStateOf(false)
     }
 
-    LaunchedEffect(mediaMetadata?.id, playbackState, aodModeEnabled, state.isExpanded) {
+    LaunchedEffect(mediaMetadata?.id, playbackState, aodModeEnabled) {
         val startTime = SystemClock.elapsedRealtime()
         if (playbackState == STATE_READY) {
             while (isActive) {
-                delay(
-                    when {
-                        aodModeEnabled -> 500L
-                        !state.isExpanded -> 400L
-                        else -> 100L
-                    },
-                )
+                delay(if (aodModeEnabled) 500L else 100L)
                 val isTransitioning = playerConnection.player.currentMediaItem?.mediaId != mediaMetadata?.id
                 val currentPlayerPosition = playerConnection.player.currentPosition
                 val currentPlayerDuration = playerConnection.player.duration
