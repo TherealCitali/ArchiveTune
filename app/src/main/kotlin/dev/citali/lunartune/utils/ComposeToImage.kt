@@ -224,7 +224,7 @@ object ComposeToImage {
             var coverArtBitmap: Bitmap? = null
             if (coverArtUrl != null) {
                 try {
-                    val imageLoader = ImageLoader(context)
+                    val imageLoader = context.imageLoader
                     val request =
                         ImageRequest
                             .Builder(context)
