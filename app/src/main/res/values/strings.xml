@@ -106,6 +106,12 @@
     <string name="featured_album_badge">FEATURED ALBUM</string>
     <string name="other_versions">Other versions</string>
     <string name="liked_songs">Liked songs</string>
+    <string name="smart_playlist_on_repeat">On repeat</string>
+    <string name="smart_playlist_on_repeat_desc">Most played this month</string>
+    <string name="smart_playlist_forgotten">Forgotten favorites</string>
+    <string name="smart_playlist_forgotten_desc">Loved songs you left behind</string>
+    <string name="smart_playlist_recent">Recently played</string>
+    <string name="smart_playlist_recent_desc">Your latest listens</string>
     <string name="downloaded_songs">Downloaded songs</string>
     <string name="playlist_is_empty">The playlist is empty</string>
     <string name="remove_download_playlist_confirm">Do you really want to remove all \"%s\" playlist songs from the Downloaded Songs storage?</string>

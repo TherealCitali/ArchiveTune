@@ -7,6 +7,7 @@
 
 package dev.citali.lunartune.ui.screens.library
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,12 +45,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,6 +63,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -82,6 +87,7 @@ import dev.citali.lunartune.playback.queues.ListQueue
 import dev.citali.lunartune.ui.component.ExpressivePullToRefreshBox
 import dev.citali.lunartune.ui.component.ItemThumbnail
 import dev.citali.lunartune.ui.component.LocalMenuState
+import dev.citali.lunartune.ui.menu.SelectionSongMenu
 import dev.citali.lunartune.ui.menu.SongMenu
 import dev.citali.lunartune.ui.screens.library.rememberArtworkGradient
 import dev.citali.lunartune.ui.utils.ItemWrapper
@@ -128,7 +134,19 @@ fun LibrarySongsScreen(
             .asPaddingValues()
             .calculateBottomPadding() + 12.dp
 
-    val wrappedSongs = remember(songs) { songs.map { item -> ItemWrapper(item) }.toMutableList() }
+    val wrappedSongs = remember(songs) { songs.map { item -> ItemWrapper(item) }.toMutableStateList() }
+
+    var selection by remember { mutableStateOf(false) }
+    val selectedCount by remember { derivedStateOf { wrappedSongs.count { it.isSelected } } }
+    LaunchedEffect(selection, selectedCount) {
+        if (selection && selectedCount == 0) selection = false
+    }
+    if (selection) {
+        BackHandler {
+            selection = false
+            wrappedSongs.forEach { it.isSelected = false }
+        }
+    }
 
     val filteredSongs =
         remember(wrappedSongs, hideExplicit) {
@@ -316,6 +334,60 @@ fun LibrarySongsScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            if (selection) {
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = pluralStringResource(R.plurals.n_song, selectedCount, selectedCount),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    )
+                    Row {
+                        IconButton(
+                            onClick = {
+                                if (selectedCount == wrappedSongs.size) {
+                                    wrappedSongs.forEach { it.isSelected = false }
+                                } else {
+                                    wrappedSongs.forEach { it.isSelected = true }
+                                }
+                            },
+                        ) {
+                            Icon(
+                                painter =
+                                    painterResource(
+                                        if (selectedCount == wrappedSongs.size) R.drawable.deselect else R.drawable.select_all,
+                                    ),
+                                contentDescription = null,
+                            )
+                        }
+                        IconButton(
+                            onClick = {
+                                menuState.show {
+                                    SelectionSongMenu(
+                                        songSelection = wrappedSongs.filter { it.isSelected }.map { it.item },
+                                        onDismiss = menuState::dismiss,
+                                        clearAction = {
+                                            selection = false
+                                            wrappedSongs.forEach { it.isSelected = false }
+                                        },
+                                    )
+                                }
+                            },
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.more_vert),
+                                contentDescription = null,
+                            )
+                        }
+                    }
+                }
+            }
+
             LazyColumn(
                 state = lazyListState,
                 // Issue 2: use player-aware window insets for bottom padding
@@ -481,6 +553,7 @@ fun LibrarySongsScreen(
                             thumbnailUrl = song.song.thumbnailUrl,
                             isActive = isActive,
                             isPlaying = isPlaying,
+                            isSelected = selection && songWrapper.isSelected,
                             shape = RoundedCornerShape(thumbCorner),
                             contentScale = ContentScale.Crop,
                             showPlaceholder = true,
