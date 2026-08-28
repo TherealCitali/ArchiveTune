@@ -150,28 +150,24 @@ fun VinylPlayerStage(
         if (isPlaying) {
             var last = 0L
             while (isActive) {
-                withFrameNanos { frame ->
-                    if (last != 0L) {
-                        val dt = ((frame - last) / 1_000_000_000f).coerceIn(0f, 0.05f)
-                        val next = (rotation.value + degreesPerSecond * dt) % 360f
-                        rotation.snapTo(next)
-                    }
-                    last = frame
+                val frame = withFrameNanos { it }
+                if (last != 0L) {
+                    val dt = ((frame - last) / 1_000_000_000f).coerceIn(0f, 0.05f)
+                    rotation.snapTo((rotation.value + degreesPerSecond * dt) % 360f)
                 }
+                last = frame
             }
         } else {
             var velocity = degreesPerSecond
             var last = 0L
             while (isActive && velocity > 1.2f) {
-                withFrameNanos { frame ->
-                    if (last != 0L) {
-                        val dt = ((frame - last) / 1_000_000_000f).coerceIn(0f, 0.05f)
-                        velocity *= exp(-2.6f * dt)
-                        val next = (rotation.value + velocity * dt) % 360f
-                        rotation.snapTo(next)
-                    }
-                    last = frame
+                val frame = withFrameNanos { it }
+                if (last != 0L) {
+                    val dt = ((frame - last) / 1_000_000_000f).coerceIn(0f, 0.05f)
+                    velocity *= exp(-2.6f * dt)
+                    rotation.snapTo((rotation.value + velocity * dt) % 360f)
                 }
+                last = frame
             }
         }
     }
