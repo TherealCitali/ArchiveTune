@@ -33,6 +33,7 @@ import dev.citali.lunartune.ui.screens.artist.ArtistAlbumsScreen
 import dev.citali.lunartune.ui.screens.artist.ArtistItemsScreen
 import dev.citali.lunartune.ui.screens.artist.ArtistScreen
 import dev.citali.lunartune.ui.screens.artist.ArtistSongsScreen
+import dev.citali.lunartune.ui.screens.library.LibraryMixHubScreen
 import dev.citali.lunartune.ui.screens.library.LibraryScreen
 import dev.citali.lunartune.ui.screens.library.LocalSongScreen
 import dev.citali.lunartune.ui.screens.musicrecognition.MusicRecognitionScreen
@@ -111,6 +112,9 @@ fun NavGraphBuilder.navigationBuilder(
     }
     composable("local_songs") {
         LocalSongScreen(navController)
+    }
+    composable("library_mix_hub") {
+        LibraryMixHubScreen(navController)
     }
     composable("history") {
         HistoryScreen(navController)

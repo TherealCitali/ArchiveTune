@@ -109,6 +109,12 @@ import dev.citali.lunartune.constants.QuickPicksDisplayMode
 import dev.citali.lunartune.constants.QuickPicksDisplayModeKey
 import dev.citali.lunartune.constants.RandomThemeOnStartupKey
 import dev.citali.lunartune.constants.ShowHomeCategoryChipsKey
+import dev.citali.lunartune.constants.ShowLibraryCardCachedKey
+import dev.citali.lunartune.constants.ShowLibraryCardLikedKey
+import dev.citali.lunartune.constants.ShowLibraryCardLocalKey
+import dev.citali.lunartune.constants.ShowLibraryCardMixHubKey
+import dev.citali.lunartune.constants.ShowLibraryCardMyTopKey
+import dev.citali.lunartune.constants.ShowLibraryCardOfflineKey
 import dev.citali.lunartune.constants.ShowPlayerVolumeBarKey
 import dev.citali.lunartune.constants.ShowTagsInLibraryKey
 import dev.citali.lunartune.constants.SliderStyle
@@ -274,6 +280,18 @@ fun AppearanceSettings(navController: NavController) {
             ShowTagsInLibraryKey,
             defaultValue = true,
         )
+    val (showLibraryCardLiked, onShowLibraryCardLikedChange) =
+        rememberPreference(ShowLibraryCardLikedKey, defaultValue = true)
+    val (showLibraryCardOffline, onShowLibraryCardOfflineChange) =
+        rememberPreference(ShowLibraryCardOfflineKey, defaultValue = true)
+    val (showLibraryCardCached, onShowLibraryCardCachedChange) =
+        rememberPreference(ShowLibraryCardCachedKey, defaultValue = true)
+    val (showLibraryCardLocal, onShowLibraryCardLocalChange) =
+        rememberPreference(ShowLibraryCardLocalKey, defaultValue = true)
+    val (showLibraryCardMyTop, onShowLibraryCardMyTopChange) =
+        rememberPreference(ShowLibraryCardMyTopKey, defaultValue = true)
+    val (showLibraryCardMixHub, onShowLibraryCardMixHubChange) =
+        rememberPreference(ShowLibraryCardMixHubKey, defaultValue = true)
     val (showHomeCategoryChips, onShowHomeCategoryChipsChange) =
         rememberPreference(
             ShowHomeCategoryChipsKey,
@@ -1196,6 +1214,72 @@ private fun SliderStyleOptionCard(
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier =
+            modifier
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(16.dp))
+                .border(
+                    1.dp,
+                    if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                    RoundedCornerShape(16.dp),
+                ).clickable(onClick = onClick)
+                .padding(16.dp),
+    ) {
+        StyledPlaybackSlider(
+            sliderStyle = sliderStyle,
+            value = sliderValue,
+            valueRange = 0f..1f,
+            onValueChange = { sliderValue = it },
+            onValueChangeFinished = {},
+            activeColor = MaterialTheme.colorScheme.primary,
+            isPlaying = true,
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+        )
+
+        Text(
+            text = sliderStyleLabel(sliderStyle),
+            style = MaterialTheme.typography.labelLarge,
+        )
+    }
+}
+
+@Composable
+private fun sliderStyleLabel(sliderStyle: SliderStyle): String =
+    when (sliderStyle) {
+        SliderStyle.Standard -> stringResource(R.string.slider_style_standard)
+        SliderStyle.Wavy -> stringResource(R.string.slider_style_wavy)
+        SliderStyle.Thick -> stringResource(R.string.slider_style_thick)
+        SliderStyle.Circular -> stringResource(R.string.slider_style_circular)
+        SliderStyle.Simple -> stringResource(R.string.slider_style_simple)
+    }
+
+enum class DarkMode {
+    ON,
+    OFF,
+    AUTO,
+}
+
+enum class NavigationTab {
+    HOME,
+    SEARCH,
+    LIBRARY,
+}
+
+enum class PlayerTextAlignment {
+    SIDED,
+    CENTER,
+}
+
+enum class LyricsPosition {
+    LEFT,
+    CENTER,
+    RIGHT,
+}
+nment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier =
             modifier
