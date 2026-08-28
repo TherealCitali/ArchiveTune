@@ -2821,7 +2821,7 @@ private data class V7PlayerBackdropState(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun LittlePlayerContent(
+internal fun LittlePlayerContent(
     mediaMetadata: MediaMetadata,
     sliderPosition: Long?,
     positionMs: Long,
