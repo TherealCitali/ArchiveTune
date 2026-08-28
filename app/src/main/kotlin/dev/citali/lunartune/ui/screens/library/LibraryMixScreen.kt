@@ -87,7 +87,6 @@ import dev.citali.lunartune.constants.LibraryFilter
 import dev.citali.lunartune.constants.ShowLibraryCardCachedKey
 import dev.citali.lunartune.constants.ShowLibraryCardLikedKey
 import dev.citali.lunartune.constants.ShowLibraryCardLocalKey
-import dev.citali.lunartune.constants.ShowLibraryCardMixHubKey
 import dev.citali.lunartune.constants.ShowLibraryCardMyTopKey
 import dev.citali.lunartune.constants.ShowLibraryCardOfflineKey
 import dev.citali.lunartune.constants.ShowSpotifyPlaylistsKey
@@ -147,7 +146,6 @@ fun LibraryMixScreen(
     val (showCachedCard) = rememberPreference(ShowLibraryCardCachedKey, defaultValue = true)
     val (showLocalCard) = rememberPreference(ShowLibraryCardLocalKey, defaultValue = true)
     val (showMyTopCard) = rememberPreference(ShowLibraryCardMyTopKey, defaultValue = true)
-    val (showMixHubCard) = rememberPreference(ShowLibraryCardMixHubKey, defaultValue = true)
 
     val filteredPlaylistIds by database
         .playlistIdsByTags(
@@ -242,8 +240,6 @@ fun LibraryMixScreen(
                     val localTitle = stringResource(R.string.local_files)
                     val localCount = stringResource(R.string.on_device)
                     val allTimeLabel = stringResource(R.string.all_time)
-                    val mixHubTitle = stringResource(R.string.library_mix_hub)
-                    val mixHubCount = stringResource(R.string.library_mix_hub_card_desc)
                     val errorContainer = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.6f)
                     val errorColor = MaterialTheme.colorScheme.error
                     val primaryContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
@@ -312,18 +308,6 @@ fun LibraryMixScreen(
                                         containerColor = secondaryContainer,
                                         iconColor = secondaryColor,
                                         onClick = { navController.navigate("top_playlist/$topSize") },
-                                    ),
-                                )
-                            }
-                            if (showMixHubCard) {
-                                add(
-                                    LibraryShortcutSpec(
-                                        title = mixHubTitle,
-                                        countText = mixHubCount,
-                                        iconRes = R.drawable.mix,
-                                        containerColor = tertiaryContainer,
-                                        iconColor = tertiaryColor,
-                                        onClick = { navController.navigate("library_mix_hub") },
                                     ),
                                 )
                             }
