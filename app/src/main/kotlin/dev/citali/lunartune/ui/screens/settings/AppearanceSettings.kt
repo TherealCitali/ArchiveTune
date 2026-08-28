@@ -893,6 +893,59 @@ fun AppearanceSettings(navController: NavController) {
                 }
             }
 
+            PreferenceGroup(title = stringResource(R.string.library_shortcut_cards)) {
+                item {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.liked_songs)) },
+                        description = stringResource(R.string.library_shortcut_cards_desc),
+                        icon = { Icon(painterResource(R.drawable.favorite), null) },
+                        checked = showLibraryCardLiked,
+                        onCheckedChange = onShowLibraryCardLikedChange,
+                    )
+                }
+                item {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.offline_shortcut)) },
+                        icon = { Icon(painterResource(R.drawable.offline), null) },
+                        checked = showLibraryCardOffline,
+                        onCheckedChange = onShowLibraryCardOfflineChange,
+                    )
+                }
+                item {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.cached)) },
+                        icon = { Icon(painterResource(R.drawable.cached), null) },
+                        checked = showLibraryCardCached,
+                        onCheckedChange = onShowLibraryCardCachedChange,
+                    )
+                }
+                item {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.local_files)) },
+                        icon = { Icon(painterResource(R.drawable.snippet_folder), null) },
+                        checked = showLibraryCardLocal,
+                        onCheckedChange = onShowLibraryCardLocalChange,
+                    )
+                }
+                item {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.my_top)) },
+                        icon = { Icon(painterResource(R.drawable.trending_up), null) },
+                        checked = showLibraryCardMyTop,
+                        onCheckedChange = onShowLibraryCardMyTopChange,
+                    )
+                }
+                item {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.library_mix_hub)) },
+                        description = stringResource(R.string.library_mix_hub_card_desc),
+                        icon = { Icon(painterResource(R.drawable.mix), null) },
+                        checked = showLibraryCardMixHub,
+                        onCheckedChange = onShowLibraryCardMixHubChange,
+                    )
+                }
+            }
+
             PreferenceGroup(title = stringResource(R.string.misc)) {
                 item {
                     EnumListPreference(
