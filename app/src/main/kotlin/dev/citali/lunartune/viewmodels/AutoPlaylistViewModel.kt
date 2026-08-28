@@ -82,6 +82,22 @@ class AutoPlaylistViewModel
                             database.likedSongs(songSortType, descending, hideVideo).map { it.filterExplicit(hideExplicit) }
                         }
 
+                        "on_repeat" -> {
+                            database
+                                .mostPlayedSongs(
+                                    fromTimeStamp = System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000,
+                                    limit = 50,
+                                ).map { it.filterExplicit(hideExplicit) }
+                        }
+
+                        "forgotten" -> {
+                            database.forgottenFavorites().map { it.filterExplicit(hideExplicit) }
+                        }
+
+                        "recent" -> {
+                            database.recentSongs(80).map { it.filterExplicit(hideExplicit) }
+                        }
+
                         else -> {
                             MutableStateFlow(emptyList())
                         }
