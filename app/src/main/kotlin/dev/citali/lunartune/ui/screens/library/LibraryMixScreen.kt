@@ -142,6 +142,12 @@ fun LibraryMixScreen(
     val topMixesUiState by viewModel.topMixesUiState.collectAsStateWithLifecycle()
     val spotifyPlaylists by spotifyLibraryViewModel.playlists.collectAsStateWithLifecycle()
     val (showSpotifyPlaylists) = rememberPreference(ShowSpotifyPlaylistsKey, false)
+    val (showLikedCard) = rememberPreference(ShowLibraryCardLikedKey, defaultValue = true)
+    val (showOfflineCard) = rememberPreference(ShowLibraryCardOfflineKey, defaultValue = true)
+    val (showCachedCard) = rememberPreference(ShowLibraryCardCachedKey, defaultValue = true)
+    val (showLocalCard) = rememberPreference(ShowLibraryCardLocalKey, defaultValue = true)
+    val (showMyTopCard) = rememberPreference(ShowLibraryCardMyTopKey, defaultValue = true)
+    val (showMixHubCard) = rememberPreference(ShowLibraryCardMixHubKey, defaultValue = true)
 
     val filteredPlaylistIds by database
         .playlistIdsByTags(
