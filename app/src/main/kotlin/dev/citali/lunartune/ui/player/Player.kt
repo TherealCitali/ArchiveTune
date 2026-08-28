@@ -208,6 +208,7 @@ import dev.citali.lunartune.ui.utils.YtimgResizePolicy
 import dev.citali.lunartune.ui.utils.getNextFallbackUrl
 import dev.citali.lunartune.ui.utils.resize
 import dev.citali.lunartune.utils.ImageBlurUtils
+import dev.citali.lunartune.utils.LyricsArtBlurCache
 import dev.citali.lunartune.utils.makeTimeString
 import dev.citali.lunartune.utils.parseTabMap
 import dev.citali.lunartune.utils.rememberEnumPreference
@@ -536,6 +537,10 @@ fun BottomSheetPlayer(
             previousThumbnailUrl = currentThumbnail
             previousGradientColors = gradientColors
         }
+    }
+
+    LaunchedEffect(mediaMetadata?.thumbnailUrl) {
+        LyricsArtBlurCache.prefetch(context, mediaMetadata?.thumbnailUrl)
     }
 
     LaunchedEffect(mediaMetadata?.id, mediaMetadata?.thumbnailUrl, playerBackground, playerDesignStyle) {
