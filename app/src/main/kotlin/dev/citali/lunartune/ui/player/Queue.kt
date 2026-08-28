@@ -536,7 +536,7 @@ fun Queue(
                     )
                 }
 
-                PlayerDesignStyle.V4 -> {
+                PlayerDesignStyle.V4, PlayerDesignStyle.V10 -> {
                     QueueCollapsedContentV4(
                         showCodecOnPlayer = showCodecOnPlayer,
                         currentFormat = currentFormat,
