@@ -84,6 +84,12 @@ import dev.citali.lunartune.LocalPlayerAwareWindowInsets
 import dev.citali.lunartune.LocalPlayerConnection
 import dev.citali.lunartune.R
 import dev.citali.lunartune.constants.LibraryFilter
+import dev.citali.lunartune.constants.ShowLibraryCardCachedKey
+import dev.citali.lunartune.constants.ShowLibraryCardLikedKey
+import dev.citali.lunartune.constants.ShowLibraryCardLocalKey
+import dev.citali.lunartune.constants.ShowLibraryCardMixHubKey
+import dev.citali.lunartune.constants.ShowLibraryCardMyTopKey
+import dev.citali.lunartune.constants.ShowLibraryCardOfflineKey
 import dev.citali.lunartune.constants.ShowSpotifyPlaylistsKey
 import dev.citali.lunartune.extensions.toMediaItem
 import dev.citali.lunartune.playback.queues.ListQueue
@@ -136,6 +142,12 @@ fun LibraryMixScreen(
     val topMixesUiState by viewModel.topMixesUiState.collectAsStateWithLifecycle()
     val spotifyPlaylists by spotifyLibraryViewModel.playlists.collectAsStateWithLifecycle()
     val (showSpotifyPlaylists) = rememberPreference(ShowSpotifyPlaylistsKey, false)
+    val (showLikedCard) = rememberPreference(ShowLibraryCardLikedKey, defaultValue = true)
+    val (showOfflineCard) = rememberPreference(ShowLibraryCardOfflineKey, defaultValue = true)
+    val (showCachedCard) = rememberPreference(ShowLibraryCardCachedKey, defaultValue = true)
+    val (showLocalCard) = rememberPreference(ShowLibraryCardLocalKey, defaultValue = true)
+    val (showMyTopCard) = rememberPreference(ShowLibraryCardMyTopKey, defaultValue = true)
+    val (showMixHubCard) = rememberPreference(ShowLibraryCardMixHubKey, defaultValue = true)
 
     val filteredPlaylistIds by database
         .playlistIdsByTags(
@@ -221,82 +233,131 @@ fun LibraryMixScreen(
 
                 // 2. Shortcuts Grid
                 item(key = "shortcuts_grid", contentType = "shortcuts_grid") {
-                    Column(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 24.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            // Liked Songs
-                            ShortcutCard(
-                                title = stringResource(R.string.liked_songs),
-                                countText = "$likedSongsCount ${stringResource(R.string.tracks_label)}",
-                                iconRes = R.drawable.favorite,
-                                containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.6f),
-                                iconColor = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.weight(1f),
-                                onClick = { navController.navigate("auto_playlist/liked") },
-                            )
+                    val likedTitle = stringResource(R.string.liked_songs)
+                    val likedCount = "$likedSongsCount ${stringResource(R.string.tracks_label)}"
+                    val offlineTitle = stringResource(R.string.offline_shortcut)
+                    val offlineCount = stringResource(R.string.downloaded_desc)
+                    val cachedTitle = stringResource(R.string.cached)
+                    val cachedCount = stringResource(R.string.instant_playback)
+                    val localTitle = stringResource(R.string.local_files)
+                    val localCount = stringResource(R.string.on_device)
+                    val allTimeLabel = stringResource(R.string.all_time)
+                    val mixHubTitle = stringResource(R.string.library_mix_hub)
+                    val mixHubCount = stringResource(R.string.library_mix_hub_card_desc)
+                    val errorContainer = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.6f)
+                    val errorColor = MaterialTheme.colorScheme.error
+                    val primaryContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
+                    val primaryColor = MaterialTheme.colorScheme.primary
+                    val tertiaryContainer = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f)
+                    val tertiaryColor = MaterialTheme.colorScheme.tertiary
+                    val secondaryContainer = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f)
+                    val secondaryColor = MaterialTheme.colorScheme.secondary
 
-                            // Offline/Downloaded
-                            ShortcutCard(
-                                title = stringResource(R.string.offline_shortcut),
-                                countText = stringResource(R.string.downloaded_desc),
-                                iconRes = R.drawable.offline,
-                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
-                                iconColor = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.weight(1f),
-                                onClick = { navController.navigate("auto_playlist/downloaded") },
-                            )
+                    val shortcutCards =
+                        buildList {
+                            if (showLikedCard) {
+                                add(
+                                    LibraryShortcutSpec(
+                                        title = likedTitle,
+                                        countText = likedCount,
+                                        iconRes = R.drawable.favorite,
+                                        containerColor = errorContainer,
+                                        iconColor = errorColor,
+                                        onClick = { navController.navigate("auto_playlist/liked") },
+                                    ),
+                                )
+                            }
+                            if (showOfflineCard) {
+                                add(
+                                    LibraryShortcutSpec(
+                                        title = offlineTitle,
+                                        countText = offlineCount,
+                                        iconRes = R.drawable.offline,
+                                        containerColor = primaryContainer,
+                                        iconColor = primaryColor,
+                                        onClick = { navController.navigate("auto_playlist/downloaded") },
+                                    ),
+                                )
+                            }
+                            if (showCachedCard) {
+                                add(
+                                    LibraryShortcutSpec(
+                                        title = cachedTitle,
+                                        countText = cachedCount,
+                                        iconRes = R.drawable.cached,
+                                        containerColor = tertiaryContainer,
+                                        iconColor = tertiaryColor,
+                                        onClick = { navController.navigate("cache_playlist/cached") },
+                                    ),
+                                )
+                            }
+                            if (showLocalCard) {
+                                add(
+                                    LibraryShortcutSpec(
+                                        title = localTitle,
+                                        countText = localCount,
+                                        iconRes = R.drawable.snippet_folder,
+                                        containerColor = secondaryContainer,
+                                        iconColor = secondaryColor,
+                                        onClick = { navController.navigate("local_songs") },
+                                    ),
+                                )
+                            }
+                            if (showMyTopCard) {
+                                add(
+                                    LibraryShortcutSpec(
+                                        title = topPlaylistTitle,
+                                        countText = allTimeLabel,
+                                        iconRes = R.drawable.trending_up,
+                                        containerColor = secondaryContainer,
+                                        iconColor = secondaryColor,
+                                        onClick = { navController.navigate("top_playlist/$topSize") },
+                                    ),
+                                )
+                            }
+                            if (showMixHubCard) {
+                                add(
+                                    LibraryShortcutSpec(
+                                        title = mixHubTitle,
+                                        countText = mixHubCount,
+                                        iconRes = R.drawable.mix,
+                                        containerColor = tertiaryContainer,
+                                        iconColor = tertiaryColor,
+                                        onClick = { navController.navigate("library_mix_hub") },
+                                    ),
+                                )
+                            }
                         }
 
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.fillMaxWidth(),
+                    if (shortcutCards.isNotEmpty()) {
+                        Column(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 24.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
-                            // Cached
-                            ShortcutCard(
-                                title = stringResource(R.string.cached),
-                                countText = stringResource(R.string.instant_playback),
-                                iconRes = R.drawable.cached,
-                                containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f),
-                                iconColor = MaterialTheme.colorScheme.tertiary,
-                                modifier = Modifier.weight(1f),
-                                onClick = { navController.navigate("cache_playlist/cached") },
-                            )
-
-                            // Local Files
-                            ShortcutCard(
-                                title = stringResource(R.string.local_files),
-                                countText = stringResource(R.string.on_device),
-                                iconRes = R.drawable.snippet_folder,
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f),
-                                iconColor = MaterialTheme.colorScheme.secondary,
-                                modifier = Modifier.weight(1f),
-                                onClick = { navController.navigate("local_songs") },
-                            )
-                        }
-
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            ShortcutCard(
-                                title = topPlaylistTitle,
-                                countText = stringResource(R.string.all_time),
-                                iconRes = R.drawable.trending_up,
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f),
-                                iconColor = MaterialTheme.colorScheme.secondary,
-                                modifier = Modifier.weight(1f),
-                                onClick = { navController.navigate("top_playlist/$topSize") },
-                            )
-
-                            Spacer(modifier = Modifier.weight(1f))
+                            shortcutCards.chunked(2).forEach { row ->
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                    row.forEach { card ->
+                                        ShortcutCard(
+                                            title = card.title,
+                                            countText = card.countText,
+                                            iconRes = card.iconRes,
+                                            containerColor = card.containerColor,
+                                            iconColor = card.iconColor,
+                                            modifier = Modifier.weight(1f),
+                                            onClick = card.onClick,
+                                        )
+                                    }
+                                    if (row.size == 1) {
+                                        Spacer(modifier = Modifier.weight(1f))
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -1302,6 +1363,15 @@ private fun MostPlayedAlbumSpotlightCard(
         }
     }
 }
+
+private data class LibraryShortcutSpec(
+    val title: String,
+    val countText: String,
+    val iconRes: Int,
+    val containerColor: Color,
+    val iconColor: Color,
+    val onClick: () -> Unit,
+)
 
 @Composable
 fun ShortcutCard(
