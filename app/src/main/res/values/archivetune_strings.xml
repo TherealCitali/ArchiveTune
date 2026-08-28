@@ -328,6 +328,9 @@
     <string name="mini_player_background_style">Mini player background style</string>
     <string name="follow_theme">Follow theme</string>
     <string name="gradient">Gradient</string>
+    <string name="customise_now_playing">Customise now playing</string>
+    <string name="customise_now_playing_desc">Style, background, and controls with a live preview</string>
+    <string name="now_playing_preview_caption">Preview · Suzume — RADWIMPS</string>
     <string name="player_design_style">Player design style</string>
     <string name="player_design_v1">Classic</string>
     <string name="player_design_v2">Modern</string>
