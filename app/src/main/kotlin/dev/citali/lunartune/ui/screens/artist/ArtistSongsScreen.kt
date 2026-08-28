@@ -7,7 +7,6 @@
 
 package dev.citali.lunartune.ui.screens.artist
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -28,14 +27,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -62,9 +55,7 @@ import dev.citali.lunartune.ui.component.IconButton
 import dev.citali.lunartune.ui.component.LocalMenuState
 import dev.citali.lunartune.ui.component.SongListItem
 import dev.citali.lunartune.ui.component.SortHeader
-import dev.citali.lunartune.ui.menu.SelectionSongMenu
 import dev.citali.lunartune.ui.menu.SongMenu
-import dev.citali.lunartune.ui.utils.ItemWrapper
 import dev.citali.lunartune.ui.utils.backToMain
 import dev.citali.lunartune.utils.rememberEnumPreference
 import dev.citali.lunartune.utils.rememberPreference
@@ -98,18 +89,6 @@ fun ArtistSongsScreen(
     val artist by viewModel.artist.collectAsState()
     val songs by viewModel.songs.collectAsState()
     val lazyListState = rememberLazyListState()
-    val wrappedSongs = remember(songs) { songs.map { ItemWrapper(it) }.toMutableStateList() }
-    var selection by remember { mutableStateOf(false) }
-    val selectedCount by remember { derivedStateOf { wrappedSongs.count { it.isSelected } } }
-    LaunchedEffect(selection, selectedCount) {
-        if (selection && selectedCount == 0) selection = false
-    }
-    if (selection) {
-        BackHandler {
-            selection = false
-            wrappedSongs.forEach { it.isSelected = false }
-        }
-    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -151,14 +130,12 @@ fun ArtistSongsScreen(
             }
 
             itemsIndexed(
-                items = wrappedSongs,
-                key = { _, item -> item.item.id },
-            ) { index, songWrapper ->
-                val song = songWrapper.item
+                items = songs,
+                key = { _, item -> item.id },
+            ) { index, song ->
                 SongListItem(
                     song = song,
                     showInLibraryIcon = true,
-                    isSelected = selection && songWrapper.isSelected,
                     isActive = song.id == mediaMetadata?.id,
                     isPlaying = isPlaying,
                     trailingContent = {
@@ -184,9 +161,7 @@ fun ArtistSongsScreen(
                             .fillMaxWidth()
                             .combinedClickable(
                                 onClick = {
-                                    if (selection) {
-                                        songWrapper.isSelected = !songWrapper.isSelected
-                                    } else if (song.id == mediaMetadata?.id) {
+                                    if (song.id == mediaMetadata?.id) {
                                         playerConnection.player.togglePlayPause()
                                     } else {
                                         playerConnection.playQueue(
@@ -200,12 +175,12 @@ fun ArtistSongsScreen(
                                 },
                                 onLongClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    if (!selection) {
-                                        selection = true
-                                        wrappedSongs.forEach { it.isSelected = false }
-                                        songWrapper.isSelected = true
-                                    } else {
-                                        songWrapper.isSelected = !songWrapper.isSelected
+                                    menuState.show {
+                                        SongMenu(
+                                            originalSong = song,
+                                            navController = navController,
+                                            onDismiss = menuState::dismiss,
+                                        )
                                     }
                                 },
                             ).animateItem(),

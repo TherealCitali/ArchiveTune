@@ -15,7 +15,6 @@ import androidx.media3.common.Player
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.minutes
 
@@ -38,22 +37,10 @@ class SleepTimer(
         if (minute == -1) {
             pauseWhenSongEnd = true
         } else {
-            val durationMs = minute.minutes.inWholeMilliseconds
-            triggerTime = System.currentTimeMillis() + durationMs
+            triggerTime = System.currentTimeMillis() + minute.minutes.inWholeMilliseconds
             sleepTimerJob =
                 scope.launch {
-                    val fadeMs = FADE_MS.coerceAtMost(durationMs)
-                    val waitMs = (durationMs - fadeMs).coerceAtLeast(0L)
-                    delay(waitMs)
-                    val startVolume = player.volume
-                    val startedAt = android.os.SystemClock.elapsedRealtime()
-                    while (isActive) {
-                        val elapsed = android.os.SystemClock.elapsedRealtime() - startedAt
-                        val progress = (elapsed.toFloat() / fadeMs.toFloat()).coerceIn(0f, 1f)
-                        player.volume = (startVolume * (1f - progress)).coerceAtLeast(0f)
-                        if (progress >= 1f) break
-                        delay(32L)
-                    }
+                    delay(minute.minutes)
                     service.pauseFromSleepTimer()
                 }
         }
@@ -81,9 +68,5 @@ class SleepTimer(
         if (playbackState == Player.STATE_ENDED && pauseWhenSongEnd) {
             service.pauseFromSleepTimer()
         }
-    }
-
-    companion object {
-        private const val FADE_MS = 30_000L
     }
 }
