@@ -11,9 +11,7 @@ package dev.citali.lunartune.ui.player
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Build
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -70,7 +68,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
@@ -89,11 +86,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
@@ -116,13 +110,6 @@ import androidx.media3.common.Player.STATE_ENDED
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
-import coil3.imageLoader
-import coil3.request.ImageRequest
-import coil3.request.SuccessResult
-import coil3.request.allowHardware
-import coil3.toBitmap
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import me.saket.squiggles.SquigglySlider
 import dev.citali.lunartune.R
 import dev.citali.lunartune.constants.EnableHapticFeedbackKey
@@ -146,7 +133,6 @@ import dev.citali.lunartune.ui.theme.PlayerBackgroundColorUtils
 import dev.citali.lunartune.ui.theme.PlayerSliderColors
 import dev.citali.lunartune.ui.utils.ShowMediaInfo
 import dev.citali.lunartune.ui.utils.highRes
-import dev.citali.lunartune.utils.ImageBlurUtils
 import dev.citali.lunartune.utils.makeTimeString
 import dev.citali.lunartune.utils.rememberLowDataModeActive
 import dev.citali.lunartune.utils.rememberPreference
@@ -3992,54 +3978,6 @@ private fun V9BottomToggleRow(
 }
 
 @Composable
-private fun PlayerSoftwareBlurredArtwork(
-    thumbnailUrl: String,
-    blurRadius: Float,
-    modifier: Modifier = Modifier,
-) {
-    val context = LocalContext.current
-    val blurred by produceState<Bitmap?>(null, thumbnailUrl, blurRadius) {
-        value =
-            withContext(Dispatchers.IO) {
-                runCatching {
-                    val request =
-                        ImageRequest
-                            .Builder(context)
-                            .data(thumbnailUrl)
-                            .allowHardware(false)
-                            .size(480)
-                            .build()
-                    val result = context.imageLoader.execute(request)
-                    if (result is SuccessResult) {
-                        ImageBlurUtils.blur(
-                            result.image.toBitmap().copy(Bitmap.Config.ARGB_8888, true),
-                            blurRadius.coerceIn(8f, 48f),
-                        )
-                    } else {
-                        null
-                    }
-                }.getOrNull()
-            }
-    }
-    val bitmap = blurred
-    if (bitmap != null) {
-        Image(
-            painter = BitmapPainter(bitmap.asImageBitmap()),
-            contentDescription = "Blurred background",
-            contentScale = ContentScale.Crop,
-            modifier = modifier,
-        )
-    } else {
-        AsyncImage(
-            model = thumbnailUrl,
-            contentDescription = "Blurred background",
-            contentScale = ContentScale.Crop,
-            modifier = modifier,
-        )
-    }
-}
-
-@Composable
 fun PlayerBackground(
     playerBackground: PlayerBackgroundStyle,
     mediaMetadata: MediaMetadata?,
@@ -4076,28 +4014,15 @@ fun PlayerBackground(
                 ) { thumbnailUrl ->
                     if (thumbnailUrl != null) {
                         Box(modifier = Modifier.fillMaxSize()) {
-                            val artUrl = thumbnailUrl.highRes()
-                            if (styleAppliesBlur && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                                PlayerSoftwareBlurredArtwork(
-                                    thumbnailUrl = artUrl,
-                                    blurRadius = effectiveBlurRadius,
-                                    modifier = Modifier.fillMaxSize(),
-                                )
-                            } else {
-                                AsyncImage(
-                                    model = artUrl,
-                                    contentDescription = "Blurred background",
-                                    contentScale = ContentScale.Crop,
-                                    modifier =
-                                        Modifier.fillMaxSize().let {
-                                            if (styleAppliesBlur && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                                it.blur(radius = effectiveBlurRadius.dp)
-                                            } else {
-                                                it
-                                            }
-                                        },
-                                )
-                            }
+                            AsyncImage(
+                                model = thumbnailUrl.highRes(),
+                                contentDescription = "Blurred background",
+                                contentScale = ContentScale.Crop,
+                                modifier =
+                                    Modifier.fillMaxSize().let {
+                                        if (styleAppliesBlur) it.blur(radius = effectiveBlurRadius.dp) else it
+                                    },
+                            )
                             val overlayStops = PlayerBackgroundColorUtils.buildBlurOverlayStops(gradientColors)
                             Box(
                                 modifier =
@@ -4198,28 +4123,15 @@ fun PlayerBackground(
                 ) { thumbnailUrl ->
                     if (thumbnailUrl != null) {
                         Box(modifier = Modifier.fillMaxSize()) {
-                            val artUrl = thumbnailUrl.highRes()
-                            if (styleAppliesBlur && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                                PlayerSoftwareBlurredArtwork(
-                                    thumbnailUrl = artUrl,
-                                    blurRadius = effectiveBlurRadius,
-                                    modifier = Modifier.fillMaxSize(),
-                                )
-                            } else {
-                                AsyncImage(
-                                    model = artUrl,
-                                    contentDescription = "Blurred background",
-                                    contentScale = ContentScale.Crop,
-                                    modifier =
-                                        Modifier.fillMaxSize().let {
-                                            if (styleAppliesBlur && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                                it.blur(radius = effectiveBlurRadius.dp)
-                                            } else {
-                                                it
-                                            }
-                                        },
-                                )
-                            }
+                            AsyncImage(
+                                model = thumbnailUrl.highRes(),
+                                contentDescription = "Blurred background",
+                                contentScale = ContentScale.Crop,
+                                modifier =
+                                    Modifier.fillMaxSize().let {
+                                        if (styleAppliesBlur) it.blur(radius = effectiveBlurRadius.dp) else it
+                                    },
+                            )
                             val gradientColorStops =
                                 PlayerBackgroundColorUtils.buildBlurGradientStops(gradientColors)
                             Box(

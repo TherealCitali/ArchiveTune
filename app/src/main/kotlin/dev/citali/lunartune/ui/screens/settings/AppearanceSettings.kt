@@ -725,11 +725,80 @@ fun AppearanceSettings(navController: NavController) {
 
             PreferenceGroup(title = stringResource(R.string.player)) {
                 item {
-                    PreferenceEntry(
-                        title = { Text(stringResource(R.string.customise_now_playing)) },
-                        description = stringResource(R.string.customise_now_playing_desc),
+                    EnumListPreference(
+                        title = { Text(stringResource(R.string.player_design_style)) },
                         icon = { Icon(painterResource(R.drawable.palette), null) },
-                        onClick = { navController.navigate("settings/appearance/now_playing") },
+                        selectedValue = playerDesignStyle,
+                        onValueSelected = onPlayerDesignStyleChange,
+                        valueText = {
+                            when (it) {
+                                PlayerDesignStyle.V1 -> stringResource(R.string.player_design_v1)
+                                PlayerDesignStyle.V2 -> stringResource(R.string.player_design_v2)
+                                PlayerDesignStyle.V3 -> stringResource(R.string.player_design_v3)
+                                PlayerDesignStyle.V4 -> stringResource(R.string.player_design_v4)
+                                PlayerDesignStyle.V5 -> stringResource(R.string.player_design_v5)
+                                PlayerDesignStyle.V6 -> stringResource(R.string.player_design_v6)
+                                PlayerDesignStyle.V7 -> stringResource(R.string.player_design_v7)
+                                PlayerDesignStyle.V7_LEGACY -> stringResource(R.string.player_design_v7_legacy)
+                                PlayerDesignStyle.V8 -> stringResource(R.string.player_design_v8)
+                                PlayerDesignStyle.V9 -> stringResource(R.string.player_design_v9)
+                            }
+                        },
+                    )
+                }
+
+                item {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.show_player_volume_bar)) },
+                        description =
+                            if (isVolumeBarSupported) {
+                                null
+                            } else {
+                                stringResource(R.string.player_volume_bar_v7_v8_only)
+                            },
+                        icon = { Icon(painterResource(R.drawable.volume_up), null) },
+                        checked = showPlayerVolumeBar,
+                        onCheckedChange = onShowPlayerVolumeBarChange,
+                        isEnabled = isVolumeBarSupported,
+                    )
+                }
+
+                item {
+                    EnumListPreference(
+                        title = { Text(stringResource(R.string.player_background_style)) },
+                        description =
+                            if (isPlayerBackgroundCustomizationEnabled) {
+                                null
+                            } else {
+                                stringResource(R.string.player_background_style_v8_v9_desc)
+                            },
+                        icon = { Icon(painterResource(R.drawable.gradient), null) },
+                        selectedValue = playerBackground,
+                        onValueSelected = { selectedBackground ->
+                            onPlayerBackgroundChange(selectedBackground)
+                            when {
+                                selectedBackground == PlayerBackgroundStyle.CUSTOM -> {
+                                    onLyricsBackgroundChange(LyricsBackgroundStyle.CUSTOM)
+                                }
+
+                                configuredLyricsBackground == LyricsBackgroundStyle.CUSTOM -> {
+                                    onLyricsBackgroundChange(LyricsBackgroundStyle.DEFAULT)
+                                }
+                            }
+                        },
+                        isEnabled = isPlayerBackgroundCustomizationEnabled,
+                        valueText = {
+                            when (it) {
+                                PlayerBackgroundStyle.DEFAULT -> stringResource(R.string.follow_theme)
+                                PlayerBackgroundStyle.GRADIENT -> stringResource(R.string.gradient)
+                                PlayerBackgroundStyle.CUSTOM -> stringResource(R.string.custom)
+                                PlayerBackgroundStyle.BLUR -> stringResource(R.string.player_background_blur)
+                                PlayerBackgroundStyle.COLORING -> stringResource(R.string.coloring)
+                                PlayerBackgroundStyle.BLUR_GRADIENT -> stringResource(R.string.blur_gradient)
+                                PlayerBackgroundStyle.GLOW -> stringResource(R.string.glow)
+                                PlayerBackgroundStyle.GLOW_ANIMATED -> "Glow Animated"
+                            }
+                        },
                     )
                 }
 
@@ -752,6 +821,14 @@ fun AppearanceSettings(navController: NavController) {
                     )
                 }
 
+                item(visible = playerBackground == PlayerBackgroundStyle.CUSTOM) {
+                    PreferenceEntry(
+                        title = { Text(stringResource(R.string.customized_background)) },
+                        icon = { Icon(painterResource(R.drawable.image), null) },
+                        onClick = { navController.navigate("customize_background") },
+                    )
+                }
+
                 item {
                     EnumListPreference(
                         title = { Text(stringResource(R.string.mini_player_background_style)) },
@@ -765,6 +842,16 @@ fun AppearanceSettings(navController: NavController) {
                                 MiniPlayerBackgroundStyle.GLOW -> stringResource(R.string.glow)
                             }
                         },
+                    )
+                }
+
+                item {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.hide_player_thumbnail)) },
+                        description = stringResource(R.string.hide_player_thumbnail_desc),
+                        icon = { Icon(painterResource(R.drawable.hide_image), null) },
+                        checked = hidePlayerThumbnail,
+                        onCheckedChange = onHidePlayerThumbnailChange,
                     )
                 }
 
@@ -800,6 +887,40 @@ fun AppearanceSettings(navController: NavController) {
                         description = stringResource(R.string.aod_customize_entry_desc),
                         icon = { Icon(painterResource(R.drawable.bedtime), null) },
                         onClick = { navController.navigate("settings/appearance/aod_customized") },
+                    )
+                }
+
+                item {
+                    EnumListPreference(
+                        title = { Text(stringResource(R.string.player_buttons_style)) },
+                        description =
+                            if (isPlayerControlsCustomizationEnabled) {
+                                null
+                            } else {
+                                stringResource(R.string.player_background_style_v8_v9_desc)
+                            },
+                        icon = { Icon(painterResource(R.drawable.palette), null) },
+                        selectedValue = playerButtonsStyle,
+                        onValueSelected = onPlayerButtonsStyleChange,
+                        isEnabled = isPlayerControlsCustomizationEnabled,
+                        valueText = {
+                            when (it) {
+                                PlayerButtonsStyle.DEFAULT -> stringResource(R.string.default_style)
+                                PlayerButtonsStyle.SECONDARY -> stringResource(R.string.secondary_color_style)
+                            }
+                        },
+                    )
+                }
+
+                item {
+                    PreferenceEntry(
+                        title = { Text(stringResource(R.string.player_slider_style)) },
+                        description = sliderStyleLabel(sliderStyle),
+                        icon = { Icon(painterResource(R.drawable.sliders), null) },
+                        onClick = {
+                            showSliderOptionDialog = true
+                        },
+                        isEnabled = isPlayerControlsCustomizationEnabled,
                     )
                 }
 
