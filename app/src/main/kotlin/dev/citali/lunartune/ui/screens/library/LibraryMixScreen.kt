@@ -296,40 +296,7 @@ fun LibraryMixScreen(
                                 onClick = { navController.navigate("top_playlist/$topSize") },
                             )
 
-                            ShortcutCard(
-                                title = stringResource(R.string.smart_playlist_on_repeat),
-                                countText = stringResource(R.string.smart_playlist_on_repeat_desc),
-                                iconRes = R.drawable.replay,
-                                containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f),
-                                iconColor = MaterialTheme.colorScheme.tertiary,
-                                modifier = Modifier.weight(1f),
-                                onClick = { navController.navigate("auto_playlist/on_repeat") },
-                            )
-                        }
-
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            ShortcutCard(
-                                title = stringResource(R.string.smart_playlist_forgotten),
-                                countText = stringResource(R.string.smart_playlist_forgotten_desc),
-                                iconRes = R.drawable.history,
-                                containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.45f),
-                                iconColor = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.weight(1f),
-                                onClick = { navController.navigate("auto_playlist/forgotten") },
-                            )
-
-                            ShortcutCard(
-                                title = stringResource(R.string.smart_playlist_recent),
-                                countText = stringResource(R.string.smart_playlist_recent_desc),
-                                iconRes = R.drawable.history,
-                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f),
-                                iconColor = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.weight(1f),
-                                onClick = { navController.navigate("auto_playlist/recent") },
-                            )
+                            Spacer(modifier = Modifier.weight(1f))
                         }
                     }
                 }
