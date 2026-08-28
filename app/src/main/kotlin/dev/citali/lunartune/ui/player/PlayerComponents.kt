@@ -416,7 +416,7 @@ fun PlayerTopActions(
             }
         }
 
-        PlayerDesignStyle.V4 -> {
+        PlayerDesignStyle.V4, PlayerDesignStyle.V10 -> {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -1241,7 +1241,7 @@ fun PlayerPlaybackControls(
             }
         }
 
-        PlayerDesignStyle.V4 -> {
+        PlayerDesignStyle.V4, PlayerDesignStyle.V10 -> {
             BoxWithConstraints(
                 modifier =
                     Modifier

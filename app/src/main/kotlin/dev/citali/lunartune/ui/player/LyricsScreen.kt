@@ -590,7 +590,7 @@ private fun AppleMusicBackground(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.62f)),
+                    .background(Color.Black.copy(alpha = 0.52f)),
         )
     }
 }
