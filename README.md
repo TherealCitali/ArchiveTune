@@ -17,9 +17,6 @@
   </p>
 
   <p align="center">
-    <a href="#features"><b>Features</b></a> •
-    <a href="#download-now"><b>Download</b></a> •
-    <a href="#screenshots"><b>Screenshots</b></a> •
     <a href="https://github.com/cognitiveshadows03/LunarTune/issues/new/choose"><b>Support</b></a>
   </p>
 
