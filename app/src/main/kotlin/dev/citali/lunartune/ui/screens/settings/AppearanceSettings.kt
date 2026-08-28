@@ -109,6 +109,12 @@ import dev.citali.lunartune.constants.QuickPicksDisplayMode
 import dev.citali.lunartune.constants.QuickPicksDisplayModeKey
 import dev.citali.lunartune.constants.RandomThemeOnStartupKey
 import dev.citali.lunartune.constants.ShowHomeCategoryChipsKey
+import dev.citali.lunartune.constants.ShowLibraryCardCachedKey
+import dev.citali.lunartune.constants.ShowLibraryCardLikedKey
+import dev.citali.lunartune.constants.ShowLibraryCardLocalKey
+import dev.citali.lunartune.constants.ShowLibraryCardMixHubKey
+import dev.citali.lunartune.constants.ShowLibraryCardMyTopKey
+import dev.citali.lunartune.constants.ShowLibraryCardOfflineKey
 import dev.citali.lunartune.constants.ShowPlayerVolumeBarKey
 import dev.citali.lunartune.constants.ShowTagsInLibraryKey
 import dev.citali.lunartune.constants.SliderStyle
@@ -274,6 +280,18 @@ fun AppearanceSettings(navController: NavController) {
             ShowTagsInLibraryKey,
             defaultValue = true,
         )
+    val (showLibraryCardLiked, onShowLibraryCardLikedChange) =
+        rememberPreference(ShowLibraryCardLikedKey, defaultValue = true)
+    val (showLibraryCardOffline, onShowLibraryCardOfflineChange) =
+        rememberPreference(ShowLibraryCardOfflineKey, defaultValue = true)
+    val (showLibraryCardCached, onShowLibraryCardCachedChange) =
+        rememberPreference(ShowLibraryCardCachedKey, defaultValue = true)
+    val (showLibraryCardLocal, onShowLibraryCardLocalChange) =
+        rememberPreference(ShowLibraryCardLocalKey, defaultValue = true)
+    val (showLibraryCardMyTop, onShowLibraryCardMyTopChange) =
+        rememberPreference(ShowLibraryCardMyTopKey, defaultValue = true)
+    val (showLibraryCardMixHub, onShowLibraryCardMixHubChange) =
+        rememberPreference(ShowLibraryCardMixHubKey, defaultValue = true)
     val (showHomeCategoryChips, onShowHomeCategoryChipsChange) =
         rememberPreference(
             ShowHomeCategoryChipsKey,
@@ -871,6 +889,59 @@ fun AppearanceSettings(navController: NavController) {
                         description = stringResource(R.string.sensitivity_percentage, (swipeSensitivity * 100).roundToInt()),
                         icon = { Icon(painterResource(R.drawable.tune), null) },
                         onClick = { showSensitivityDialog = true },
+                    )
+                }
+            }
+
+            PreferenceGroup(title = stringResource(R.string.library_shortcut_cards)) {
+                item {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.liked_songs)) },
+                        description = stringResource(R.string.library_shortcut_cards_desc),
+                        icon = { Icon(painterResource(R.drawable.favorite), null) },
+                        checked = showLibraryCardLiked,
+                        onCheckedChange = onShowLibraryCardLikedChange,
+                    )
+                }
+                item {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.offline_shortcut)) },
+                        icon = { Icon(painterResource(R.drawable.offline), null) },
+                        checked = showLibraryCardOffline,
+                        onCheckedChange = onShowLibraryCardOfflineChange,
+                    )
+                }
+                item {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.cached)) },
+                        icon = { Icon(painterResource(R.drawable.cached), null) },
+                        checked = showLibraryCardCached,
+                        onCheckedChange = onShowLibraryCardCachedChange,
+                    )
+                }
+                item {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.local_files)) },
+                        icon = { Icon(painterResource(R.drawable.snippet_folder), null) },
+                        checked = showLibraryCardLocal,
+                        onCheckedChange = onShowLibraryCardLocalChange,
+                    )
+                }
+                item {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.my_top)) },
+                        icon = { Icon(painterResource(R.drawable.trending_up), null) },
+                        checked = showLibraryCardMyTop,
+                        onCheckedChange = onShowLibraryCardMyTopChange,
+                    )
+                }
+                item {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.library_mix_hub)) },
+                        description = stringResource(R.string.library_mix_hub_card_desc),
+                        icon = { Icon(painterResource(R.drawable.mix), null) },
+                        checked = showLibraryCardMixHub,
+                        onCheckedChange = onShowLibraryCardMixHubChange,
                     )
                 }
             }
