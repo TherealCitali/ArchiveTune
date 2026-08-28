@@ -10,9 +10,9 @@
 package dev.citali.lunartune.ui.player
 
 import android.content.res.Configuration
-import android.os.Build
 import android.view.HapticFeedbackConstants
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -58,6 +58,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -72,6 +73,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.C
 import androidx.media3.common.Player.STATE_BUFFERING
@@ -115,6 +117,7 @@ import dev.citali.lunartune.ui.component.LyricsV2
 import dev.citali.lunartune.ui.component.PlayerSliderTrack
 import dev.citali.lunartune.ui.menu.LyricsMenu
 import dev.citali.lunartune.ui.theme.PlayerColorExtractor
+import dev.citali.lunartune.utils.LyricsArtBlurCache
 import dev.citali.lunartune.utils.makeTimeString
 import dev.citali.lunartune.utils.rememberEnumPreference
 import dev.citali.lunartune.utils.rememberPreference
@@ -395,8 +398,7 @@ fun LyricsScreen(
                     )
 
                     Column(
-                        modifier =
-                            Modifier
+                Modifier
                                 .weight(0.85f)
                                 .widthIn(max = 420.dp),
                         verticalArrangement = Arrangement.Center,
@@ -554,28 +556,25 @@ private fun AppleMusicBackground(
 ) {
     val context = LocalContext.current
     val thumbnailUrl = mediaMetadata.thumbnailUrl
-    val isPreS = Build.VERSION.SDK_INT < Build.VERSION_CODES.S
-    // Tiny decode + stretch (and GPU blur on S+) is instant and lockscreen-like.
-    // Skip RenderScript so Android 11 never waits on a 720px software blur.
-    val blurRequest =
-        remember(thumbnailUrl, context) {
-            thumbnailUrl?.let { url ->
-                ImageRequest
-                    .Builder(context)
-                    .data(url)
-                    .size(Size(48, 48))
-                    .build()
-            }
+    val cacheRevision by LyricsArtBlurCache.updates.collectAsState()
+    val blurredArt =
+        remember(thumbnailUrl, cacheRevision) {
+            LyricsArtBlurCache.peek(thumbnailUrl)
         }
+
+    LaunchedEffect(thumbnailUrl) {
+        LyricsArtBlurCache.prefetch(context, thumbnailUrl)
+    }
+
     Box(
         modifier =
             modifier
                 .fillMaxSize()
                 .background(Color.Black),
     ) {
-        if (blurRequest != null) {
-            AsyncImage(
-                model = blurRequest,
+        if (blurredArt != null) {
+            Image(
+                bitmap = blurredArt.asImageBitmap(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier =
@@ -584,14 +583,14 @@ private fun AppleMusicBackground(
                         .graphicsLayer {
                             scaleX = 1.12f
                             scaleY = 1.12f
-                        }.then(if (isPreS) Modifier else Modifier.blur(64.dp)),
+                        },
             )
         }
         Box(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.48f)),
+                    .background(Color.Black.copy(alpha = 0.62f)),
         )
     }
 }
