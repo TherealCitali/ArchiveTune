@@ -396,8 +396,7 @@ fun BottomSheetPlayer(
     )
     val playerUsesFixedBackground =
         playerDesignStyle == PlayerDesignStyle.V8 ||
-            playerDesignStyle == PlayerDesignStyle.V9 ||
-            playerDesignStyle == PlayerDesignStyle.V10
+            playerDesignStyle == PlayerDesignStyle.V9
     val playerBackground =
         if (playerUsesFixedBackground) PlayerBackgroundStyle.DEFAULT else storedPlayerBackground
 
@@ -673,7 +672,7 @@ fun BottomSheetPlayer(
     val TextBackgroundColor =
         if (playerDesignStyle == PlayerDesignStyle.V9) {
             dynamicTextColor
-        } else if (playerDesignStyle == PlayerDesignStyle.V7 || playerDesignStyle == PlayerDesignStyle.V7_LEGACY || playerDesignStyle == PlayerDesignStyle.V8 || playerDesignStyle == PlayerDesignStyle.V10) {
+        } else if (playerDesignStyle == PlayerDesignStyle.V7 || playerDesignStyle == PlayerDesignStyle.V7_LEGACY || playerDesignStyle == PlayerDesignStyle.V8) {
             Color.White
         } else {
             when (playerBackground) {
@@ -691,7 +690,7 @@ fun BottomSheetPlayer(
     val icBackgroundColor =
         if (playerDesignStyle == PlayerDesignStyle.V9) {
             dynamicBgColor
-        } else if (playerDesignStyle == PlayerDesignStyle.V7 || playerDesignStyle == PlayerDesignStyle.V7_LEGACY || playerDesignStyle == PlayerDesignStyle.V8 || playerDesignStyle == PlayerDesignStyle.V10) {
+        } else if (playerDesignStyle == PlayerDesignStyle.V7 || playerDesignStyle == PlayerDesignStyle.V7_LEGACY || playerDesignStyle == PlayerDesignStyle.V8) {
             Color.Black
         } else {
             when (playerBackground) {
@@ -723,7 +722,7 @@ fun BottomSheetPlayer(
                 }
             }
         }.let { (tb, ib) ->
-            if (playerDesignStyle == PlayerDesignStyle.V7 || playerDesignStyle == PlayerDesignStyle.V8 || playerDesignStyle == PlayerDesignStyle.V10) {
+            if (playerDesignStyle == PlayerDesignStyle.V7 || playerDesignStyle == PlayerDesignStyle.V8) {
                 Pair(Color.White, Color.Black)
             } else if (playerDesignStyle == PlayerDesignStyle.V9) {
                 Pair(dynamicAccentColor, dynamicIconButtonColor)
@@ -1331,8 +1330,7 @@ fun BottomSheetPlayer(
             playerDesignStyle != PlayerDesignStyle.V7 &&
             playerDesignStyle != PlayerDesignStyle.V7_LEGACY &&
             playerDesignStyle != PlayerDesignStyle.V8 &&
-            playerDesignStyle != PlayerDesignStyle.V9 &&
-            playerDesignStyle != PlayerDesignStyle.V10
+            playerDesignStyle != PlayerDesignStyle.V9
         ) {
             PlayerBackground(
                 playerBackground = playerBackground,
@@ -1618,34 +1616,6 @@ fun BottomSheetPlayer(
                                         ),
                                     ).nestedScroll(state.preUpPostDownNestedScrollConnection),
                         )
-                    }
-                } else if (playerDesignStyle == PlayerDesignStyle.V10) {
-                    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-                        enrichedMetadata?.let { metadata ->
-                            VinylPlayerStage(
-                                mediaMetadata = metadata,
-                                isPlaying = isPlaying,
-                                modifier =
-                                    Modifier
-                                        .fillMaxSize()
-                                        .padding(bottom = queueSheetState.collapsedBound + 180.dp),
-                            )
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier =
-                                    Modifier
-                                        .align(Alignment.BottomCenter)
-                                        .padding(bottom = queueSheetState.collapsedBound)
-                                        .windowInsetsPadding(
-                                            WindowInsets.systemBars.only(
-                                                WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
-                                            ),
-                                        ).nestedScroll(state.preUpPostDownNestedScrollConnection),
-                            ) {
-                                controlsContent(metadata)
-                                Spacer(Modifier.height(16.dp))
-                            }
-                        }
                     }
                 } else {
                     Row(
@@ -1950,31 +1920,6 @@ fun BottomSheetPlayer(
                                         ),
                                     ).nestedScroll(state.preUpPostDownNestedScrollConnection),
                         )
-                    }
-                } else if (playerDesignStyle == PlayerDesignStyle.V10) {
-                    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-                        enrichedMetadata?.let { metadata ->
-                            VinylPlayerStage(
-                                mediaMetadata = metadata,
-                                isPlaying = isPlaying,
-                                modifier =
-                                    Modifier
-                                        .fillMaxSize()
-                                        .padding(bottom = queueSheetState.collapsedBound + 220.dp),
-                            )
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier =
-                                    Modifier
-                                        .align(Alignment.BottomCenter)
-                                        .padding(bottom = queueSheetState.collapsedBound)
-                                        .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
-                                        .nestedScroll(state.preUpPostDownNestedScrollConnection),
-                            ) {
-                                controlsContent(metadata)
-                                Spacer(Modifier.height(24.dp))
-                            }
-                        }
                     }
                 } else {
                     Column(
