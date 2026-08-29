@@ -197,6 +197,7 @@ import dev.citali.lunartune.constants.CustomThemeColorKey
 import dev.citali.lunartune.constants.DarkModeKey
 import dev.citali.lunartune.constants.DefaultOpenTabKey
 import dev.citali.lunartune.constants.DisableAnimationsKey
+import dev.citali.lunartune.constants.ForceHighRefreshRateKey
 import dev.citali.lunartune.constants.DisableScreenshotKey
 import dev.citali.lunartune.constants.DynamicThemeKey
 import dev.citali.lunartune.constants.EnableHapticFeedbackKey
@@ -288,6 +289,7 @@ import dev.citali.lunartune.ui.screens.search.OnlineSearchResultRoutePrefix
 import dev.citali.lunartune.ui.screens.search.OnlineSearchScreen
 import dev.citali.lunartune.ui.screens.search.decodeOnlineSearchQuery
 import dev.citali.lunartune.ui.screens.search.onlineSearchResultRoute
+import dev.citali.lunartune.ui.screens.settings.ApplyForcedRefreshRate
 import dev.citali.lunartune.ui.screens.settings.DarkMode
 import dev.citali.lunartune.ui.screens.settings.NavigationTab
 import dev.citali.lunartune.ui.theme.LunarTuneTheme
@@ -750,6 +752,11 @@ class MainActivity : ComponentActivity() {
                 DisableAnimationsKey,
                 defaultValue = defaultDisableAnimations,
             )
+            val forceHighRefreshRate by rememberPreference(
+                ForceHighRefreshRateKey,
+                defaultValue = true,
+            )
+            ApplyForcedRefreshRate(enabled = forceHighRefreshRate)
             val fontPreference by rememberEnumPreference(FontPreferenceKey, defaultValue = AppFontPreference.DEFAULT)
             val customFontUri by rememberPreference(CustomFontUriKey, defaultValue = "")
             val legacyUseSystemFont by rememberPreference(UseSystemFontKey, defaultValue = false)
