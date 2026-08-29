@@ -106,12 +106,6 @@
     <string name="featured_album_badge">FEATURED ALBUM</string>
     <string name="other_versions">Other versions</string>
     <string name="liked_songs">Liked songs</string>
-    <string name="smart_playlist_on_repeat">On repeat</string>
-    <string name="smart_playlist_on_repeat_desc">Most played this month</string>
-    <string name="smart_playlist_forgotten">Forgotten favorites</string>
-    <string name="smart_playlist_forgotten_desc">Loved songs you left behind</string>
-    <string name="smart_playlist_recent">Recently played</string>
-    <string name="smart_playlist_recent_desc">Your latest listens</string>
     <string name="library_shortcut_cards">Library cards</string>
     <string name="library_shortcut_cards_desc">Choose which shortcut cards show on the Library tab</string>
     <string name="downloaded_songs">Downloaded songs</string>

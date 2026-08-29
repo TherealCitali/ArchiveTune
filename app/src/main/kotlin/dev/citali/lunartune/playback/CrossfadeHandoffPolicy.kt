@@ -31,11 +31,6 @@ internal fun hasPlaybackPositionAdvanced(
     currentPositionMs: Long,
 ): Boolean = currentPositionMs > positionAfterSeekMs
 
-internal fun requiredCrossfadeStartBufferMs(durationMs: Long): Long =
-    durationMs
-        .coerceAtLeast(750L)
-        .coerceAtMost(3_000L)
-
 internal fun equalPowerGains(progress: Float): EqualPowerGains {
     val clampedProgress = progress.coerceIn(0f, 1f)
     val radians = clampedProgress.toDouble() * (PI / 2.0)

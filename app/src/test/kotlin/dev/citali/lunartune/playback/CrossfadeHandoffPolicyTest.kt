@@ -45,13 +45,6 @@ class CrossfadeHandoffPolicyTest {
     }
 
     @Test
-    fun startBuffer_isShortEnoughToBeatTheReadyTimeout() {
-        assertEquals(750L, requiredCrossfadeStartBufferMs(200L))
-        assertEquals(2_000L, requiredCrossfadeStartBufferMs(2_000L))
-        assertEquals(3_000L, requiredCrossfadeStartBufferMs(8_000L))
-    }
-
-    @Test
     fun equalPowerHandoff_preservesPowerAtEndpointsAndMidpoint() {
         val start = equalPowerGains(0f)
         val midpoint = equalPowerGains(0.5f)
