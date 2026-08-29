@@ -334,7 +334,6 @@ private fun HomeContent(
                                 chips = uiState.homePage?.chips.orEmpty(),
                                 selectedChip = uiState.selectedChip,
                                 onChipSelected = { onAction(HomeAction.SelectChip(it)) },
-                                modifier = Modifier.animateItem(),
                             )
                         }
                     }
@@ -346,7 +345,6 @@ private fun HomeContent(
                         ) {
                             HomeSectionHeader(
                                 title = remoteQuickPicks.title,
-                                modifier = Modifier.animateItem(),
                             )
                         }
                         item(
@@ -362,7 +360,6 @@ private fun HomeContent(
                                 menuState = menuState,
                                 haptic = haptic,
                                 scope = scope,
-                                modifier = Modifier.animateItem(),
                             )
                         }
                     } else if (uiState.quickPicks.isNotEmpty()) {
@@ -372,7 +369,6 @@ private fun HomeContent(
                         ) {
                             HomeSectionHeader(
                                 title = stringResource(R.string.quick_picks),
-                                modifier = Modifier.animateItem(),
                             )
                         }
                         item(
@@ -388,7 +384,6 @@ private fun HomeContent(
                                 playerConnection = playerConnection,
                                 menuState = menuState,
                                 haptic = haptic,
-                                modifier = Modifier.animateItem(),
                             )
                         }
                     }
@@ -401,7 +396,6 @@ private fun HomeContent(
                         ) {
                             HomeSectionHeader(
                                 title = stringResource(R.string.speed_dial),
-                                modifier = Modifier.animateItem(),
                             )
                         }
                         item(
@@ -417,7 +411,6 @@ private fun HomeContent(
                                 menuState = menuState,
                                 haptic = haptic,
                                 scope = scope,
-                                modifier = Modifier.animateItem(),
                             )
                         }
                     }
@@ -430,7 +423,6 @@ private fun HomeContent(
                         ) {
                             HomeSectionHeader(
                                 title = stringResource(R.string.keep_listening),
-                                modifier = Modifier.animateItem(),
                             )
                         }
                         item(
@@ -446,7 +438,6 @@ private fun HomeContent(
                                 menuState = menuState,
                                 haptic = haptic,
                                 scope = scope,
-                                modifier = Modifier.animateItem(),
                             )
                         }
                     }
@@ -457,7 +448,7 @@ private fun HomeContent(
                             key = "home_account_playlists",
                             contentType = "media_shelf",
                         ) {
-                            Column(modifier = Modifier.animateItem()) {
+                            Column {
                                 AccountPlaylistsTitle(
                                     accountName = uiState.accountName,
                                     accountImageUrl = uiState.accountImageUrl,
@@ -485,7 +476,6 @@ private fun HomeContent(
                         ) {
                             HomeSectionHeader(
                                 title = stringResource(R.string.forgotten_favorites),
-                                modifier = Modifier.animateItem(),
                             )
                         }
                         item(
@@ -503,7 +493,6 @@ private fun HomeContent(
                                 playerConnection = playerConnection,
                                 menuState = menuState,
                                 haptic = haptic,
-                                modifier = Modifier.animateItem(),
                             )
                         }
                     }
@@ -517,7 +506,6 @@ private fun HomeContent(
                             SimilarRecommendationsTitle(
                                 recommendation = recommendation,
                                 navController = navController,
-                                modifier = Modifier.animateItem(),
                             )
                         }
                         item(
@@ -533,7 +521,6 @@ private fun HomeContent(
                                 menuState = menuState,
                                 haptic = haptic,
                                 scope = scope,
-                                modifier = Modifier.animateItem(),
                             )
                         }
                     }
@@ -548,7 +535,6 @@ private fun HomeContent(
                             HomePageSectionTitle(
                                 section = section,
                                 navController = navController,
-                                modifier = Modifier.animateItem(),
                             )
                         }
                         item(
@@ -564,7 +550,6 @@ private fun HomeContent(
                                 menuState = menuState,
                                 haptic = haptic,
                                 scope = scope,
-                                modifier = Modifier.animateItem(),
                             )
                         }
                     }
@@ -579,8 +564,8 @@ private fun HomeContent(
                                 modifier =
                                     Modifier
                                         .fillMaxWidth()
-                                        .padding(32.dp)
-                                        .animateItem(),
+                                        .padding(32.dp),
+
                             ) {
                                 LoadingIndicator()
                             }
