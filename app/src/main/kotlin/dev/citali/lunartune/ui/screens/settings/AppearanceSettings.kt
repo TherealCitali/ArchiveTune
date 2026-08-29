@@ -225,7 +225,7 @@ fun AppearanceSettings(navController: NavController) {
     val (forceHighRefreshRate, onForceHighRefreshRateChange) =
         rememberPreference(
             ForceHighRefreshRateKey,
-            defaultValue = false,
+            defaultValue = true,
         )
     val (blurRadius, onBlurRadiusChange) = rememberPreference(BlurRadiusKey, defaultValue = 48f)
     val (backdropEnabled, onBackdropEnabledChange) = rememberPreference(BackdropEnabledKey, defaultValue = true)
@@ -408,11 +408,6 @@ fun AppearanceSettings(navController: NavController) {
         )
     val supportedHighestFps = rememberSupportedHighestFps()
     val isHighRefreshRateSupported = supportedHighestFps > HIGH_REFRESH_RATE_THRESHOLD_FPS
-
-    ApplyRefreshRate(
-        isEnabled = forceHighRefreshRate && isHighRefreshRateSupported,
-        targetFps = supportedHighestFps,
-    )
 
     var showSliderOptionDialog by rememberSaveable {
         mutableStateOf(false)
@@ -1204,7 +1199,16 @@ fun ApplyRefreshRate(
 }
 
 @Composable
-private fun rememberSupportedHighestFps(): Float {
+internal fun ApplyForcedRefreshRate(enabled: Boolean) {
+    val supportedHighestFps = rememberSupportedHighestFps()
+    ApplyRefreshRate(
+        isEnabled = enabled && supportedHighestFps > HIGH_REFRESH_RATE_THRESHOLD_FPS,
+        targetFps = supportedHighestFps,
+    )
+}
+
+@Composable
+internal fun rememberSupportedHighestFps(): Float {
     val view = LocalView.current
 
     return remember(view) {
@@ -1224,13 +1228,24 @@ private fun applyRefreshRate(
 ) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
         view.setRequestedFrameRate(requestedFps)
-        return
     }
 
     activity?.window?.let { window ->
         val attributes = window.attributes
-        if (attributes.preferredRefreshRate != requestedFps) {
-            attributes.preferredRefreshRate = requestedFps
+        val targetModeId =
+            if (requestedFps <= 0f) {
+                0
+            } else {
+                view.display
+                    ?.supportedModes
+                    ?.filter { it.refreshRate >= requestedFps - 0.01f }
+                    ?.minByOrNull { it.refreshRate }
+                    ?.modeId
+                    ?: view.display?.supportedModes?.maxByOrNull { it.refreshRate }?.modeId
+                    ?: 0
+            }
+        if (attributes.preferredDisplayModeId != targetModeId) {
+            attributes.preferredDisplayModeId = targetModeId
             window.attributes = attributes
         }
     }
