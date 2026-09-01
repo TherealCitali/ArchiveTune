@@ -130,6 +130,12 @@ private data class HomeContent(
                 remote.homePage?.sections?.any { it.items.isNotEmpty() } == true
 }
 
+private data class HomeLoadingFlags(
+    val isRefreshing: Boolean,
+    val isLoadingMore: Boolean,
+    val isChipLoading: Boolean,
+)
+
 private data class HomeStateInputs(
     val content: HomeContent,
     val preferences: HomePresentationPreferences,
@@ -297,7 +303,7 @@ class HomeViewModel
                     loadError = loadError,
                 )
             }.combine(
-                combine(
+                combine<Boolean, Boolean, Boolean, HomeLoadingFlags>(
                     isRefreshing,
                     isLoadingMore,
                     isChipLoading,
