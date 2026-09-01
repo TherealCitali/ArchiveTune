@@ -18,6 +18,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
@@ -45,6 +46,7 @@ import dev.citali.lunartune.home.HomeAction
 import dev.citali.lunartune.home.HomePresentationPreferences
 import dev.citali.lunartune.home.HomeScreenState
 import dev.citali.lunartune.home.HomeUiState
+import dev.citali.lunartune.home.LoadPersonalizedQuickPicksUseCase
 import dev.citali.lunartune.home.ObserveHomePresentationPreferencesUseCase
 import moe.rukamori.archivetune.innertube.YouTube
 import moe.rukamori.archivetune.innertube.models.AccountChannel
@@ -195,6 +197,7 @@ class HomeViewModel
         observeAiContentFilter: ObserveAiContentFilterUseCase,
         private val loadAiContentFilterPolicy: LoadAiContentFilterPolicyUseCase,
         private val filterAiContent: FilterAiContentUseCase,
+        private val loadPersonalizedQuickPicksUseCase: LoadPersonalizedQuickPicksUseCase,
     ) : ViewModel() {
         private val isRefreshing = MutableStateFlow(false)
         private val isLoading = MutableStateFlow(false)
@@ -344,6 +347,47 @@ class HomeViewModel
             return copy(sections = sections.toMutableList().apply { removeAt(quickPicksIndex) }) to sections[quickPicksIndex]
         }
 
+        /**
+         * Quick picks come from YouTube Music: seeds from the listening history are expanded
+         * into related songs online. Returns true when online picks were produced, so the
+         * caller knows it can skip the "Quick picks" shelf of the home response.
+         */
+        private suspend fun loadPersonalizedQuickPicks(): Boolean {
+            if (quickPicksMode.first() != QuickPicks.QUICK_PICKS) return false
+            val excludedSongIds = remoteQuickPicks.value?.items.orEmpty().mapTo(mutableSetOf(), YTItem::id)
+            val songs =
+                loadPersonalizedQuickPicksUseCase(excludedSongIds).getOrElse { throwable ->
+                    if (throwable is CancellationException) throw throwable
+                    Timber.w(throwable, "Failed to load personalized quick picks")
+                    return false
+                }
+            if (songs.isEmpty()) return false
+
+            val hideExplicit = context.dataStore.get(HideExplicitKey, false)
+            val hideVideo = context.dataStore.get(HideVideoKey, false)
+            val blockedArtistIds = database.getBlockedArtistIds().toSet()
+            val aiContentFilterPolicy = loadAiContentFilterPolicy()
+            val filteredSongs =
+                filterAiContent(
+                    songs
+                        .filterExplicit(hideExplicit)
+                        .filterVideo(hideVideo)
+                        .filterBlockedArtists(blockedArtistIds),
+                    aiContentFilterPolicy,
+                )
+            if (filteredSongs.isEmpty()) return false
+
+            remoteQuickPicks.value =
+                HomePage.Section(
+                    title = "",
+                    label = null,
+                    thumbnail = null,
+                    endpoint = null,
+                    items = filteredSongs,
+                )
+            return true
+        }
+
         private fun List<Song>.toQuickPickSample(): List<Song> =
             filter { song -> song.artists.none { it.blockedAt != null } }
                 .distinctBy { it.id }
@@ -410,11 +454,10 @@ class HomeViewModel
                 quickPicksMode
                     .flatMapLatest { mode ->
                         when (mode) {
+                            // Quick picks are online recommendations now, the local
+                            // listening history is only used for "Last listen".
                             QuickPicks.QUICK_PICKS -> {
-                                database
-                                    .quickPicks()
-                                    .distinctUntilSongIdsChanged()
-                                    .map { songs -> quickPicksWithFallback(songs) }
+                                flowOf(null)
                             }
 
                             QuickPicks.LAST_LISTEN -> {
@@ -439,7 +482,7 @@ class HomeViewModel
             val picks =
                 when (quickPicksMode.first()) {
                     QuickPicks.QUICK_PICKS -> {
-                        quickPicksWithFallback(database.quickPicks().first())
+                        null
                     }
 
                     QuickPicks.LAST_LISTEN -> {
@@ -504,6 +547,7 @@ class HomeViewModel
                 supervisorScope {
 
                     launch { loadSpeedDialItems() }
+                    val personalizedQuickPicks = async { loadPersonalizedQuickPicks() }
                     launch {
                         forgottenFavorites.value =
                             database
@@ -564,8 +608,18 @@ class HomeViewModel
                                             },
                                     )
                                 val (pageWithoutQuickPicks, quickPicksSection) = filteredPage.extractQuickPicks()
-                                remoteQuickPicks.value = quickPicksSection
                                 homePage.value = pageWithoutQuickPicks
+                                // The shelves are up as fast as possible; the "Quick picks" shelf
+                                // of the home response is only used when YouTube Music gave us
+                                // nothing better from the recommendation seeds.
+                                if (
+                                    quickPicksMode.first() == QuickPicks.QUICK_PICKS &&
+                                    !personalizedQuickPicks.await()
+                                ) {
+                                    quickPicksSection?.takeIf { it.items.isNotEmpty() }?.let { fallback ->
+                                        remoteQuickPicks.value = fallback
+                                    }
+                                }
                             }.onFailure {
                                 reportException(it)
                                 loadError.value = R.string.error_unknown
@@ -795,8 +849,7 @@ class HomeViewModel
                                     )
                                 },
                         )
-                    val (pageWithoutQuickPicks, quickPicksSection) = mergedPage.extractQuickPicks()
-                    quickPicksSection?.let { remoteQuickPicks.value = it }
+                    val (pageWithoutQuickPicks, _) = mergedPage.extractQuickPicks()
                     homePage.value = pageWithoutQuickPicks
                 } finally {
                     isLoadingMore.value = false
