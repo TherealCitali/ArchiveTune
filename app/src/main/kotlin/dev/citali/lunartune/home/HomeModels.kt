@@ -53,6 +53,7 @@ data class HomeUiState(
     val showTonalBackdrop: Boolean,
     val isRefreshing: Boolean,
     val isLoadingMore: Boolean,
+    val isChipLoading: Boolean,
 )
 
 sealed interface HomeAction {
@@ -61,6 +62,8 @@ sealed interface HomeAction {
     data class SelectChip(
         val chip: HomePage.Chip?,
     ) : HomeAction
+
+    data object RetryChip : HomeAction
 
     data class LoadMore(
         val continuation: String?,
