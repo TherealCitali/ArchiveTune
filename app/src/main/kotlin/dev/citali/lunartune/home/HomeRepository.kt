@@ -85,6 +85,11 @@ class HomeRepository
                 YouTube.next(WatchEndpoint(videoId = seedSongId)).getOrElse { throwable ->
                     return Result.failure(throwable)
                 }
+            // The up next list is the recommendation YouTube Music actually serves for a
+            // song (it is what the radio queue is built from). The related browse page is
+            // only a fallback: it is a different module and often missing or empty.
+            val upNextSongs = nextPage.items.filterNot { song -> song.id == seedSongId }
+            if (upNextSongs.isNotEmpty()) return Result.success(upNextSongs)
             val relatedEndpoint = nextPage.relatedEndpoint ?: return Result.success(emptyList())
             return YouTube.related(relatedEndpoint).map { page -> page.songs }
         }
