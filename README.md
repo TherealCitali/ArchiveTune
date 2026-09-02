@@ -1,6 +1,6 @@
 <div align="center">
 
-  <img src="fastlane/metadata/android/en-US/images/icon.png" width="160" height="160" alt="LunarTune Logo" style="border-radius: 22%">
+  <img src="assets/lunartune-icon-rounded.png" width="160" height="160" alt="LunarTune Logo">
 
   <h1>LunarTune</h1>
 
