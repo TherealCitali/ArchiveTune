@@ -361,7 +361,10 @@ class HomeViewModel
                     Timber.w(throwable, "Failed to load personalized quick picks")
                     return false
                 }
-            if (songs.isEmpty()) return false
+            if (songs.isEmpty()) {
+                Timber.w("Personalized quick picks returned no songs")
+                return false
+            }
 
             val hideExplicit = context.dataStore.get(HideExplicitKey, false)
             val hideVideo = context.dataStore.get(HideVideoKey, false)
@@ -454,10 +457,13 @@ class HomeViewModel
                 quickPicksMode
                     .flatMapLatest { mode ->
                         when (mode) {
-                            // Quick picks are online recommendations now, the local
-                            // listening history is only used for "Last listen".
+                            // Online recommendations lead, the listening history is only
+                            // a safety net for when YouTube Music gives us nothing.
                             QuickPicks.QUICK_PICKS -> {
-                                flowOf(null)
+                                database
+                                    .quickPicks()
+                                    .distinctUntilSongIdsChanged()
+                                    .map { songs -> quickPicksWithFallback(songs) }
                             }
 
                             QuickPicks.LAST_LISTEN -> {
@@ -482,7 +488,7 @@ class HomeViewModel
             val picks =
                 when (quickPicksMode.first()) {
                     QuickPicks.QUICK_PICKS -> {
-                        null
+                        quickPicksWithFallback(database.quickPicks().first())
                     }
 
                     QuickPicks.LAST_LISTEN -> {

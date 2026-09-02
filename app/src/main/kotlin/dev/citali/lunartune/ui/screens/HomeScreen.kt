@@ -418,7 +418,7 @@ private fun HomeContent(
                                 )
                             }
                         } else if (
-                            uiState.quickPicksMode == QuickPicks.LAST_LISTEN &&
+                            uiState.quickPicksMode != QuickPicks.DONT_SHOW &&
                                 uiState.quickPicks.isNotEmpty()
                         ) {
                             item(
