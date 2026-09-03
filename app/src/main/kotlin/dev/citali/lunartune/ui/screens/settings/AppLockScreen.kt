@@ -62,7 +62,6 @@ import dev.citali.lunartune.ui.component.SegmentedPreference
 import dev.citali.lunartune.ui.component.SwitchPreference
 import dev.citali.lunartune.ui.utils.backToMain
 import dev.citali.lunartune.utils.SecurityUtils
-import dev.citali.lunartune.utils.canUseScreenLock
 import dev.citali.lunartune.utils.rememberEnumPreference
 import dev.citali.lunartune.utils.rememberPreference
 
