@@ -394,6 +394,10 @@ fun buildSettingsGroups(
                 SettingsChild("Smart trimmer", "smart_trimmer", listOf("smart trimmer", "trim cache", "auto clean cache")) { SearchResultSwitch(SmartTrimmerKey, false) },
             ),
         )
+    // The row is hidden: it opened the same screen as Storage right next to it. The entry
+    // stays in the index so its children (clear all downloads, auto download on like,
+    // external downloader) are still reachable through settings search, and they also live
+    // on the Storage and Player screens.
     val downloads =
         SettingsItem(
             key = "downloads",
@@ -403,6 +407,7 @@ fun buildSettingsGroups(
             accentColor = MaterialTheme.colorScheme.primary,
             keywords = listOf("download", "downloader", "offline", "auto download", "external downloader", "clear downloads"),
             onClick = { navController.navigate("settings/storage") },
+            hidden = true,
             children = listOf(
                 SettingsChild("Clear all downloads", "clear_all_downloads", listOf("clear downloads", "delete downloads", "remove downloads")),
                 SettingsChild("Auto download on like", "auto_download_like", listOf("auto download", "like", "download liked")) { SearchResultSwitch(AutoDownloadOnLikeKey, false) },

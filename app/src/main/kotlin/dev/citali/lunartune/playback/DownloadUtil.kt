@@ -56,10 +56,13 @@ import dev.citali.lunartune.utils.isLowDataModeActive
 import dev.citali.lunartune.utils.retryWithoutPlaybackLoginContext
 import okhttp3.ConnectionPool
 import okhttp3.OkHttpClient
+import timber.log.Timber
 import java.time.LocalDateTime
+import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -82,7 +85,11 @@ class DownloadUtil
         )
         private val downloadScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         private val songUrlCache = ConcurrentHashMap<String, AuthScopedCacheValue>()
-        private val downloadExecutor = Executors.newSingleThreadExecutor()
+        private val downloadAttempts = ConcurrentHashMap<String, Int>()
+        private val autoRetriedSongIds = Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
+        private val sessionFailedSongIds = Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
+        private val lastAutoRetryAtMs = AtomicLong(0L)
+        private val downloadExecutor = Executors.newFixedThreadPool(MAX_PARALLEL_DOWNLOADS)
 
         private val mediaOkHttpClient: OkHttpClient by lazy {
             OkHttpClient
@@ -96,7 +103,7 @@ class DownloadUtil
                 .dispatcher(
                     okhttp3.Dispatcher().apply {
                         maxRequests = MAX_DOWNLOAD_HTTP_REQUESTS
-                        maxRequestsPerHost = MAX_DOWNLOAD_HTTP_REQUESTS
+                        maxRequestsPerHost = MAX_DOWNLOAD_HTTP_REQUESTS_PER_HOST
                     },
                 ).connectionPool(
                     ConnectionPool(
@@ -210,9 +217,11 @@ class DownloadUtil
                             finalException: Exception?,
                         ) {
                             if (finalException != null || download.state == Download.STATE_FAILED) {
+                                sessionFailedSongIds.add(download.request.id)
                                 songUrlCache.keys.removeIf { it.startsWith("${download.request.id}:") }
                                 YTPlayerUtils.invalidateCachedStreamUrls(download.request.id)
                             }
+                            trackRetryState(download)
                             downloads.update { map ->
                                 map.toMutableMap().apply {
                                     set(download.request.id, download.toProgressSnapshot())
@@ -224,6 +233,9 @@ class DownloadUtil
                             downloadManager: DownloadManager,
                             download: Download,
                         ) {
+                            downloadAttempts.remove(download.request.id)
+                            autoRetriedSongIds.remove(download.request.id)
+                            sessionFailedSongIds.remove(download.request.id)
                             downloads.update { map -> map - download.request.id }
                         }
                     },
@@ -246,6 +258,7 @@ class DownloadUtil
                 while (isActive) {
                     delay(DOWNLOAD_PROGRESS_REFRESH_INTERVAL_MS)
                     refreshActiveDownloadSnapshots()
+                    retryFailedDownloadsWhenIdle()
                 }
             }
             downloadScope.launch {
@@ -261,6 +274,72 @@ class DownloadUtil
                     }
             }
         }
+
+        private fun trackRetryState(download: Download) {
+            val songId = download.request.id
+            when (download.state) {
+                Download.STATE_COMPLETED -> {
+                    downloadAttempts.remove(songId)
+                    autoRetriedSongIds.remove(songId)
+                    sessionFailedSongIds.remove(songId)
+                }
+
+                Download.STATE_DOWNLOADING -> {
+                    // A download that got going again without our retry is a fresh
+                    // attempt (manual resume), so give it its retries back.
+                    if (!autoRetriedSongIds.remove(songId)) {
+                        downloadAttempts.remove(songId)
+                    }
+                }
+            }
+        }
+
+        /**
+         * Re-queues downloads that failed on their own once nothing else is downloading,
+         * so a bulk download finishes instead of leaving a pile of failed songs behind.
+         *
+         * Manually paused downloads are left alone, the cached stream url is dropped so
+         * the retry resolves a fresh one, and every song only gets a few attempts. Only
+         * songs that failed while the app was running are retried, so a failed download
+         * from an older session is left for the user to resume instead of coming back on
+         * every launch.
+         */
+        private fun retryFailedDownloadsWhenIdle() {
+            val snapshot = downloads.value
+            if (snapshot.values.any { download -> download.state.isActiveDownloadState() }) return
+
+            val failed =
+                snapshot.values.filter { download ->
+                    download.state == Download.STATE_FAILED &&
+                        download.stopReason == Download.STOP_REASON_NONE &&
+                        download.request.id in sessionFailedSongIds
+                }
+            if (failed.isEmpty()) return
+
+            val now = System.currentTimeMillis()
+            if (now - lastAutoRetryAtMs.get() < AUTO_RETRY_COOLDOWN_MS) return
+            lastAutoRetryAtMs.set(now)
+
+            failed.forEach { download ->
+                val songId = download.request.id
+                val attempts = downloadAttempts[songId] ?: 0
+                if (attempts >= MAX_AUTO_RETRY_ATTEMPTS) return@forEach
+                downloadAttempts[songId] = attempts + 1
+                autoRetriedSongIds.add(songId)
+                songUrlCache.keys.removeIf { it.startsWith("$songId:") }
+                YTPlayerUtils.invalidateCachedStreamUrls(songId)
+                runCatching {
+                    downloadManager.addDownload(download.request)
+                }.onFailure { throwable ->
+                    Timber.w(throwable, "Failed to re-queue download $songId")
+                }
+            }
+        }
+
+        private fun Int.isActiveDownloadState(): Boolean =
+            this == Download.STATE_QUEUED ||
+                this == Download.STATE_DOWNLOADING ||
+                this == Download.STATE_RESTARTING
 
         private fun refreshActiveDownloadSnapshots() {
             val activeDownloads = downloadManager.currentDownloads
@@ -373,9 +452,12 @@ class DownloadUtil
         }
 
         companion object {
-            private const val MAX_PARALLEL_DOWNLOADS = 1
+            private const val MAX_PARALLEL_DOWNLOADS = 6
             private const val MAX_IDLE_DOWNLOAD_CONNECTIONS = 12
-            private const val MAX_DOWNLOAD_HTTP_REQUESTS = 1
+            private const val MAX_DOWNLOAD_HTTP_REQUESTS = 8
+            private const val MAX_DOWNLOAD_HTTP_REQUESTS_PER_HOST = 6
+            private const val MAX_AUTO_RETRY_ATTEMPTS = 3
+            private const val AUTO_RETRY_COOLDOWN_MS = 3_000L
             private const val DOWNLOAD_READ_TIMEOUT_SECONDS = 90L
             private const val DOWNLOAD_PROGRESS_REFRESH_INTERVAL_MS = 1_000L
             private const val DOWNLOAD_CONNECTION_KEEP_ALIVE_MINUTES = 5L
