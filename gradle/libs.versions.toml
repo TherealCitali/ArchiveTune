@@ -73,7 +73,7 @@ compose-reorderable = { module = "sh.calvin.reorderable:reorderable", version.re
 squigglyslider = { module = "me.saket.squigglyslider:squigglyslider", version.ref = "squigglyslider" }
 
 viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
-biometric = { module = "androidx.biometric:biometric-ktx", version.ref = "biometric" }
+biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 fragment = { module = "androidx.fragment:fragment-ktx", version.ref = "fragment" }
 viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
