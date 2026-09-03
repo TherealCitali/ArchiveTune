@@ -219,18 +219,18 @@ private fun PinIndicatorRow(
     pinLength: Int,
     maxPinLength: Int,
 ) {
+    // toShape() is a composable call, so the shapes are built during composition
+    // rather than inside a remember block.
     val expressiveShapes =
-        remember {
-            listOf(
-                MaterialShapes.Cookie4Sided,
-                MaterialShapes.Cookie9Sided,
-                MaterialShapes.Pentagon,
-                MaterialShapes.Pill,
-                MaterialShapes.Ghostish,
-                MaterialShapes.Diamond,
-                MaterialShapes.Clover4Leaf,
-            ).map { it.toShape() }
-        }
+        listOf(
+            MaterialShapes.Cookie4Sided,
+            MaterialShapes.Cookie9Sided,
+            MaterialShapes.Pentagon,
+            MaterialShapes.Pill,
+            MaterialShapes.Ghostish,
+            MaterialShapes.Diamond,
+            MaterialShapes.Clover4Leaf,
+        ).map { it.toShape() }
 
     val shapesForIndices =
         remember(maxPinLength) {
