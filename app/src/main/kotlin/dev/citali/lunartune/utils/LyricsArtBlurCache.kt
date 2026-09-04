@@ -27,8 +27,11 @@ import kotlinx.coroutines.withContext
  * page can open on an already-blurred bitmap instead of a sharp cover.
  */
 object LyricsArtBlurCache {
-    private const val DecodeSizePx = 160
-    private const val BlurRadius = 24f
+    // Both consumers draw this across the whole lyrics page — the Apple Music background fills
+    // the screen and the moving-blur backdrop magnifies it further — so it is decoded and blurred
+    // at a size that survives being scaled up, rather than at thumbnail size.
+    private const val DecodeSizePx = 384
+    private const val BlurRadius = 32f
     private const val MaxEntries = 8
 
     private val mutex = Mutex()
