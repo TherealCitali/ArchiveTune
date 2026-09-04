@@ -584,9 +584,15 @@ private fun AppleMusicBackground(
         remember(colors) {
             Brush.verticalGradient(
                 listOf(
-                    colors.getOrElse(0) { AppleMusicFallbackGradient[0] }.copy(alpha = 0.88f),
-                    colors.getOrElse(1) { AppleMusicFallbackGradient[1] }.copy(alpha = 0.76f),
-                    colors.getOrElse(2) { AppleMusicFallbackGradient[2] }.copy(alpha = 0.96f),
+                    // The palette has to tint the artwork, not replace it. At 0.88 / 0.76 / 0.96,
+                    // with the artwork itself at 0.62, less than a tenth of the cover survived, so
+                    // the backdrop read as a flat opaque colour instead of as a blurred cover.
+                    // These leave about as much of the artwork visible as the old flat
+                    // Black @ 0.52 scrim did — but the rest of the pixel is palette colour rather
+                    // than black, which is where the vividness comes from.
+                    colors.getOrElse(0) { AppleMusicFallbackGradient[0] }.copy(alpha = AppleMusicScrimTop),
+                    colors.getOrElse(1) { AppleMusicFallbackGradient[1] }.copy(alpha = AppleMusicScrimMid),
+                    colors.getOrElse(2) { AppleMusicFallbackGradient[2] }.copy(alpha = AppleMusicScrimBottom),
                 ),
             )
         }
@@ -632,8 +638,7 @@ private fun AppleMusicBackground(
                     .graphicsLayer {
                         scaleX = AppleMusicBackdropScale
                         scaleY = AppleMusicBackdropScale
-                    }
-                    .alpha(0.62f),
+                    },
         ) { art ->
             if (art != null) {
                 Image(
@@ -654,7 +659,7 @@ private fun AppleMusicBackground(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.18f)),
+                    .background(Color.Black.copy(alpha = 0.10f)),
         )
         Box(
             modifier =
@@ -666,6 +671,14 @@ private fun AppleMusicBackground(
 }
 
 private const val AppleMusicBackdropScale = 1.12f
+
+/**
+ * How much of the track's own palette is laid over the blurred artwork, top to bottom. Lower these
+ * to let more of the cover through; raise them for a flatter, more coloured backdrop.
+ */
+private const val AppleMusicScrimTop = 0.55f
+private const val AppleMusicScrimMid = 0.45f
+private const val AppleMusicScrimBottom = 0.66f
 
 /**
  * How long the backdrop takes to trade one track's artwork for the next. Without it the backdrop
