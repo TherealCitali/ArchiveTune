@@ -688,11 +688,15 @@ private fun MovingBlurBackground(
         remember(colors) {
             Brush.verticalGradient(
                 listOf(
-                    // Pulled in line with the static AppleMusicBackground alphas (0.88 / 0.76 /
-                    // 0.96) so the moving-blur page reads just as vivid as the default one.
-                    colors.getOrElse(0) { AppleMusicFallbackGradient[0] }.copy(alpha = 0.85f),
-                    colors.getOrElse(1) { AppleMusicFallbackGradient[1] }.copy(alpha = 0.75f),
-                    colors.getOrElse(2) { AppleMusicFallbackGradient[2] }.copy(alpha = 0.95f),
+                    // Much lighter than the static AppleMusicBackground (0.88 / 0.76 / 0.96).
+                    // Those alphas sit fine over that backdrop because it is hardly blurred, so
+                    // the artwork still reads through them; under a 77dp blur the palette is
+                    // nearly all you can see, and a dark palette made the page read as almost
+                    // black. The bottom stays the heaviest of the three so lyrics keep their
+                    // contrast where they are actually read.
+                    colors.getOrElse(0) { AppleMusicFallbackGradient[0] }.copy(alpha = MOVING_BLUR_SCRIM_TOP),
+                    colors.getOrElse(1) { AppleMusicFallbackGradient[1] }.copy(alpha = MOVING_BLUR_SCRIM_MID),
+                    colors.getOrElse(2) { AppleMusicFallbackGradient[2] }.copy(alpha = MOVING_BLUR_SCRIM_BOTTOM),
                 ),
             )
         }
@@ -706,17 +710,19 @@ private fun MovingBlurBackground(
             )
         }
 
-    // 1.6x saturation, applied only to this backdrop — it does not touch the shared
-    // PlayerColorExtractor palette that other screens consume, and it is what lets the colours
-    // punch through the blur. ColorMatrix is built by hand because
-    // androidx.compose.ui.graphics.ColorMatrix has no setSaturation(); the terms below are the
-    // standard Rec. 709 saturation matrix (sat = 1 gives the identity).
+    // Saturation and a brightness lift, applied only to this backdrop — it does not touch the
+    // shared PlayerColorExtractor palette that other screens consume. Heavy blurring averages a
+    // cover towards its own mean, which is usually dark and flat, so the artwork needs both to
+    // stay legible as colour under the scrim. ColorMatrix is built by hand because
+    // androidx.compose.ui.graphics.ColorMatrix has no setSaturation(): the terms below are the
+    // standard Rec. 709 saturation matrix (sat = 1 gives the identity), each row then scaled by
+    // [MOVING_BLUR_BRIGHTNESS] to lift the result.
     val vibrancyColorFilter =
         remember {
-            val sat = 1.6f
-            val r = 0.213f + 0.787f * sat
-            val g = 0.715f - 0.715f * sat
-            val b = 0.072f - 0.072f * sat
+            val sat = MOVING_BLUR_SATURATION
+            val r = (0.213f + 0.787f * sat) * MOVING_BLUR_BRIGHTNESS
+            val g = (0.715f - 0.715f * sat) * MOVING_BLUR_BRIGHTNESS
+            val b = (0.072f - 0.072f * sat) * MOVING_BLUR_BRIGHTNESS
             ColorFilter.colorMatrix(
                 ColorMatrix(
                     floatArrayOf(
@@ -897,7 +903,20 @@ private const val MOVING_BLUR_SCALE = 2.4f
  */
 private const val MOVING_BLUR_BLUR_GAIN = 1.6f
 
-private const val MOVING_BLUR_ALPHA = 0.95f
+private const val MOVING_BLUR_ALPHA = 1f
+
+/**
+ * How much of the track's own palette is laid over the blurred artwork, top to bottom.
+ *
+ * Lower these to let more of the artwork through — this is the control to reach for if the
+ * moving-blur page still reads as too dim on your covers.
+ */
+private const val MOVING_BLUR_SCRIM_TOP = 0.55f
+private const val MOVING_BLUR_SCRIM_MID = 0.45f
+private const val MOVING_BLUR_SCRIM_BOTTOM = 0.68f
+
+private const val MOVING_BLUR_SATURATION = 1.75f
+private const val MOVING_BLUR_BRIGHTNESS = 1.12f
 
 /** Decode size for the drifting artwork — the blur hides everything finer than this. */
 private const val MOVING_BLUR_ART_PX = 256
