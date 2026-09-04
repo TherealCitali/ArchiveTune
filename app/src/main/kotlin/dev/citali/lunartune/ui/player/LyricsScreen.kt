@@ -645,8 +645,7 @@ private fun MovingBlurBackground(
     val gpuBlurAvailable =
         useGpuBlur &&
             !disableBlur &&
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-            RenderEffect.isSupported
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val blurEffect =
         remember(gpuBlurAvailable, blurRadius) {
             if (!gpuBlurAvailable) {
