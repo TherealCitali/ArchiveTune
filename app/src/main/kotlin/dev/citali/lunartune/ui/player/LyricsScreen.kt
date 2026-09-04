@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -57,8 +58,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.graphics.BlurEffect
+import androidx.compose.ui.graphics.RenderEffect
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -80,6 +91,7 @@ import androidx.media3.common.Player.STATE_BUFFERING
 import androidx.media3.common.Player.STATE_READY
 import androidx.navigation.NavController
 import androidx.palette.graphics.Palette
+import android.os.Build
 import coil3.compose.AsyncImage
 import coil3.imageLoader
 import coil3.request.ImageRequest
@@ -100,6 +112,7 @@ import dev.citali.lunartune.constants.DisableBlurKey
 import dev.citali.lunartune.constants.EnableHapticFeedbackKey
 import dev.citali.lunartune.constants.LyricsBackgroundStyle
 import dev.citali.lunartune.constants.LyricsBackgroundStyleKey
+import dev.citali.lunartune.constants.UseGpuBlurKey
 import dev.citali.lunartune.constants.LyricsMode
 import dev.citali.lunartune.constants.LyricsModeKey
 import dev.citali.lunartune.constants.PlayerBackgroundStyle
@@ -166,6 +179,7 @@ fun LyricsScreen(
     val configuredLyricsBackground by rememberEnumPreference(LyricsBackgroundStyleKey, LyricsBackgroundStyle.DEFAULT)
     val lyricsBackground = configuredLyricsBackground.resolveFor(playerBackground)
     val disableBlur by rememberPreference(DisableBlurKey, false)
+    val useGpuBlur by rememberPreference(UseGpuBlurKey, true)
     val blurRadius by rememberPreference(BlurRadiusKey, 48f)
     val playerCustomImageUri by rememberPreference(PlayerCustomImageUriKey, "")
     val playerCustomBlur by rememberPreference(PlayerCustomBlurKey, 0f)
@@ -344,6 +358,7 @@ fun LyricsScreen(
             mediaMetadata = mediaMetadata,
             gradientColors = gradientColors,
             disableBlur = disableBlur,
+            useGpuBlur = useGpuBlur,
             blurRadius = blurRadius,
             playerCustomImageUri = playerCustomImageUri,
             playerCustomBlur = playerCustomBlur,
@@ -495,6 +510,7 @@ private fun LyricsScreenBackground(
     mediaMetadata: MediaMetadata,
     gradientColors: List<Color>,
     disableBlur: Boolean,
+    useGpuBlur: Boolean,
     blurRadius: Float,
     playerCustomImageUri: String,
     playerCustomBlur: Float,
@@ -523,6 +539,15 @@ private fun LyricsScreenBackground(
             }
 
             LyricsBackgroundStyle.FOLLOW_THEME -> Unit
+
+            LyricsBackgroundStyle.MOVING_BLUR -> {
+                MovingBlurBackground(
+                    mediaMetadata = mediaMetadata,
+                    useGpuBlur = useGpuBlur,
+                    blurRadius = blurRadius,
+                    disableBlur = disableBlur,
+                )
+            }
 
             LyricsBackgroundStyle.COLORING,
             LyricsBackgroundStyle.CUSTOM,
@@ -594,6 +619,134 @@ private fun AppleMusicBackground(
         )
     }
 }
+
+@Composable
+private fun MovingBlurBackground(
+    mediaMetadata: MediaMetadata,
+    useGpuBlur: Boolean,
+    blurRadius: Float,
+    disableBlur: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    val thumbnailUrl = mediaMetadata.thumbnailUrl
+    val cacheRevision by LyricsArtBlurCache.updates.collectAsState()
+    val blurredArt =
+        remember(thumbnailUrl, cacheRevision) {
+            LyricsArtBlurCache.peek(thumbnailUrl)
+        }
+
+    LaunchedEffect(thumbnailUrl) {
+        LyricsArtBlurCache.prefetch(context, thumbnailUrl)
+    }
+
+    // RenderEffect is Android 12+. Below that — or with the toggle off — the
+    // pre-blurred bitmap is used and only its position animates.
+    val gpuBlurAvailable =
+        useGpuBlur &&
+            !disableBlur &&
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    val blurEffect =
+        remember(gpuBlurAvailable, blurRadius) {
+            if (!gpuBlurAvailable) {
+                null
+            } else {
+                val radius = blurRadius.coerceIn(MOVING_BLUR_MIN_RADIUS, MOVING_BLUR_MAX_RADIUS)
+                BlurEffect(radius, radius, TileMode.Clamp).takeIf(RenderEffect::isSupported)
+            }
+        }
+    val gpuRequest =
+        remember(context, thumbnailUrl) {
+            thumbnailUrl?.let { url ->
+                ImageRequest
+                    .Builder(context)
+                    .data(url)
+                    // The blur hides the missing detail, so a small decode keeps
+                    // the per frame GPU cost down.
+                    .size(MOVING_BLUR_ART_PX)
+                    .build()
+            }
+        }
+
+    // Two different periods on the axes keep the drift from looking like a loop.
+    val drift = rememberInfiniteTransition(label = "movingBlur")
+    val driftX by drift.animateFloat(
+        initialValue = -1f,
+        targetValue = 1f,
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(MOVING_BLUR_DRIFT_MS, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+        label = "driftX",
+    )
+    val driftY by drift.animateFloat(
+        initialValue = -1f,
+        targetValue = 1f,
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(MOVING_BLUR_DRIFT_MS * 4 / 3, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+        label = "driftY",
+    )
+
+    Box(
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(Color.Black),
+    ) {
+        val driftModifier =
+            Modifier
+                .fillMaxSize()
+                .offset {
+                    IntOffset(
+                        x = (driftX * MOVING_BLUR_DRIFT_DP).dp.roundToPx(),
+                        y = (driftY * MOVING_BLUR_DRIFT_DP * 0.7f).dp.roundToPx(),
+                    )
+                }
+
+        if (blurEffect != null && gpuRequest != null) {
+            AsyncImage(
+                model = gpuRequest,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier =
+                    driftModifier.graphicsLayer {
+                        scaleX = MOVING_BLUR_SCALE
+                        scaleY = MOVING_BLUR_SCALE
+                        renderEffect = blurEffect
+                    },
+            )
+        } else if (blurredArt != null) {
+            Image(
+                bitmap = blurredArt.asImageBitmap(),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier =
+                    driftModifier.graphicsLayer {
+                        scaleX = MOVING_BLUR_SCALE
+                        scaleY = MOVING_BLUR_SCALE
+                    },
+            )
+        }
+
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.52f)),
+        )
+    }
+}
+
+private const val MOVING_BLUR_ART_PX = 256
+private const val MOVING_BLUR_SCALE = 1.35f
+private const val MOVING_BLUR_DRIFT_DP = 26f
+private const val MOVING_BLUR_DRIFT_MS = 26_000
+private const val MOVING_BLUR_MIN_RADIUS = 8f
+private const val MOVING_BLUR_MAX_RADIUS = 32f
 
 @Composable
 private fun AppleMusicGrabber(

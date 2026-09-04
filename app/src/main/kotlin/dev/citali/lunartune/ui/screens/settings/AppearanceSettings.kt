@@ -95,6 +95,7 @@ import dev.citali.lunartune.constants.LibraryChipOrderKey
 import dev.citali.lunartune.constants.LibraryFilter
 import dev.citali.lunartune.constants.LyricsBackgroundStyle
 import dev.citali.lunartune.constants.LyricsBackgroundStyleKey
+import dev.citali.lunartune.constants.UseGpuBlurKey
 import dev.citali.lunartune.constants.MiniPlayerBackgroundStyle
 import dev.citali.lunartune.constants.MiniPlayerBackgroundStyleKey
 import dev.citali.lunartune.constants.PlayerBackgroundStyle
@@ -228,6 +229,7 @@ fun AppearanceSettings(navController: NavController) {
             defaultValue = true,
         )
     val (blurRadius, onBlurRadiusChange) = rememberPreference(BlurRadiusKey, defaultValue = 48f)
+    val (useGpuBlur, onUseGpuBlurChange) = rememberPreference(UseGpuBlurKey, defaultValue = true)
     val (backdropEnabled, onBackdropEnabledChange) = rememberPreference(BackdropEnabledKey, defaultValue = true)
     val (backdropBlurAmount, onBackdropBlurAmountChange) = rememberPreference(BackdropBlurAmountKey, defaultValue = 60)
     val (fontPreference, onFontPreferenceChange) =
@@ -376,6 +378,7 @@ fun AppearanceSettings(navController: NavController) {
                 LyricsBackgroundStyle.DEFAULT,
                 LyricsBackgroundStyle.FOLLOW_THEME,
                 LyricsBackgroundStyle.COLORING,
+                LyricsBackgroundStyle.MOVING_BLUR,
             )
         }
     val lyricsBackground = configuredLyricsBackground.resolveFor(playerBackground)
@@ -634,6 +637,17 @@ fun AppearanceSettings(navController: NavController) {
                 }
 
                 item {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.use_gpu_blur)) },
+                        description = stringResource(R.string.use_gpu_blur_desc),
+                        icon = { Icon(painterResource(R.drawable.blur_on), null) },
+                        checked = useGpuBlur,
+                        onCheckedChange = onUseGpuBlurChange,
+                        isEnabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
+                    )
+                }
+
+                item {
                     PreferenceEntry(
                         title = { Text(stringResource(R.string.blur_intensity)) },
                         description = stringResource(R.string.blur_intensity_value, blurRadius.roundToInt()),
@@ -811,6 +825,7 @@ fun AppearanceSettings(navController: NavController) {
                                 LyricsBackgroundStyle.FOLLOW_THEME -> stringResource(R.string.follow_theme)
                                 LyricsBackgroundStyle.COLORING -> stringResource(R.string.coloring)
                                 LyricsBackgroundStyle.CUSTOM -> stringResource(R.string.custom)
+                                LyricsBackgroundStyle.MOVING_BLUR -> stringResource(R.string.lyrics_background_moving_blur)
                             }
                         },
                     )
