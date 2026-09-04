@@ -9,8 +9,8 @@ package dev.citali.lunartune.ui.player
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,9 +38,6 @@ import dev.citali.lunartune.constants.MiniPlayerHeight
 import dev.citali.lunartune.utils.rememberPreference
 import kotlin.math.min
 
-/** How long the mini player takes to unfold from the pill. */
-private const val MINI_PLAYER_ENTRY_MS = 520
-
 /** Size of the pill at the very start of the unfold. */
 private val PillHeight = 48.dp
 private const val PillWidthFraction = 0.42f
@@ -57,6 +54,26 @@ private val PillRise = (MiniPlayerHeight - PillHeight) / 2
 
 /** Fraction of the unfold over which the pill fades up from nothing. */
 private const val PillAlphaFraction = 0.18f
+
+/** How much of the bar is still missing at the start of the unfold. */
+private const val UnfoldStartScale = 0.94f
+
+/**
+ * How much of the spring's overshoot is spent as a bounce, rather than as the window growing past
+ * the bar — which would be invisible, since there is nothing out there to reveal.
+ */
+private const val BounceScaleGain = 0.35f
+
+/**
+ * A spring rather than an ease-out, so the bar settles with a little give instead of stopping
+ * dead. 0.62 damping overshoots by roughly 7%, which after [BounceScaleGain] lands as about a 2.5%
+ * bounce — enough to feel, not enough to read as a wobble.
+ */
+private val UnfoldSpring =
+    spring<Float>(
+        dampingRatio = 0.62f,
+        stiffness = Spring.StiffnessMediumLow,
+    )
 
 /**
  * Progress of the mini player's entrance, `0f` = a pill sitting on the navigation bar, `1f` = the
@@ -105,10 +122,7 @@ internal fun rememberMiniPlayerEntryProgress(hasPlayback: Boolean): State<Float>
 
 private suspend fun unfold(progress: Animatable<Float, AnimationVector1D>) {
     progress.snapTo(0f)
-    progress.animateTo(
-        targetValue = 1f,
-        animationSpec = tween(durationMillis = MINI_PLAYER_ENTRY_MS, easing = FastOutSlowInEasing),
-    )
+    progress.animateTo(targetValue = 1f, animationSpec = UnfoldSpring)
 }
 
 /**
@@ -131,11 +145,22 @@ internal fun Modifier.unfoldFromPill(
     restingShape: Shape,
 ): Modifier =
     this.graphicsLayer {
-        val p = progress().coerceIn(0f, 1f)
+        val p = progress().coerceIn(0f, 1.35f)
         clip = true
         shape = UnfoldingPillShape(progress = p, restingShape = restingShape)
         translationY = PillRise.toPx() * (1f - p)
         alpha = (p / PillAlphaFraction).coerceIn(0f, 1f)
+        // Below 1 the bar grows into place. Past 1 the spring's overshoot is spent as a bounce
+        // instead: letting the window itself overshoot would show nothing extra, because there is
+        // nothing beyond the bar to reveal.
+        val scale =
+            if (p >= 1f) {
+                1f + (p - 1f) * BounceScaleGain
+            } else {
+                lerp(UnfoldStartScale, 1f, p)
+            }
+        scaleX = scale
+        scaleY = scale
     }
 
 private class UnfoldingPillShape(
