@@ -12,6 +12,7 @@ package dev.citali.lunartune.ui.player
 import android.content.res.Configuration
 import android.view.HapticFeedbackConstants
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -82,6 +83,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.collectAsState
+import androidx.compose.animation.core.tween
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.C
 import androidx.media3.common.Player.STATE_BUFFERING
@@ -618,20 +620,29 @@ private fun AppleMusicBackground(
                 .fillMaxSize()
                 .background(AppleMusicFallbackGradient.last()),
     ) {
-        if (blurredArt != null) {
-            Image(
-                bitmap = blurredArt.asImageBitmap(),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .graphicsLayer {
-                            scaleX = AppleMusicBackdropScale
-                            scaleY = AppleMusicBackdropScale
-                        }
-                        .alpha(0.62f),
-            )
+        // Keyed on the bitmap, not the url: the outgoing artwork stays on screen until the incoming
+        // one is actually ready, so a track change never flashes an empty backdrop.
+        Crossfade(
+            targetState = blurredArt,
+            animationSpec = tween(BACKDROP_FADE_MS),
+            label = "appleMusicBackdrop",
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        scaleX = AppleMusicBackdropScale
+                        scaleY = AppleMusicBackdropScale
+                    }
+                    .alpha(0.62f),
+        ) { art ->
+            if (art != null) {
+                Image(
+                    bitmap = art.asImageBitmap(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
         }
         Box(
             modifier =
@@ -655,6 +666,13 @@ private fun AppleMusicBackground(
 }
 
 private const val AppleMusicBackdropScale = 1.12f
+
+/**
+ * How long the backdrop takes to trade one track's artwork for the next. Without it the backdrop
+ * pops the instant the new bitmap lands, which is the one thing that makes the whole effect read
+ * as a glitch rather than as a finish.
+ */
+private const val BACKDROP_FADE_MS = 700
 
 @Composable
 private fun MovingBlurBackground(
@@ -795,27 +813,37 @@ private fun MovingBlurBackground(
                         Modifier
                     }
 
-                AsyncImage(
-                    model = gpuRequest,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    colorFilter = vibrancyColorFilter,
+                // The crossfade sits under the blur, so what fades is the artwork and not the
+                // finished blurred result — no sharp edge is ever visible mid-transition.
+                Crossfade(
+                    targetState = gpuRequest,
+                    animationSpec = tween(BACKDROP_FADE_MS),
+                    label = "movingBlurBackdrop",
                     // blur INSIDE the transform: the artwork is blurred while it is still centred
                     // and only then moved, so the blur never samples the transparent area behind
                     // the layer's trailing edge.
                     modifier = driftModifier.then(blurModifier),
-                )
+                ) { request ->
+                    AsyncImage(
+                        model = request,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        colorFilter = vibrancyColorFilter,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
             }
         } else if (blurredArt != null) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                Image(
-                    bitmap = blurredArt.asImageBitmap(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    colorFilter = vibrancyColorFilter,
+                // Keyed on the bitmap, so the old artwork holds the frame until the new one has
+                // been blurred and cached — the CPU path is the one that would otherwise flash.
+                Crossfade(
+                    targetState = blurredArt,
+                    animationSpec = tween(BACKDROP_FADE_MS),
+                    label = "movingBlurBackdrop",
                     modifier =
                         Modifier
                             .requiredSize(footprint)
@@ -828,7 +856,15 @@ private fun MovingBlurBackground(
                                 compositingStrategy = CompositingStrategy.Offscreen
                             }
                             .alpha(MOVING_BLUR_ALPHA),
-                )
+                ) { art ->
+                    Image(
+                        bitmap = art.asImageBitmap(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        colorFilter = vibrancyColorFilter,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
             }
         }
 
