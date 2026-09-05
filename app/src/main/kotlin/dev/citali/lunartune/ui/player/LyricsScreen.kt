@@ -732,16 +732,23 @@ private fun MovingBlurBackground(
     // [MOVING_BLUR_BRIGHTNESS] to lift the result.
     val vibrancyColorFilter =
         remember {
-            val sat = MOVING_BLUR_SATURATION
-            val r = (0.213f + 0.787f * sat) * MOVING_BLUR_BRIGHTNESS
-            val g = (0.715f - 0.715f * sat) * MOVING_BLUR_BRIGHTNESS
-            val b = (0.072f - 0.072f * sat) * MOVING_BLUR_BRIGHTNESS
+            val s = MOVING_BLUR_SATURATION
+            val gain = MOVING_BLUR_BRIGHTNESS
+            // Rec. 709 saturation matrix. The rows are deliberately *not* identical: each output
+            // channel keeps its own channel at (luma + s) and takes the other two at
+            // (luma * (1 - s)). Writing one row three times — which is what the ported version of
+            // this did — computes the same weighted sum for R, G and B, and that is a greyscale
+            // conversion however high s goes: a blue sky came out grey, and turning the saturation
+            // up only made the grey brighter. At s = 1 this is the identity matrix.
+            val lr = 0.213f * (1f - s)
+            val lg = 0.715f * (1f - s)
+            val lb = 0.072f * (1f - s)
             ColorFilter.colorMatrix(
                 ColorMatrix(
                     floatArrayOf(
-                        r, g, b, 0f, 0f,
-                        r, g, b, 0f, 0f,
-                        r, g, b, 0f, 0f,
+                        (lr + s) * gain, lg * gain, lb * gain, 0f, 0f,
+                        lr * gain, (lg + s) * gain, lb * gain, 0f, 0f,
+                        lr * gain, lg * gain, (lb + s) * gain, 0f, 0f,
                         0f, 0f, 0f, 1f, 0f,
                     ),
                 ),
@@ -928,8 +935,13 @@ private const val MOVING_BLUR_SCRIM_TOP = 0.55f
 private const val MOVING_BLUR_SCRIM_MID = 0.45f
 private const val MOVING_BLUR_SCRIM_BOTTOM = 0.68f
 
-private const val MOVING_BLUR_SATURATION = 1.75f
-private const val MOVING_BLUR_BRIGHTNESS = 1.12f
+private const val MOVING_BLUR_SATURATION = 1.6f
+
+/**
+ * Only a slight lift now. The larger gain this used to carry was compensating for the filter
+ * turning everything grey — with real saturation, much more than this blows the highlights out.
+ */
+private const val MOVING_BLUR_BRIGHTNESS = 1.06f
 
 /** Decode size for the drifting artwork — the blur hides everything finer than this. */
 private const val MOVING_BLUR_ART_PX = 256
