@@ -78,7 +78,6 @@ import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
@@ -4014,14 +4013,11 @@ fun PlayerBackground(
                 ) { thumbnailUrl ->
                     if (thumbnailUrl != null) {
                         Box(modifier = Modifier.fillMaxSize()) {
-                            AsyncImage(
+                            BlurredArtwork(
                                 model = thumbnailUrl.highRes(),
+                                radius = if (styleAppliesBlur) effectiveBlurRadius.dp else 0.dp,
                                 contentDescription = "Blurred background",
-                                contentScale = ContentScale.Crop,
-                                modifier =
-                                    Modifier.fillMaxSize().let {
-                                        if (styleAppliesBlur) it.blur(radius = effectiveBlurRadius.dp) else it
-                                    },
+                                modifier = Modifier.fillMaxSize(),
                             )
                             val overlayStops = PlayerBackgroundColorUtils.buildBlurOverlayStops(gradientColors)
                             Box(
@@ -4123,14 +4119,11 @@ fun PlayerBackground(
                 ) { thumbnailUrl ->
                     if (thumbnailUrl != null) {
                         Box(modifier = Modifier.fillMaxSize()) {
-                            AsyncImage(
+                            BlurredArtwork(
                                 model = thumbnailUrl.highRes(),
+                                radius = if (styleAppliesBlur) effectiveBlurRadius.dp else 0.dp,
                                 contentDescription = "Blurred background",
-                                contentScale = ContentScale.Crop,
-                                modifier =
-                                    Modifier.fillMaxSize().let {
-                                        if (styleAppliesBlur) it.blur(radius = effectiveBlurRadius.dp) else it
-                                    },
+                                modifier = Modifier.fillMaxSize(),
                             )
                             val gradientColorStops =
                                 PlayerBackgroundColorUtils.buildBlurGradientStops(gradientColors)
@@ -4192,15 +4185,12 @@ fun PlayerBackground(
 
                             val cm = ColorMatrix(matrix)
 
-                            AsyncImage(
+                            BlurredArtwork(
                                 model = Uri.parse(uri),
+                                radius = if (disableBlur) 0.dp else blurPx.dp,
                                 contentDescription = "Custom background",
-                                contentScale = ContentScale.Crop,
-                                modifier =
-                                    Modifier.fillMaxSize().let {
-                                        if (disableBlur) it else it.blur(radius = blurPx.dp)
-                                    },
                                 colorFilter = ColorFilter.colorMatrix(cm),
+                                modifier = Modifier.fillMaxSize(),
                             )
                             Box(
                                 modifier =
