@@ -548,19 +548,6 @@ private fun LyricsScreenBackground(
                 )
             }
 
-            LyricsBackgroundStyle.MOVING_GLOW -> {
-                MovingGlowBackground(
-                    mediaMetadata = mediaMetadata,
-                    gradientColors = gradientColors,
-                    disableBlur = disableBlur,
-                    blurRadius = blurRadius,
-                    playerCustomImageUri = playerCustomImageUri,
-                    playerCustomBlur = playerCustomBlur,
-                    playerCustomContrast = playerCustomContrast,
-                    playerCustomBrightness = playerCustomBrightness,
-                )
-            }
-
             LyricsBackgroundStyle.COLORING,
             LyricsBackgroundStyle.CUSTOM,
             -> {
@@ -668,16 +655,17 @@ private fun MovingBlurBackground(
     disableBlur: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    // Blurring this hard averages a cover towards its own mean, which costs it the colour the
-    // still backdrop keeps — so the artwork gets a light saturation correction on the way in. Not
-    // the glow's lift, which pushed saturation to 1.6 and brightness past 1.0: this only gives
-    // back what the blur averaged away. If this still reads pale, this is the dial.
+    // Blurring this hard averages a cover towards its own mean, which costs it both colour and
+    // brightness — so the artwork gets a light saturation correction and a small lift on the way
+    // in. Only giving back what the blur averaged away, not a look of its own: both dials are
+    // constants below, and if this still reads pale or dim they are the two to turn.
     //
     // Built by hand because androidx.compose.ui.graphics.ColorMatrix has no setSaturation(): these
     // are the standard Rec. 709 saturation terms, and at s = 1 the matrix is the identity.
     val vibrancyColorFilter =
         remember {
             val s = MOVING_BLUR_SATURATION
+            val gain = MOVING_BLUR_BRIGHTNESS
             // The rows are deliberately *not* identical: each output channel keeps its own channel
             // at (luma + s) and takes the other two at (luma * (1 - s)). Writing one row three
             // times — which is what the ported version of this did — computes the same weighted sum
@@ -689,9 +677,9 @@ private fun MovingBlurBackground(
             ColorFilter.colorMatrix(
                 ColorMatrix(
                     floatArrayOf(
-                        lr + s, lg, lb, 0f, 0f,
-                        lr, lg + s, lb, 0f, 0f,
-                        lr, lg, lb + s, 0f, 0f,
+                        (lr + s) * gain, lg * gain, lb * gain, 0f, 0f,
+                        lr * gain, (lg + s) * gain, lb * gain, 0f, 0f,
+                        lr * gain, lg * gain, (lb + s) * gain, 0f, 0f,
                         0f, 0f, 0f, 1f, 0f,
                     ),
                 ),
@@ -794,44 +782,6 @@ private fun MovingBlurBackground(
 }
 
 /**
- * The player's own GLOW background, set on the same walk as the moving blur.
- *
- * GLOW is a field of radial gradients drawn from the track's palette — the album's colours doing
- * the glowing rather than the cover itself, which is the other reading of "a moving glow". Getting
- * it moving is only a matter of wrapping it: it fills whatever box it is put in.
- */
-@Composable
-private fun MovingGlowBackground(
-    mediaMetadata: MediaMetadata,
-    gradientColors: List<Color>,
-    disableBlur: Boolean,
-    blurRadius: Float,
-    playerCustomImageUri: String,
-    playerCustomBlur: Float,
-    playerCustomContrast: Float,
-    playerCustomBrightness: Float,
-    modifier: Modifier = Modifier,
-) {
-    Box(modifier = modifier.fillMaxSize().background(Color.Black)) {
-        // Keyed on the palette, not the artwork: GLOW draws no cover, so it is the colours
-        // arriving that should start it moving.
-        DriftingBackdrop(active = gradientColors.isNotEmpty()) {
-            PlayerBackground(
-                playerBackground = PlayerBackgroundStyle.GLOW,
-                mediaMetadata = mediaMetadata,
-                gradientColors = gradientColors,
-                disableBlur = disableBlur,
-                blurRadius = blurRadius,
-                playerCustomImageUri = playerCustomImageUri,
-                playerCustomBlur = playerCustomBlur,
-                playerCustomContrast = playerCustomContrast,
-                playerCustomBrightness = playerCustomBrightness,
-            )
-        }
-    }
-}
-
-/**
  * Puts [content] on the walk.
  *
  * The layer cannot simply be screen-shaped: rotated by the walk, a screen-sized rectangle only
@@ -907,9 +857,17 @@ private const val MOVING_BLUR_ALPHA = 1f
 
 /**
  * Light saturation for the drifting artwork. Blurring averages colour away, so this gives a little
- * of it back — a correction, not the glow's 1.6, which was a look in itself.
+ * of it back. A correction, not a look: the earlier version ran this at 1.6 and laid a palette wash
+ * over the top as well, which turned the backdrop into a glow rather than a cover.
  */
-private const val MOVING_BLUR_SATURATION = 1.2f
+private const val MOVING_BLUR_SATURATION = 1.3f
+
+/**
+ * A small brightness lift on the same reasoning. The blur averages a cover towards its own mean,
+ * and that mean sits below the cover's own highlights, so the backdrop reads dimmer than the still
+ * one under the same scrim. Kept small on purpose — past roughly 1.15 the highlights start to blow.
+ */
+private const val MOVING_BLUR_BRIGHTNESS = 1.08f
 
 /** Decode size for the drifting artwork — the blur hides everything finer than this. */
 private const val MOVING_BLUR_ART_PX = 256
