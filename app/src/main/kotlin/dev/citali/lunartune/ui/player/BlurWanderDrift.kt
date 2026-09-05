@@ -181,19 +181,22 @@ internal class BlurWanderDrift(
          */
         const val WanderRadiusDp = 120f
 
-        /** Average travel speed. Deliberately slow — this sits behind lyrics. */
-        private const val WanderSpeedDpPerSecond = 26f
+        /**
+         * Average travel speed. Deliberately slow — this sits behind lyrics. Was 26dp/s, which
+         * read as slightly busy when you were trying to read.
+         */
+        private const val WanderSpeedDpPerSecond = 19f
 
         private const val MinLegDurationMs = 6_000f
-        private const val MaxLegDurationMs = 18_000f
+        private const val MaxLegDurationMs = 22_000f
 
         /**
-         * Degrees of rotation one leg may add. Against the ~12s median leg that is roughly 3°/s,
-         * so a colour crosses the screen — half a turn — in about a minute: ambient, rather than
-         * something you notice while reading lyrics.
+         * Degrees of rotation one leg may add. Against the ~15s median leg that is roughly 2°/s,
+         * so a colour crosses the screen — half a turn — in about a minute and a half: ambient,
+         * rather than something you notice while reading lyrics.
          */
-        private const val MinLegRotationDegrees = 18f
-        private const val MaxLegRotationDegrees = 55f
+        private const val MinLegRotationDegrees = 15f
+        private const val MaxLegRotationDegrees = 45f
 
         /** Waypoints are never closer to the centre than this fraction of the radius. */
         private const val MinRadiusFraction = 0.5f
