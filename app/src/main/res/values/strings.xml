@@ -1138,6 +1138,7 @@
     <string name="navigation_bar_reset_dimensions">Reset dimensions to default</string>
     <!-- Moving blur lyrics background -->
     <string name="lyrics_background_moving_blur">Moving blur</string>
+    <string name="lyrics_background_moving_glow">Moving glow</string>
     <string name="use_gpu_blur">Use GPU blur</string>
     <string name="use_gpu_blur_desc">Blur the moving lyrics background on the GPU instead of reusing a pre-blurred image. Android 12 and above only.</string>
 </resources>

@@ -719,7 +719,8 @@ enum class LyricsBackgroundStyle {
     FOLLOW_THEME,
     COLORING,
     CUSTOM,
-    MOVING_BLUR;
+    MOVING_BLUR,
+    MOVING_GLOW;
 
     fun resolveFor(playerBackgroundStyle: PlayerBackgroundStyle): LyricsBackgroundStyle =
         when {
