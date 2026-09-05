@@ -91,7 +91,6 @@ private fun NewMiniPlayer(
         defaultValue = MiniPlayerBackgroundStyle.THEME,
     )
     val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
-    val entryProgress = rememberMiniPlayerEntryProgress(hasPlayback = mediaMetadata != null)
     var gradientColors by remember {
         mutableStateOf<List<Color>>(emptyList())
     }
@@ -209,10 +208,6 @@ private fun NewMiniPlayer(
                 Modifier
                     .fillMaxWidth()
                     .height(MiniPlayerHeight)
-                    .unfoldFromPill(
-                        progress = { entryProgress.value },
-                        restingShape = miniPlayerShape,
-                    )
                     .offset { IntOffset(offsetX.roundToInt(), 0) }
                     .clip(miniPlayerShape),
         ) {
