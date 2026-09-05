@@ -383,6 +383,7 @@ fun AppearanceSettings(navController: NavController) {
                 LyricsBackgroundStyle.FOLLOW_THEME,
                 LyricsBackgroundStyle.COLORING,
                 LyricsBackgroundStyle.MOVING_BLUR,
+                LyricsBackgroundStyle.MOVING_GLOW,
             )
         }
     val lyricsBackground = configuredLyricsBackground.resolveFor(playerBackground)
@@ -830,6 +831,7 @@ fun AppearanceSettings(navController: NavController) {
                                 LyricsBackgroundStyle.COLORING -> stringResource(R.string.coloring)
                                 LyricsBackgroundStyle.CUSTOM -> stringResource(R.string.custom)
                                 LyricsBackgroundStyle.MOVING_BLUR -> stringResource(R.string.lyrics_background_moving_blur)
+                                LyricsBackgroundStyle.MOVING_GLOW -> stringResource(R.string.lyrics_background_moving_glow)
                             }
                         },
                     )

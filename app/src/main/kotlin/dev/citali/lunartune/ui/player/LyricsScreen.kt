@@ -546,6 +546,18 @@ private fun LyricsScreenBackground(
                     useGpuBlur = useGpuBlur,
                     blurRadius = blurRadius,
                     disableBlur = disableBlur,
+                    glow = false,
+                )
+            }
+
+            LyricsBackgroundStyle.MOVING_GLOW -> {
+                MovingBlurBackground(
+                    mediaMetadata = mediaMetadata,
+                    gradientColors = gradientColors,
+                    useGpuBlur = useGpuBlur,
+                    blurRadius = blurRadius,
+                    disableBlur = disableBlur,
+                    glow = true,
                 )
             }
 
@@ -627,12 +639,18 @@ private fun AppleMusicBackground(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.52f)),
+                    .background(Color.Black.copy(alpha = AppleMusicScrimAlpha)),
         )
     }
 }
 
 private const val AppleMusicBackdropScale = 1.12f
+
+/**
+ * The flat scrim laid over the blurred artwork. Shared with the moving backdrop's plain variant so
+ * the two read as the same picture — one still, one drifting.
+ */
+private const val AppleMusicScrimAlpha = 0.52f
 
 /**
  * How long the backdrop takes to trade one track's artwork for the next. Without it the backdrop
@@ -648,6 +666,7 @@ private fun MovingBlurBackground(
     useGpuBlur: Boolean,
     blurRadius: Float,
     disableBlur: Boolean,
+    glow: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val colors = if (gradientColors.isNotEmpty()) gradientColors else AppleMusicFallbackGradient
@@ -748,7 +767,7 @@ private fun MovingBlurBackground(
             modifier
                 .fillMaxSize()
                 .clipToBounds()
-                .background(AppleMusicFallbackGradient.last()),
+                .background(if (glow) AppleMusicFallbackGradient.last() else Color.Black),
     ) {
         // The blur clips to its own bounds, so the layer cannot simply be screen-shaped: rotated
         // by the walk, a screen-sized rectangle only covers its inscribed circle and a black wedge
@@ -808,7 +827,7 @@ private fun MovingBlurBackground(
                         model = request,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
-                        colorFilter = vibrancyColorFilter,
+                        colorFilter = if (glow) vibrancyColorFilter else null,
                         modifier = Modifier.fillMaxSize(),
                     )
                 }
@@ -841,26 +860,38 @@ private fun MovingBlurBackground(
                         bitmap = art.asImageBitmap(),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
-                        colorFilter = vibrancyColorFilter,
+                        colorFilter = if (glow) vibrancyColorFilter else null,
                         modifier = Modifier.fillMaxSize(),
                     )
                 }
             }
         }
 
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(backgroundBrush),
-        )
+        if (glow) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(backgroundBrush),
+            )
 
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(bottomScrim),
-        )
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(bottomScrim),
+            )
+        } else {
+            // The still backdrop's own treatment, moving: the blurred cover under a flat black
+            // scrim, with the track's palette left out of it entirely. Same artwork, dimmed by the
+            // same amount as the still one — the walk is the only thing added.
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = AppleMusicScrimAlpha)),
+            )
+        }
     }
 }
 
