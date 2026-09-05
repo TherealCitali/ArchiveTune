@@ -14,6 +14,7 @@ import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.size.Size
 import coil3.toBitmap
+import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,8 +24,12 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
- * Pre-blurs the playing track's cover on a background thread so the lyrics
- * page can open on an already-blurred bitmap instead of a sharp cover.
+ * Pre-blurs the playing track's cover on a background thread so a surface that needs blurred
+ * artwork can show an already-blurred bitmap instead of a sharp cover.
+ *
+ * Started out serving only the lyrics page — hence the name — but it is now also how the player's
+ * blur backgrounds get their blur on Android 11 and below, where `Modifier.blur` does nothing at
+ * all. One blur per track, shared by every surface that needs one.
  */
 object LyricsArtBlurCache {
     // Both consumers draw this across the whole lyrics page — the Apple Music background fills
@@ -33,6 +38,12 @@ object LyricsArtBlurCache {
     private const val DecodeSizePx = 384
     private const val BlurRadius = 32f
     private const val MaxEntries = 8
+
+    /**
+     * Blur radii are rounded to this before they are used as a cache key. A blur slider would
+     * otherwise fill the cache with one entry per value it is dragged through.
+     */
+    private const val RadiusStep = 8f
 
     private val mutex = Mutex()
     private val bitmaps =
@@ -45,26 +56,32 @@ object LyricsArtBlurCache {
 
     val updates: StateFlow<Int> = revision.asStateFlow()
 
-    fun peek(url: String?): Bitmap? {
+    fun peek(
+        url: String?,
+        radius: Float = BlurRadius,
+    ): Bitmap? {
         if (url.isNullOrBlank()) return null
+        val key = key(url, radius)
         synchronized(bitmaps) {
-            return bitmaps[url]
+            return bitmaps[key]
         }
     }
 
     suspend fun prefetch(
         context: Context,
         url: String?,
+        radius: Float = BlurRadius,
     ) {
         if (url.isNullOrBlank()) return
-        if (peek(url) != null) return
+        val key = key(url, radius)
+        if (peek(url, radius) != null) return
 
         val shouldLoad =
             mutex.withLock {
-                if (url in inFlight || peek(url) != null) {
+                if (key in inFlight || peek(url, radius) != null) {
                     false
                 } else {
-                    inFlight.add(url)
+                    inFlight.add(key)
                     true
                 }
             }
@@ -82,15 +99,23 @@ object LyricsArtBlurCache {
                             .build()
                     val image = context.applicationContext.imageLoader.execute(request).image ?: return@withContext null
                     val bitmap = image.toBitmap().copy(Bitmap.Config.ARGB_8888, true)
-                    ImageBlurUtils.blur(bitmap, BlurRadius)
+                    ImageBlurUtils.blur(bitmap, quantize(radius))
                 } ?: return
 
             synchronized(bitmaps) {
-                bitmaps[url] = blurred
+                bitmaps[key] = blurred
             }
             revision.value = revision.value + 1
         } finally {
-            mutex.withLock { inFlight.remove(url) }
+            mutex.withLock { inFlight.remove(key) }
         }
     }
+
+    private fun key(
+        url: String,
+        radius: Float,
+    ): String = "$url#${quantize(radius).toInt()}"
+
+    private fun quantize(radius: Float): Float =
+        (radius / RadiusStep).roundToInt() * RadiusStep
 }
