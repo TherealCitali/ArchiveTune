@@ -19,6 +19,7 @@ import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.SystemClock
 import android.os.IBinder
 import android.provider.OpenableColumns
 import android.view.View
@@ -115,6 +116,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -200,6 +202,10 @@ import dev.citali.lunartune.constants.CustomThemeColorKey
 import dev.citali.lunartune.constants.AppLockBiometricUnlockKey
 import dev.citali.lunartune.constants.AppLockEnabledKey
 import dev.citali.lunartune.constants.AppLockPinHashKey
+import dev.citali.lunartune.constants.AppLockScope
+import dev.citali.lunartune.constants.AppLockScopeKey
+import dev.citali.lunartune.constants.AppLockTimeout
+import dev.citali.lunartune.constants.AppLockTimeoutKey
 import dev.citali.lunartune.constants.AppLockType
 import dev.citali.lunartune.constants.AppLockTypeKey
 import dev.citali.lunartune.constants.DarkModeKey
@@ -270,6 +276,8 @@ import dev.citali.lunartune.playback.queues.Queue
 import dev.citali.lunartune.playback.queues.YouTubeAlbumRadio
 import dev.citali.lunartune.playback.queues.YouTubeQueue
 import dev.citali.lunartune.ui.component.AppLockGate
+import dev.citali.lunartune.ui.component.appLockConfigured
+import dev.citali.lunartune.ui.component.isSensitiveRoute
 import dev.citali.lunartune.ui.component.BottomSheetMenu
 import dev.citali.lunartune.ui.component.BottomSheetPage
 import dev.citali.lunartune.ui.component.COLLAPSED_ANCHOR
@@ -560,7 +568,10 @@ class MainActivity : FragmentActivity() {
 
         lifecycleScope.launch(Dispatchers.IO) {
             dataStore.data
-                .map { it[DisableScreenshotKey] ?: false }
+                // An app lock implies the secure flag: without it the task switcher
+                // keeps a thumbnail of whatever was on screen when the app was left,
+                // which is exactly what the lock is meant to hide.
+                .map { (it[DisableScreenshotKey] ?: false) || it.appLockConfigured() }
                 .distinctUntilChanged()
                 .collectLatest {
                     withContext(Dispatchers.Main) {
@@ -2515,53 +2526,84 @@ class MainActivity : FragmentActivity() {
                             openSearch()
                         }
                     }
-                }
-                val appLockEnabled by rememberPreference(AppLockEnabledKey, defaultValue = false)
-                val appLockType by rememberEnumPreference(AppLockTypeKey, defaultValue = AppLockType.NONE)
-                val appLockPinHash by rememberPreference(AppLockPinHashKey, defaultValue = "")
-                val appLockBiometricUnlock by rememberPreference(AppLockBiometricUnlockKey, defaultValue = false)
 
-                val appLockActive =
-                    appLockEnabled &&
-                        (
-                            appLockType == AppLockType.BIOMETRIC ||
-                                (appLockType == AppLockType.PIN && appLockPinHash.isNotBlank())
-                        )
-                var isLocked by rememberSaveable { mutableStateOf(appLockActive) }
-                var unlockedOnce by rememberSaveable { mutableStateOf(false) }
+                    val appLockEnabled by rememberPreference(AppLockEnabledKey, defaultValue = false)
+                    val appLockType by rememberEnumPreference(AppLockTypeKey, defaultValue = AppLockType.NONE)
+                    val appLockPinHash by rememberPreference(AppLockPinHashKey, defaultValue = "")
+                    val appLockBiometricUnlock by rememberPreference(AppLockBiometricUnlockKey, defaultValue = false)
+                    val appLockTimeout by rememberEnumPreference(AppLockTimeoutKey, defaultValue = AppLockTimeout.IMMEDIATELY)
+                    val appLockScope by rememberEnumPreference(AppLockScopeKey, defaultValue = AppLockScope.WHOLE_APP)
 
-                LaunchedEffect(appLockActive) {
-                    if (!appLockActive) {
-                        isLocked = false
-                    } else if (!isLocked && !unlockedOnce) {
-                        // Covers the case where the cached preference had not been read
-                        // when the first frame was composed. Turning the lock on from the
-                        // settings does not lock the session that is already open.
-                        isLocked = true
-                    }
-                }
+                    val appLockActive =
+                        appLockEnabled &&
+                            (
+                                appLockType == AppLockType.BIOMETRIC ||
+                                    (appLockType == AppLockType.PIN && appLockPinHash.isNotBlank())
+                            )
+                    var isLocked by rememberSaveable { mutableStateOf(appLockActive) }
+                    var unlockedOnce by rememberSaveable { mutableStateOf(false) }
+                    // When the app went to the background, or 0 while it is in front.
+                    // Kept across rotation so a config change cannot be used to skip the timeout.
+                    var leftAt by rememberSaveable { mutableLongStateOf(0L) }
 
-                DisposableEffect(appLockActive) {
-                    val observer =
-                        object : DefaultLifecycleObserver {
-                            override fun onStop(owner: LifecycleOwner) {
-                                if (appLockActive) isLocked = true
-                            }
-                        }
-                    ProcessLifecycleOwner.get().lifecycle.addObserver(observer)
-                    onDispose { ProcessLifecycleOwner.get().lifecycle.removeObserver(observer) }
-                }
-
-                if (isLocked && appLockActive) {
-                    AppLockGate(
-                        lockType = appLockType,
-                        pinHash = appLockPinHash,
-                        biometricUnlock = appLockBiometricUnlock,
-                        onUnlocked = {
+                    LaunchedEffect(appLockActive) {
+                        if (!appLockActive) {
                             isLocked = false
-                            unlockedOnce = true
-                        },
-                    )
+                        } else if (!isLocked && !unlockedOnce) {
+                            // Covers the case where the cached preference had not been read
+                            // when the first frame was composed. Turning the lock on from the
+                            // settings does not lock the session that is already open.
+                            isLocked = true
+                        }
+                    }
+
+                    DisposableEffect(appLockActive, appLockTimeout) {
+                        val observer =
+                            object : DefaultLifecycleObserver {
+                                override fun onStop(owner: LifecycleOwner) {
+                                    if (!appLockActive) return
+                                    if (appLockTimeout == AppLockTimeout.IMMEDIATELY) {
+                                        isLocked = true
+                                    } else {
+                                        leftAt = SystemClock.elapsedRealtime()
+                                    }
+                                }
+
+                                override fun onStart(owner: LifecycleOwner) {
+                                    if (!appLockActive || leftAt == 0L) return
+                                    // elapsedRealtime cannot be wound back by changing the clock.
+                                    if (SystemClock.elapsedRealtime() - leftAt >= appLockTimeout.millis) {
+                                        isLocked = true
+                                    }
+                                    leftAt = 0L
+                                }
+                            }
+                        ProcessLifecycleOwner.get().lifecycle.addObserver(observer)
+                        onDispose { ProcessLifecycleOwner.get().lifecycle.removeObserver(observer) }
+                    }
+
+                    // With the lock scoped to sensitive screens, the gate only drops over
+                    // the screens that hold personal data. Everything else stays usable,
+                    // and the lock waits until such a screen is opened.
+                    val appLockGateVisible =
+                        isLocked &&
+                            appLockActive &&
+                            (
+                                appLockScope == AppLockScope.WHOLE_APP ||
+                                    isSensitiveRoute(navBackStackEntry?.destination?.route)
+                            )
+
+                    if (appLockGateVisible) {
+                        AppLockGate(
+                            lockType = appLockType,
+                            pinHash = appLockPinHash,
+                            biometricUnlock = appLockBiometricUnlock,
+                            onUnlocked = {
+                                isLocked = false
+                                unlockedOnce = true
+                            },
+                        )
+                    }
                 }
             }
         }

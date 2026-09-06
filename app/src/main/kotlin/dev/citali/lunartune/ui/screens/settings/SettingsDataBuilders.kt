@@ -32,6 +32,10 @@ import dev.citali.lunartune.constants.CrossfadeEnabledKey
 import dev.citali.lunartune.constants.CrossfadeGaplessKey
 import dev.citali.lunartune.constants.DisableAnimationsKey
 import dev.citali.lunartune.constants.DisableBlurKey
+import dev.citali.lunartune.constants.AppLockEnabledKey
+import dev.citali.lunartune.constants.AppLockPinHashKey
+import dev.citali.lunartune.constants.AppLockType
+import dev.citali.lunartune.constants.AppLockTypeKey
 import dev.citali.lunartune.constants.DisableScreenshotKey
 import dev.citali.lunartune.constants.DynamicThemeKey
 import dev.citali.lunartune.constants.EnableDiscordRPCKey
@@ -72,6 +76,7 @@ import dev.citali.lunartune.constants.UseLyricsV2Key
 import dev.citali.lunartune.constants.UseSystemFontKey
 import dev.citali.lunartune.constants.UseGpuBlurKey
 import dev.citali.lunartune.constants.WakelockKey
+import dev.citali.lunartune.utils.rememberEnumPreference
 import dev.citali.lunartune.utils.rememberPreference
 
 @Composable
@@ -85,6 +90,22 @@ private fun SearchResultSwitch(
         checked = checked,
         onCheckedChange = onCheckedChange,
         enabled = enabled,
+    )
+}
+
+/** Same forced-on state as the Privacy page: an app lock keeps the secure flag set. */
+@Composable
+private fun DisableScreenshotSearchSwitch() {
+    val (checked, onCheckedChange) = rememberPreference(DisableScreenshotKey, false)
+    val (lockEnabled) = rememberPreference(AppLockEnabledKey, false)
+    val (lockType) = rememberEnumPreference(AppLockTypeKey, AppLockType.NONE)
+    val (pinHash) = rememberPreference(AppLockPinHashKey, "")
+    val lockConfigured =
+        lockEnabled && (lockType == AppLockType.BIOMETRIC || (lockType == AppLockType.PIN && pinHash.isNotBlank()))
+    Switch(
+        checked = checked || lockConfigured,
+        onCheckedChange = onCheckedChange,
+        enabled = !lockConfigured,
     )
 }
 
@@ -287,7 +308,7 @@ fun buildSettingsGroups(
                 SettingsChild("Clear search history", "clear_search_history", listOf("clear search", "delete search", "reset search")),
                 SettingsChild("Sync playback to YouTube history", "sync_yt_history", listOf("youtube history", "sync history", "playback history")),
                 SettingsChild("Haptics", "haptics", listOf("haptic", "vibration", "haptic feedback", "vibrate")) { SearchResultSwitch(EnableHapticFeedbackKey, true) },
-                SettingsChild("Disable screenshot", "disable_screenshot", listOf("screenshot", "screen capture", "privacy", "no screenshot")) { SearchResultSwitch(DisableScreenshotKey, false) },
+                SettingsChild("Disable screenshot", "disable_screenshot", listOf("screenshot", "screen capture", "privacy", "no screenshot")) { DisableScreenshotSearchSwitch() },
                 SettingsChild("Network metered", "network_metered", listOf("metered", "mobile data", "cellular", "data saver")) { SearchResultSwitch(NetworkMeteredKey, false) },
                 SettingsChild("Show tags in library", "show_tags_in_library", listOf("tags", "library tags", "show tags")),
                 SettingsChild("App lock", "app_lock", listOf("app lock", "lock", "pin", "security", "privacy", "unlock")),

@@ -83,6 +83,10 @@ fun PrivacySettings(navController: NavController) {
     val (appLockType) = rememberEnumPreference(AppLockTypeKey, defaultValue = AppLockType.NONE)
     val (appLockPinHash) = rememberPreference(AppLockPinHashKey, defaultValue = "")
 
+    val appLockConfigured =
+        appLockEnabled &&
+            (appLockType == AppLockType.BIOMETRIC || (appLockType == AppLockType.PIN && appLockPinHash.isNotBlank()))
+
     val appLockSummary =
         when {
             !appLockEnabled -> stringResource(R.string.no_lock)
@@ -253,12 +257,21 @@ fun PrivacySettings(navController: NavController) {
                 }
 
                 item {
+                    // An app lock keeps the secure flag on: otherwise Recents would keep
+                    // a thumbnail of what the lock is there to hide. The switch shows the
+                    // forced state and stays put until the lock is removed.
                     SwitchPreference(
                         title = { Text(stringResource(R.string.disable_screenshot)) },
-                        description = stringResource(R.string.disable_screenshot_desc),
+                        description =
+                            if (appLockConfigured) {
+                                stringResource(R.string.disable_screenshot_locked_desc)
+                            } else {
+                                stringResource(R.string.disable_screenshot_desc)
+                            },
                         icon = { Icon(painterResource(R.drawable.screenshot), null) },
-                        checked = disableScreenshot,
+                        checked = disableScreenshot || appLockConfigured,
                         onCheckedChange = onDisableScreenshotChange,
+                        isEnabled = !appLockConfigured,
                     )
                 }
             }

@@ -1163,6 +1163,19 @@
     <string name="change_lock_title">Change lock method?</string>
     <string name="change_lock_message">Your current PIN will be removed.</string>
     <string name="action_unlock">Unlock</string>
+    <string name="app_lock_options">Lock options</string>
+    <string name="lock_after">Lock again after</string>
+    <string name="lock_after_desc">How long the app can sit in the background before it asks again</string>
+    <string name="lock_timeout_immediately">Immediately</string>
+    <string name="lock_timeout_seconds">%1$d seconds</string>
+    <string name="lock_timeout_minute">1 minute</string>
+    <string name="lock_timeout_minutes">%1$d minutes</string>
+    <string name="lock_scope">What to lock</string>
+    <string name="lock_scope_whole_app">Whole app</string>
+    <string name="lock_scope_whole_app_desc">Ask before anything is shown</string>
+    <string name="lock_scope_sensitive">Personal screens only</string>
+    <string name="lock_scope_sensitive_desc">Library, history, stats, account and settings. Home, search and the player stay open.</string>
+    <string name="disable_screenshot_locked_desc">Kept on while an app lock is set, so the app\'s view in Recents cannot show what the lock hides.</string>
     <!-- Moving blur lyrics background -->
     <string name="lyrics_background_moving_blur">Moving blur</string>
     <string name="use_gpu_blur">Use GPU blur</string>
