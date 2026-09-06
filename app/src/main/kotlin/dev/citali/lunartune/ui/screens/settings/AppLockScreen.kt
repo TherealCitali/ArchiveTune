@@ -32,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +44,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import dev.citali.lunartune.LocalPlayerAwareWindowInsets
 import dev.citali.lunartune.R
@@ -85,7 +89,20 @@ fun AppLockScreen(navController: NavController) {
         rememberPreference(AppLockBiometricUnlockKey, defaultValue = false)
 
     val pinSet = pinHash.isNotBlank()
-    val screenLockAvailable = remember { SecurityUtils.canUseScreenLock(context) }
+    // Re-checked every time the screen comes back to the front, so setting up a
+    // screen lock in the system settings and returning is enough.
+    var screenLockAvailable by remember { mutableStateOf(SecurityUtils.canUseScreenLock(context)) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer =
+            LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    screenLockAvailable = SecurityUtils.canUseScreenLock(context)
+                }
+            }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
     var pendingChange by remember { mutableStateOf<(() -> Unit)?>(null) }
 
     // Switching away from a configured PIN throws it away, so confirm first.
