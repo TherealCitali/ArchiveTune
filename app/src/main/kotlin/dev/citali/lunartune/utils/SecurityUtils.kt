@@ -32,16 +32,27 @@ object SecurityUtils {
             .joinToString("") { "%02x".format(it) }
 
     /**
-     * True when the device can actually authenticate, either with a strong
-     * biometric or with the screen lock PIN, pattern or password.
+     * Biometric or device credential. BIOMETRIC_WEAK rather than STRONG because
+     * the lock guards the UI, not a key: nothing here is bound to a CryptoObject,
+     * so a Class 2 face unlock is as good as a Class 3 fingerprint. It is also
+     * the only biometric | credential combination androidx.biometric supports on
+     * every API level. STRONG | DEVICE_CREDENTIAL is rejected outright on
+     * Android 9 and 10: canAuthenticate() answers BIOMETRIC_ERROR_UNSUPPORTED
+     * without looking at the device, and PromptInfo.Builder.build() throws. That
+     * showed up as "set up a screen lock first" on a phone that had one.
+     */
+    private const val ALLOWED_AUTHENTICATORS =
+        BiometricManager.Authenticators.BIOMETRIC_WEAK or
+            BiometricManager.Authenticators.DEVICE_CREDENTIAL
+
+    /**
+     * True when the device can actually authenticate, either with a biometric
+     * or with the screen lock PIN, pattern or password.
      */
     fun canUseScreenLock(context: Context): Boolean =
         BiometricManager
             .from(context)
-            .canAuthenticate(
-                BiometricManager.Authenticators.BIOMETRIC_STRONG or
-                    BiometricManager.Authenticators.DEVICE_CREDENTIAL,
-            ) == BiometricManager.BIOMETRIC_SUCCESS
+            .canAuthenticate(ALLOWED_AUTHENTICATORS) == BiometricManager.BIOMETRIC_SUCCESS
 
     /**
      * Shows the system authentication sheet. Device credential is allowed
@@ -80,10 +91,8 @@ object SecurityUtils {
                 .PromptInfo
                 .Builder()
                 .setTitle(title)
-                .setAllowedAuthenticators(
-                    BiometricManager.Authenticators.BIOMETRIC_STRONG or
-                        BiometricManager.Authenticators.DEVICE_CREDENTIAL,
-                ).build(),
+                .setAllowedAuthenticators(ALLOWED_AUTHENTICATORS)
+                .build(),
         )
     }
 }
