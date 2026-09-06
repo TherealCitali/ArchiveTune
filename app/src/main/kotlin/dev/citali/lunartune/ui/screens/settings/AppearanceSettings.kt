@@ -15,8 +15,12 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.view.View
+import android.view.ViewTreeObserver
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -95,6 +99,7 @@ import dev.citali.lunartune.constants.LibraryChipOrderKey
 import dev.citali.lunartune.constants.LibraryFilter
 import dev.citali.lunartune.constants.LyricsBackgroundStyle
 import dev.citali.lunartune.constants.LyricsBackgroundStyleKey
+import dev.citali.lunartune.constants.UseGpuBlurKey
 import dev.citali.lunartune.constants.MiniPlayerBackgroundStyle
 import dev.citali.lunartune.constants.MiniPlayerBackgroundStyleKey
 import dev.citali.lunartune.constants.PlayerBackgroundStyle
@@ -228,6 +233,7 @@ fun AppearanceSettings(navController: NavController) {
             defaultValue = true,
         )
     val (blurRadius, onBlurRadiusChange) = rememberPreference(BlurRadiusKey, defaultValue = 48f)
+    val (useGpuBlur, onUseGpuBlurChange) = rememberPreference(UseGpuBlurKey, defaultValue = true)
     val (backdropEnabled, onBackdropEnabledChange) = rememberPreference(BackdropEnabledKey, defaultValue = true)
     val (backdropBlurAmount, onBackdropBlurAmountChange) = rememberPreference(BackdropBlurAmountKey, defaultValue = 60)
     val (fontPreference, onFontPreferenceChange) =
@@ -376,6 +382,7 @@ fun AppearanceSettings(navController: NavController) {
                 LyricsBackgroundStyle.DEFAULT,
                 LyricsBackgroundStyle.FOLLOW_THEME,
                 LyricsBackgroundStyle.COLORING,
+                LyricsBackgroundStyle.MOVING_BLUR,
             )
         }
     val lyricsBackground = configuredLyricsBackground.resolveFor(playerBackground)
@@ -634,6 +641,17 @@ fun AppearanceSettings(navController: NavController) {
                 }
 
                 item {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.use_gpu_blur)) },
+                        description = stringResource(R.string.use_gpu_blur_desc),
+                        icon = { Icon(painterResource(R.drawable.blur_on), null) },
+                        checked = useGpuBlur,
+                        onCheckedChange = onUseGpuBlurChange,
+                        isEnabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
+                    )
+                }
+
+                item {
                     PreferenceEntry(
                         title = { Text(stringResource(R.string.blur_intensity)) },
                         description = stringResource(R.string.blur_intensity_value, blurRadius.roundToInt()),
@@ -811,6 +829,7 @@ fun AppearanceSettings(navController: NavController) {
                                 LyricsBackgroundStyle.FOLLOW_THEME -> stringResource(R.string.follow_theme)
                                 LyricsBackgroundStyle.COLORING -> stringResource(R.string.coloring)
                                 LyricsBackgroundStyle.CUSTOM -> stringResource(R.string.custom)
+                                LyricsBackgroundStyle.MOVING_BLUR -> stringResource(R.string.lyrics_background_moving_blur)
                             }
                         },
                     )
@@ -1198,13 +1217,94 @@ fun ApplyRefreshRate(
     }
 }
 
+/**
+ * Runs the UI at the display's fastest refresh rate for as long as something is actually moving.
+ *
+ * Android 15 and above can take a frame-rate request per view and act on it without switching the
+ * display's mode, so the request can come and go as the UI starts and stops. Below that the only
+ * lever is the window's display mode, and changing *that* mid-animation is itself a hitch — so the
+ * old behaviour is kept there: pin it for as long as the setting is on.
+ */
 @Composable
 internal fun ApplyForcedRefreshRate(enabled: Boolean) {
-    val supportedHighestFps = rememberSupportedHighestFps()
-    ApplyRefreshRate(
-        isEnabled = enabled && supportedHighestFps > HIGH_REFRESH_RATE_THRESHOLD_FPS,
-        targetFps = supportedHighestFps,
-    )
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+        BoostRefreshRateWhileAnimating(enabled = enabled)
+    } else {
+        val supportedHighestFps = rememberSupportedHighestFps()
+        ApplyRefreshRate(
+            isEnabled = enabled && supportedHighestFps > HIGH_REFRESH_RATE_THRESHOLD_FPS,
+            targetFps = supportedHighestFps,
+        )
+    }
+}
+
+/**
+ * Holds a high frame-rate request for as long as the view keeps drawing, and drops it once it has
+ * been still for [BOOST_RELEASE_DELAY_MS].
+ *
+ * A draw pass is the one signal that covers *every* animation whatever drives it — a spring, a
+ * transition, a fling, the moving blur's drift — without this code having to know about any of
+ * them. It also costs nothing while nothing is happening: no draw, no callback, no request.
+ */
+@Composable
+private fun BoostRefreshRateWhileAnimating(enabled: Boolean) {
+    val view = LocalView.current
+    val targetFps = rememberSupportedHighestFps()
+
+    // Nothing to gain on a display that cannot go past the standard rate.
+    if (!enabled || targetFps <= HIGH_REFRESH_RATE_THRESHOLD_FPS) return
+
+    DisposableEffect(view, targetFps) {
+        val boost = AnimationFrameRateBoost(view, targetFps)
+        boost.start()
+        onDispose { boost.stop() }
+    }
+}
+
+/**
+ * How long the view has to sit still before the request is dropped. Long enough that the gap
+ * between two animations does not drop the display back down and then have to climb again.
+ */
+private const val BOOST_RELEASE_DELAY_MS = 900L
+
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+private class AnimationFrameRateBoost(
+    private val view: View,
+    private val fps: Float,
+) : ViewTreeObserver.OnPreDrawListener {
+    private val handler = Handler(Looper.getMainLooper())
+    private var requested = false
+
+    private val release =
+        Runnable {
+            if (!requested) return@Runnable
+            requested = false
+            view.setRequestedFrameRate(DEFAULT_REFRESH_RATE_REQUEST)
+        }
+
+    fun start() {
+        if (view.isAttachedToWindow) {
+            view.viewTreeObserver.addOnPreDrawListener(this)
+        }
+    }
+
+    fun stop() {
+        if (view.isAttachedToWindow) {
+            view.viewTreeObserver.removeOnPreDrawListener(this)
+        }
+        handler.removeCallbacks(release)
+        release.run()
+    }
+
+    override fun onPreDraw(): Boolean {
+        if (!requested) {
+            requested = true
+            view.setRequestedFrameRate(fps)
+        }
+        handler.removeCallbacks(release)
+        handler.postDelayed(release, BOOST_RELEASE_DELAY_MS)
+        return true
+    }
 }
 
 @Composable

@@ -12,12 +12,14 @@ package dev.citali.lunartune.ui.player
 import android.content.res.Configuration
 import android.view.HapticFeedbackConstants
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
@@ -54,10 +57,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
@@ -74,12 +82,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.collectAsState
+import androidx.compose.animation.core.tween
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.C
 import androidx.media3.common.Player.STATE_BUFFERING
 import androidx.media3.common.Player.STATE_READY
 import androidx.navigation.NavController
 import androidx.palette.graphics.Palette
+import android.os.Build
 import coil3.compose.AsyncImage
 import coil3.imageLoader
 import coil3.request.ImageRequest
@@ -100,6 +110,7 @@ import dev.citali.lunartune.constants.DisableBlurKey
 import dev.citali.lunartune.constants.EnableHapticFeedbackKey
 import dev.citali.lunartune.constants.LyricsBackgroundStyle
 import dev.citali.lunartune.constants.LyricsBackgroundStyleKey
+import dev.citali.lunartune.constants.UseGpuBlurKey
 import dev.citali.lunartune.constants.LyricsMode
 import dev.citali.lunartune.constants.LyricsModeKey
 import dev.citali.lunartune.constants.PlayerBackgroundStyle
@@ -166,6 +177,7 @@ fun LyricsScreen(
     val configuredLyricsBackground by rememberEnumPreference(LyricsBackgroundStyleKey, LyricsBackgroundStyle.DEFAULT)
     val lyricsBackground = configuredLyricsBackground.resolveFor(playerBackground)
     val disableBlur by rememberPreference(DisableBlurKey, false)
+    val useGpuBlur by rememberPreference(UseGpuBlurKey, true)
     val blurRadius by rememberPreference(BlurRadiusKey, 48f)
     val playerCustomImageUri by rememberPreference(PlayerCustomImageUriKey, "")
     val playerCustomBlur by rememberPreference(PlayerCustomBlurKey, 0f)
@@ -344,6 +356,7 @@ fun LyricsScreen(
             mediaMetadata = mediaMetadata,
             gradientColors = gradientColors,
             disableBlur = disableBlur,
+            useGpuBlur = useGpuBlur,
             blurRadius = blurRadius,
             playerCustomImageUri = playerCustomImageUri,
             playerCustomBlur = playerCustomBlur,
@@ -495,6 +508,7 @@ private fun LyricsScreenBackground(
     mediaMetadata: MediaMetadata,
     gradientColors: List<Color>,
     disableBlur: Boolean,
+    useGpuBlur: Boolean,
     blurRadius: Float,
     playerCustomImageUri: String,
     playerCustomBlur: Float,
@@ -523,6 +537,16 @@ private fun LyricsScreenBackground(
             }
 
             LyricsBackgroundStyle.FOLLOW_THEME -> Unit
+
+            LyricsBackgroundStyle.MOVING_BLUR -> {
+                MovingBlurBackground(
+                    mediaMetadata = mediaMetadata,
+                    gradientColors = gradientColors,
+                    useGpuBlur = useGpuBlur,
+                    blurRadius = blurRadius,
+                    disableBlur = disableBlur,
+                )
+            }
 
             LyricsBackgroundStyle.COLORING,
             LyricsBackgroundStyle.CUSTOM,
@@ -566,34 +590,287 @@ private fun AppleMusicBackground(
         LyricsArtBlurCache.prefetch(context, thumbnailUrl)
     }
 
+    // The look this had before the moving-blur work: the blurred cover, full strength, under a
+    // flat black scrim. The palette-tinted version that replaced it was richer but buried the
+    // artwork, and this one is the one that reads as a blurred cover rather than as a colour.
     Box(
         modifier =
             modifier
                 .fillMaxSize()
                 .background(Color.Black),
     ) {
-        if (blurredArt != null) {
-            Image(
-                bitmap = blurredArt.asImageBitmap(),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .graphicsLayer {
-                            scaleX = 1.12f
-                            scaleY = 1.12f
-                        },
-            )
+        // Keyed on the bitmap, not the url: the outgoing artwork stays on screen until the incoming
+        // one is actually ready, so a track change never flashes an empty backdrop.
+        Crossfade(
+            targetState = blurredArt,
+            animationSpec = tween(BACKDROP_FADE_MS),
+            label = "appleMusicBackdrop",
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        scaleX = AppleMusicBackdropScale
+                        scaleY = AppleMusicBackdropScale
+                    },
+        ) { art ->
+            if (art != null) {
+                Image(
+                    bitmap = art.asImageBitmap(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
         }
         Box(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.52f)),
+                    .background(Color.Black.copy(alpha = AppleMusicScrimAlpha)),
         )
     }
 }
+
+private const val AppleMusicBackdropScale = 1.12f
+
+/**
+ * The flat scrim laid over the blurred artwork. Shared with the moving backdrop's plain variant so
+ * the two read as the same picture — one still, one drifting.
+ */
+private const val AppleMusicScrimAlpha = 0.52f
+
+/**
+ * How long the backdrop takes to trade one track's artwork for the next. Without it the backdrop
+ * pops the instant the new bitmap lands, which is the one thing that makes the whole effect read
+ * as a glitch rather than as a finish.
+ */
+private const val BACKDROP_FADE_MS = 700
+
+@Composable
+private fun MovingBlurBackground(
+    mediaMetadata: MediaMetadata,
+    gradientColors: List<Color>,
+    useGpuBlur: Boolean,
+    blurRadius: Float,
+    disableBlur: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    // Blurring this hard averages a cover towards its own mean, which costs it both colour and
+    // brightness — so the artwork gets a light saturation correction and a small lift on the way
+    // in. Only giving back what the blur averaged away, not a look of its own: both dials are
+    // constants below, and if this still reads pale or dim they are the two to turn.
+    //
+    // Built by hand because androidx.compose.ui.graphics.ColorMatrix has no setSaturation(): these
+    // are the standard Rec. 709 saturation terms, and at s = 1 the matrix is the identity.
+    val vibrancyColorFilter =
+        remember {
+            val s = MOVING_BLUR_SATURATION
+            val gain = MOVING_BLUR_BRIGHTNESS
+            // The rows are deliberately *not* identical: each output channel keeps its own channel
+            // at (luma + s) and takes the other two at (luma * (1 - s)). Writing one row three
+            // times — which is what the ported version of this did — computes the same weighted sum
+            // for R, G and B, and that is a greyscale conversion however high s goes: a blue sky
+            // came out grey, and turning the saturation up only made the grey brighter.
+            val lr = 0.213f * (1f - s)
+            val lg = 0.715f * (1f - s)
+            val lb = 0.072f * (1f - s)
+            ColorFilter.colorMatrix(
+                ColorMatrix(
+                    floatArrayOf(
+                        (lr + s) * gain, lg * gain, lb * gain, 0f, 0f,
+                        lr * gain, (lg + s) * gain, lb * gain, 0f, 0f,
+                        lr * gain, lg * gain, (lb + s) * gain, 0f, 0f,
+                        0f, 0f, 0f, 1f, 0f,
+                    ),
+                ),
+            )
+        }
+
+    val context = LocalContext.current
+    val thumbnailUrl = mediaMetadata.thumbnailUrl
+    val cacheRevision by LyricsArtBlurCache.updates.collectAsState()
+    val blurredArt =
+        remember(thumbnailUrl, cacheRevision) {
+            LyricsArtBlurCache.peek(thumbnailUrl)
+        }
+
+    LaunchedEffect(thumbnailUrl) {
+        LyricsArtBlurCache.prefetch(context, thumbnailUrl)
+    }
+
+    // Modifier.blur is a no-op below Android 12 — it needs RenderEffect, API 31+ — so pre-S, and
+    // Android 12+ with the toggle off, draw the bitmap LyricsArtBlurCache blurred once on the CPU
+    // instead. The drift is a graphicsLayer transform either way, and a canvas transform is
+    // something every API level can do, so the backdrop still moves on old devices. (Animating a
+    // pre-blurred bitmap with a layout-phase Modifier.offset instead is what tears on them.)
+    val gpuBlur = useGpuBlur && !disableBlur && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+
+    val gpuRequest =
+        remember(context, thumbnailUrl) {
+            thumbnailUrl?.let { url ->
+                ImageRequest
+                    .Builder(context)
+                    .data(url)
+                    // The blur destroys the detail anyway, and the layer is rasterised at the
+                    // footprint size below, so a small decode keeps both the bitmap and the
+                    // per-frame GPU blur cheap.
+                    .size(MOVING_BLUR_ART_PX)
+                    .build()
+            }
+        }
+
+    Box(modifier = modifier.fillMaxSize().background(Color.Black)) {
+        DriftingBackdrop(active = thumbnailUrl != null) {
+            if (gpuBlur && gpuRequest != null) {
+                // Blur only when there is something to blur: a zero radius is not a no-op at the
+                // RenderEffect level, it is an invalid argument.
+                val blurModifier =
+                    if (blurRadius > 0.5f) {
+                        Modifier.blur((blurRadius * MOVING_BLUR_BLUR_GAIN / MOVING_BLUR_SCALE).dp)
+                    } else {
+                        Modifier
+                    }
+
+                // The crossfade sits under the blur, so what fades is the artwork and not the
+                // finished blurred result — no sharp edge is ever visible mid-transition. The blur
+                // is applied inside the walk's transform, so the artwork is blurred while it is
+                // still centred and only then moved: the blur never samples the transparent area
+                // behind the layer's trailing edge.
+                Crossfade(
+                    targetState = gpuRequest,
+                    animationSpec = tween(BACKDROP_FADE_MS),
+                    label = "movingBlurBackdrop",
+                    modifier = Modifier.fillMaxSize().then(blurModifier),
+                ) { request ->
+                    AsyncImage(
+                        model = request,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        colorFilter = vibrancyColorFilter,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            } else if (blurredArt != null) {
+                // Keyed on the bitmap, so the old artwork holds the frame until the new one has
+                // been blurred and cached — the CPU path is the one that would otherwise flash.
+                Crossfade(
+                    targetState = blurredArt,
+                    animationSpec = tween(BACKDROP_FADE_MS),
+                    label = "movingBlurBackdrop",
+                    modifier = Modifier.fillMaxSize(),
+                ) { art ->
+                    Image(
+                        bitmap = art.asImageBitmap(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        colorFilter = vibrancyColorFilter,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            }
+        }
+
+        // The still backdrop's own scrim, over the still backdrop's own black — so this reads as
+        // the same picture, in motion.
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = AppleMusicScrimAlpha)),
+        )
+    }
+}
+
+/**
+ * Puts [content] on the walk.
+ *
+ * The layer cannot simply be screen-shaped: rotated by the walk, a screen-sized rectangle only
+ * covers its inscribed circle, and a black wedge sweeps through a corner. So it is sized to the
+ * container's furthest corner instead.
+ *
+ * Every read here is draw-phase — the walk's position is read inside the graphicsLayer lambda — so
+ * nothing recomposes or re-measures while it moves. Content is drawn inside the transform, which
+ * is what lets the moving blur apply its own blur *before* the walk displaces it.
+ */
+@Composable
+private fun DriftingBackdrop(
+    active: Boolean,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    val wander = rememberBlurWanderDrift(active = active)
+
+    BoxWithConstraints(modifier = modifier.fillMaxSize().clipToBounds()) {
+        val footprint =
+            remember(maxWidth, maxHeight) {
+                blurBackdropFootprint(
+                    width = maxWidth,
+                    height = maxHeight,
+                    restScale = MOVING_BLUR_SCALE,
+                    driftScale = MOVING_BLUR_SCALE,
+                )
+            }
+
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .requiredSize(footprint)
+                        .graphicsLayer {
+                            scaleX = MOVING_BLUR_SCALE
+                            scaleY = MOVING_BLUR_SCALE
+                            // Deferred, draw-phase reads — see BlurWanderDrift.
+                            translationX = wander.xDp.floatValue.dp.toPx()
+                            translationY = wander.yDp.floatValue.dp.toPx()
+                            // Rotation is the only part of the walk that can carry a colour across
+                            // the whole surface; translation moves every colour by the same vector.
+                            rotationZ = wander.rotationDeg.floatValue
+                            compositingStrategy = CompositingStrategy.Offscreen
+                        }
+                        .alpha(MOVING_BLUR_ALPHA),
+            ) {
+                content()
+            }
+        }
+    }
+}
+
+private const val MOVING_BLUR_SCALE = 2.4f
+
+/**
+ * The layer is drawn scaled by [MOVING_BLUR_SCALE] and Compose scales the blur along with it, so
+ * the blur modifier divides by that scale to cancel it out — leaving the on-screen radius as
+ * `radius * MOVING_BLUR_BLUR_GAIN`.
+ *
+ * Turned down from 1.6, which put ~77dp of blur on screen at the slider's default. That much
+ * averaging pulls a cover towards its own mean, which was fine while the palette wash was
+ * unification-by-colour; stripped back to the plain artwork it read pale and mushy at the same
+ * time. This lands nearer 55dp — still soft enough to hide the walk, but the cover keeps enough of
+ * its own structure and colour to read as a cover.
+ */
+private const val MOVING_BLUR_BLUR_GAIN = 1.15f
+
+private const val MOVING_BLUR_ALPHA = 1f
+
+/**
+ * Light saturation for the drifting artwork. Blurring averages colour away, so this gives a little
+ * of it back. A correction, not a look: the earlier version ran this at 1.6 and laid a palette wash
+ * over the top as well, which turned the backdrop into a glow rather than a cover.
+ */
+private const val MOVING_BLUR_SATURATION = 1.3f
+
+/**
+ * A small brightness lift on the same reasoning. The blur averages a cover towards its own mean,
+ * and that mean sits below the cover's own highlights, so the backdrop reads dimmer than the still
+ * one under the same scrim. Kept small on purpose — past roughly 1.15 the highlights start to blow.
+ */
+private const val MOVING_BLUR_BRIGHTNESS = 1.08f
+
+/** Decode size for the drifting artwork — the blur hides everything finer than this. */
+private const val MOVING_BLUR_ART_PX = 256
 
 @Composable
 private fun AppleMusicGrabber(

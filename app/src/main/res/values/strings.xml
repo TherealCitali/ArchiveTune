@@ -1163,4 +1163,8 @@
     <string name="change_lock_title">Change lock method?</string>
     <string name="change_lock_message">Your current PIN will be removed.</string>
     <string name="action_unlock">Unlock</string>
+    <!-- Moving blur lyrics background -->
+    <string name="lyrics_background_moving_blur">Moving blur</string>
+    <string name="use_gpu_blur">Use GPU blur</string>
+    <string name="use_gpu_blur_desc">Blur the moving lyrics background on the GPU instead of reusing a pre-blurred image. Android 12 and above only.</string>
 </resources>

@@ -70,6 +70,7 @@ import dev.citali.lunartune.constants.SwipeToSongKey
 import dev.citali.lunartune.constants.TranslateLyricsKey
 import dev.citali.lunartune.constants.UseLyricsV2Key
 import dev.citali.lunartune.constants.UseSystemFontKey
+import dev.citali.lunartune.constants.UseGpuBlurKey
 import dev.citali.lunartune.constants.WakelockKey
 import dev.citali.lunartune.utils.rememberPreference
 
@@ -77,11 +78,13 @@ import dev.citali.lunartune.utils.rememberPreference
 private fun SearchResultSwitch(
     key: androidx.datastore.preferences.core.Preferences.Key<Boolean>,
     defaultValue: Boolean,
+    enabled: Boolean = true,
 ) {
     val (checked, onCheckedChange) = rememberPreference(key, defaultValue)
     Switch(
         checked = checked,
         onCheckedChange = onCheckedChange,
+        enabled = enabled,
     )
 }
 
@@ -138,6 +141,7 @@ fun buildSettingsGroups(
                 SettingsChild("App icon", "app_icon", listOf("icon", "app icon", "icon pack", "launcher icon")),
                 SettingsChild("Disable blur", "disable_blur", listOf("blur", "disable blur", "no blur", "performance")) { SearchResultSwitch(DisableBlurKey, false) },
                 SettingsChild("Blur intensity", "blur_intensity", listOf("blur intensity", "blur amount", "blur level", "blur radius")),
+                SettingsChild("Use GPU blur", "use_gpu_blur", listOf("gpu blur", "hardware blur", "render effect", "blur")) { SearchResultSwitch(UseGpuBlurKey, true, enabled = isAndroid12OrLater) },
                 SettingsChild("Backdrop blur", "backdrop_blur", listOf("backdrop", "backdrop blur", "background blur", "frosted")) { SearchResultSwitch(BackdropEnabledKey, false) },
                 SettingsChild("Font preference", "font_preference", listOf("font", "font style", "typography")),
                 SettingsChild("Use system font", "use_system_font", listOf("system font", "default font", "roboto")) { SearchResultSwitch(UseSystemFontKey, false) },
@@ -145,7 +149,7 @@ fun buildSettingsGroups(
                 SettingsChild("Crop thumbnail to square", "crop_thumbnail_to_square", listOf("crop thumbnail", "square thumbnail", "thumbnail crop")) { SearchResultSwitch(CropThumbnailToSquareKey, false) },
                 SettingsChild("Player design style", "player_design_style", listOf("player design", "player layout", "player style")),
                 SettingsChild("Player background style", "player_background_style", listOf("player background", "player bg", "background style")),
-                SettingsChild("Lyrics background style", "lyrics_background_style", listOf("lyrics background", "lyrics bg")),
+                SettingsChild("Lyrics background style", "lyrics_background_style", listOf("lyrics background", "lyrics bg", "moving blur", "blur lyrics")),
                 SettingsChild("Mini player background style", "mini_player_background_style", listOf("mini player", "mini player background")),
                 SettingsChild("Player buttons style", "player_buttons_style", listOf("player buttons", "button style", "controls style")),
                 SettingsChild("Player slider style", "player_slider_style", listOf("player slider", "slider style", "progress bar")),
