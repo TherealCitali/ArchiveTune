@@ -353,6 +353,9 @@
     <string name="per_song_custom_tags">Custom tags</string>
     <string name="per_song_custom_tags_hint">lofi, night, guitar</string>
     <string name="per_song_custom_tags_none">No tags yet</string>
+    <string name="per_song_tags_count">%1$d tags</string>
+    <string name="per_song_no_overrides">Nothing changed for this song</string>
+    <string name="per_song_overrides_count">%1$d changed for this song</string>
     <string name="player_background_blur">Blur</string>
     <string name="coloring">Coloring</string>
     <string name="blur_gradient">Blur Gradient</string>

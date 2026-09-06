@@ -79,6 +79,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
@@ -919,8 +920,9 @@ private fun LyricsSearchResultHeader(
             }
 
             is LyricsSearchScreenState.Success -> {
-                stringResource(
-                    R.string.lyrics_search_results_count,
+                pluralStringResource(
+                    R.plurals.lyrics_search_results_found,
+                    state.results.size,
                     state.results.size,
                 )
             }
@@ -1094,18 +1096,29 @@ private fun LyricsSearchResultItem(
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-                IconButton(
+                Surface(
                     onClick = onExpandedChange,
-                    modifier = Modifier.size(48.dp),
+                    shape = MaterialTheme.shapes.large,
+                    color =
+                        if (isExpanded) {
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.52f)
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainerHigh
+                        },
+                    contentColor = contentColor,
+                    modifier = Modifier.size(40.dp),
                 ) {
-                    Icon(
-                        painter =
-                            painterResource(
-                                if (isExpanded) R.drawable.expand_less else R.drawable.expand_more,
-                            ),
-                        contentDescription = stringResource(R.string.details),
-                        tint = contentColor,
-                    )
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                        Icon(
+                            painter =
+                                painterResource(
+                                    if (isExpanded) R.drawable.expand_less else R.drawable.expand_more,
+                                ),
+                            contentDescription = stringResource(R.string.details),
+                            tint = contentColor,
+                            modifier = Modifier.size(22.dp),
+                        )
+                    }
                 }
             }
             LyricsSearchResultSupportingContent(
@@ -1119,18 +1132,41 @@ private fun LyricsSearchResultItem(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 LyricsSearchMetadataPill(
-                    icon = R.drawable.info,
-                    text = lyricsType,
-                    isExpanded = isExpanded,
-                    modifier = Modifier.weight(1f),
-                )
-                LyricsSearchMetadataPill(
                     icon = R.drawable.text_fields,
                     text = stats,
                     isExpanded = isExpanded,
                     modifier = Modifier.weight(1f),
                 )
+                LyricsSearchUsePill(onClick = onResultSelected)
             }
+        }
+    }
+}
+
+/** The one action a result card has, made visible instead of relying on a tap anywhere. */
+@Composable
+private fun LyricsSearchUsePill(onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.check),
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+            )
+            Text(
+                text = stringResource(R.string.lyrics_search_use_these),
+                style = MaterialTheme.typography.labelMedium,
+                maxLines = 1,
+            )
         }
     }
 }
@@ -1261,20 +1297,34 @@ private fun LyricsSearchLoadingContent() {
 
 @Composable
 private fun LyricsSearchFooterLoading() {
-    Row(
+    Box(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+                .padding(top = 4.dp),
+        contentAlignment = Alignment.Center,
     ) {
-        LoadingIndicator(modifier = Modifier.size(24.dp))
-        Text(
-            text = stringResource(R.string.lyrics_search_still_searching),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Surface(
+            shape = MaterialTheme.shapes.extraLarge,
+            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        ) {
+            Row(
+                modifier = Modifier.padding(start = 12.dp, end = 18.dp, top = 8.dp, bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                LoadingIndicator(
+                    modifier = Modifier.size(22.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Text(
+                    text = stringResource(R.string.lyrics_search_still_searching),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
     }
 }
 
