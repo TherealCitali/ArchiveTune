@@ -313,6 +313,9 @@ fun PlayerMenu(
         PerSongSettingsDialog(
             songId = mediaMetadata.id,
             onDismiss = { showPerSongSettings = false },
+            songTitle = mediaMetadata.title,
+            songArtist = mediaMetadata.artists.joinToString(separator = " • ") { it.name },
+            thumbnailUrl = mediaMetadata.thumbnailUrl,
         )
     }
 

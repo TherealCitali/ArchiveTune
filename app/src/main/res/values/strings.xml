@@ -246,6 +246,11 @@
     <string name="lyrics_search_still_searching">Still searching</string>
     <string name="lyrics_search_results_count">%1$d results</string>
     <string name="lyrics_search_result_stats">%1$d lines, %2$d chars</string>
+    <string name="lyrics_search_use_these">Use these</string>
+    <plurals name="lyrics_search_results_found">
+        <item quantity="one">%1$d result</item>
+        <item quantity="other">%1$d results</item>
+    </plurals>
     <string name="edit_song">Edit song</string>
     <string name="song_title">Song title</string>
     <string name="song_artists">Song artists</string>
