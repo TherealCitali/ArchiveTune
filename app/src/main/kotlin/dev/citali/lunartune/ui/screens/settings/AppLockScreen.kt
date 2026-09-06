@@ -55,10 +55,15 @@ import dev.citali.lunartune.constants.AppLockEnabledKey
 import dev.citali.lunartune.constants.AppLockPinHashKey
 import dev.citali.lunartune.constants.AppLockPinLength
 import dev.citali.lunartune.constants.AppLockPinLengthKey
+import dev.citali.lunartune.constants.AppLockScope
+import dev.citali.lunartune.constants.AppLockScopeKey
+import dev.citali.lunartune.constants.AppLockTimeout
+import dev.citali.lunartune.constants.AppLockTimeoutKey
 import dev.citali.lunartune.constants.AppLockType
 import dev.citali.lunartune.constants.AppLockTypeKey
 import dev.citali.lunartune.ui.component.DefaultDialog
 import dev.citali.lunartune.ui.component.IconButton as AppIconButton
+import dev.citali.lunartune.ui.component.ListPreference
 import dev.citali.lunartune.ui.component.PinLockScreen
 import dev.citali.lunartune.ui.component.PreferenceEntry
 import dev.citali.lunartune.ui.component.PreferenceGroup
@@ -87,6 +92,10 @@ fun AppLockScreen(navController: NavController) {
         rememberEnumPreference(AppLockPinLengthKey, defaultValue = AppLockPinLength.SIX)
     val (biometricUnlock, onBiometricUnlockChange) =
         rememberPreference(AppLockBiometricUnlockKey, defaultValue = false)
+    val (lockTimeout, onLockTimeoutChange) =
+        rememberEnumPreference(AppLockTimeoutKey, defaultValue = AppLockTimeout.IMMEDIATELY)
+    val (lockScope, onLockScopeChange) =
+        rememberEnumPreference(AppLockScopeKey, defaultValue = AppLockScope.WHOLE_APP)
 
     val pinSet = pinHash.isNotBlank()
     // Re-checked every time the screen comes back to the front, so setting up a
@@ -196,6 +205,49 @@ fun AppLockScreen(navController: NavController) {
                             }
                         },
                     )
+                }
+            }
+
+            val lockConfigured =
+                lockEnabled && (lockType == AppLockType.BIOMETRIC || (lockType == AppLockType.PIN && pinSet))
+
+            if (lockConfigured) {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                PreferenceGroup(title = stringResource(R.string.app_lock_options)) {
+                    item {
+                        ListPreference(
+                            title = { Text(stringResource(R.string.lock_after)) },
+                            description = stringResource(R.string.lock_after_desc),
+                            icon = { Icon(painterResource(R.drawable.timer), null) },
+                            selectedValue = lockTimeout,
+                            values = AppLockTimeout.entries,
+                            valueText = { timeoutLabel(it) },
+                            onValueSelected = onLockTimeoutChange,
+                        )
+                    }
+
+                    item {
+                        ListPreference(
+                            title = { Text(stringResource(R.string.lock_scope)) },
+                            icon = { Icon(painterResource(R.drawable.lock), null) },
+                            selectedValue = lockScope,
+                            values = AppLockScope.entries,
+                            valueText = {
+                                when (it) {
+                                    AppLockScope.WHOLE_APP -> stringResource(R.string.lock_scope_whole_app)
+                                    AppLockScope.SENSITIVE_ONLY -> stringResource(R.string.lock_scope_sensitive)
+                                }
+                            },
+                            valueDescription = {
+                                when (it) {
+                                    AppLockScope.WHOLE_APP -> stringResource(R.string.lock_scope_whole_app_desc)
+                                    AppLockScope.SENSITIVE_ONLY -> stringResource(R.string.lock_scope_sensitive_desc)
+                                }
+                            },
+                            onValueSelected = onLockScopeChange,
+                        )
+                    }
                 }
             }
 
@@ -393,3 +445,13 @@ fun PinSetupScreen(navController: NavController) {
         )
     }
 }
+
+@Composable
+private fun timeoutLabel(timeout: AppLockTimeout): String =
+    when (timeout) {
+        AppLockTimeout.IMMEDIATELY -> stringResource(R.string.lock_timeout_immediately)
+        AppLockTimeout.THIRTY_SECONDS -> stringResource(R.string.lock_timeout_seconds, 30)
+        AppLockTimeout.ONE_MINUTE -> stringResource(R.string.lock_timeout_minute)
+        AppLockTimeout.FIVE_MINUTES -> stringResource(R.string.lock_timeout_minutes, 5)
+        AppLockTimeout.FIFTEEN_MINUTES -> stringResource(R.string.lock_timeout_minutes, 15)
+    }

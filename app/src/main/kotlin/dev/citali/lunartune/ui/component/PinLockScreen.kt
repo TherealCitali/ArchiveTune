@@ -12,6 +12,11 @@ import androidx.fragment.app.FragmentActivity
 import androidx.compose.material3.Button
 import androidx.compose.ui.platform.LocalContext
 import dev.citali.lunartune.constants.AppLockPinLength
+import androidx.datastore.preferences.core.Preferences
+import dev.citali.lunartune.constants.AppLockEnabledKey
+import dev.citali.lunartune.constants.AppLockPinHashKey
+import dev.citali.lunartune.constants.AppLockTypeKey
+import dev.citali.lunartune.extensions.toEnum
 import dev.citali.lunartune.constants.AppLockPinLengthKey
 import dev.citali.lunartune.constants.AppLockType
 import dev.citali.lunartune.utils.SecurityUtils
@@ -65,6 +70,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -463,6 +469,44 @@ private const val DELAY_AUTO_SUBMIT = 100L
 private const val DELAY_WAVE_STAGGER = 30L
 
 /**
+ * True when a lock is configured, from a raw preferences snapshot. Mirrors the
+ * condition MainActivity uses to decide whether the gate can appear.
+ */
+fun Preferences.appLockConfigured(): Boolean {
+    if (this[AppLockEnabledKey] != true) return false
+    return when (this[AppLockTypeKey].toEnum(AppLockType.NONE)) {
+        AppLockType.BIOMETRIC -> true
+        AppLockType.PIN -> !this[AppLockPinHashKey].isNullOrBlank()
+        AppLockType.NONE -> false
+    }
+}
+
+/**
+ * Routes the lock covers when it is scoped to sensitive screens: the library
+ * and everything reached from it, listening history and stats, the account
+ * page, and all of the settings (linked accounts, backups, the lock itself).
+ * Home, search, browsing and the player stay open.
+ */
+fun isSensitiveRoute(route: String?): Boolean {
+    if (route == null) return false
+    return SENSITIVE_ROUTE_PREFIXES.any { route == it || route.startsWith("$it/") || route.startsWith("$it?") }
+}
+
+private val SENSITIVE_ROUTE_PREFIXES =
+    listOf(
+        "library",
+        "local_songs",
+        "history",
+        "stats",
+        "account",
+        "settings",
+        "auto_playlist",
+        "top_playlist",
+        "cache_playlist",
+        "local_playlist",
+    )
+
+/**
  * Full screen gate drawn over the whole app while it is locked.
  *
  * With a PIN it shows the PIN pad, optionally with a fingerprint key that opens
@@ -496,33 +540,43 @@ fun AppLockGate(
         }
     }
 
-    when (lockType) {
-        AppLockType.BIOMETRIC -> {
-            LaunchedEffect(Unit) { launchScreenLock() }
-            ScreenLockGate(onUnlockClick = { launchScreenLock() })
-        }
-
-        AppLockType.PIN -> {
-            val fingerprintAvailable = biometricUnlock && SecurityUtils.canUseScreenLock(context)
-            LaunchedEffect(Unit) {
-                if (fingerprintAvailable) launchScreenLock()
+    // The gate is drawn over the live app, so it must swallow every touch that
+    // its own controls do not use. Otherwise a tap on an empty part of the
+    // lock screen would reach whatever is underneath.
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .pointerInput(Unit) { awaitPointerEventScope { while (true) { awaitPointerEvent() } } },
+    ) {
+        when (lockType) {
+            AppLockType.BIOMETRIC -> {
+                LaunchedEffect(Unit) { launchScreenLock() }
+                ScreenLockGate(onUnlockClick = { launchScreenLock() })
             }
-            PinLockScreen(
-                title = stringResource(R.string.enter_pin),
-                isError = pinError,
-                maxPinLength = pinLength.digits,
-                onBiometricClick = if (fingerprintAvailable) ({ launchScreenLock() }) else null,
-                onPinSubmitted = { pin ->
-                    if (SecurityUtils.hashPin(pin) == pinHash) {
-                        onUnlocked()
-                    } else {
-                        pinError = true
-                    }
-                },
-            )
-        }
 
-        AppLockType.NONE -> Unit
+            AppLockType.PIN -> {
+                val fingerprintAvailable = biometricUnlock && SecurityUtils.canUseScreenLock(context)
+                LaunchedEffect(Unit) {
+                    if (fingerprintAvailable) launchScreenLock()
+                }
+                PinLockScreen(
+                    title = stringResource(R.string.enter_pin),
+                    isError = pinError,
+                    maxPinLength = pinLength.digits,
+                    onBiometricClick = if (fingerprintAvailable) ({ launchScreenLock() }) else null,
+                    onPinSubmitted = { pin ->
+                        if (SecurityUtils.hashPin(pin) == pinHash) {
+                            onUnlocked()
+                        } else {
+                            pinError = true
+                        }
+                    },
+                )
+            }
+
+            AppLockType.NONE -> Unit
+        }
     }
 }
 

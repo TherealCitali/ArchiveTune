@@ -994,6 +994,8 @@ val AppLockTypeKey = stringPreferencesKey("appLockType")
 val AppLockPinHashKey = stringPreferencesKey("appLockPinHash")
 val AppLockPinLengthKey = stringPreferencesKey("appLockPinLength")
 val AppLockBiometricUnlockKey = booleanPreferencesKey("appLockBiometricUnlock")
+val AppLockTimeoutKey = stringPreferencesKey("appLockTimeout")
+val AppLockScopeKey = stringPreferencesKey("appLockScope")
 
 enum class AppLockType {
     NONE,
@@ -1005,6 +1007,22 @@ enum class AppLockPinLength(val digits: Int) {
     FOUR(4),
     SIX(6),
 }
+
+/** How long the app may stay in the background before it locks again. */
+enum class AppLockTimeout(val millis: Long) {
+    IMMEDIATELY(0L),
+    THIRTY_SECONDS(30_000L),
+    ONE_MINUTE(60_000L),
+    FIVE_MINUTES(5 * 60_000L),
+    FIFTEEN_MINUTES(15 * 60_000L),
+}
+
+/** What the lock covers: the whole app, or only the screens that hold personal data. */
+enum class AppLockScope {
+    WHOLE_APP,
+    SENSITIVE_ONLY,
+}
+
 
 enum class UpdateChannel {
     STABLE,
