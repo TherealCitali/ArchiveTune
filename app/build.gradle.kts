@@ -65,8 +65,8 @@ android {
     applicationId = "dev.citali.lunartune"
         minSdk = 26
         targetSdk = 37
-        versionCode = 510
-        versionName = "5.1.0"
+        versionCode = 520
+        versionName = "5.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
