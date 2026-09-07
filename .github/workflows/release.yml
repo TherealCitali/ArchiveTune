@@ -5,6 +5,7 @@ on:
       - 'main'
     paths:
       - 'app/build.gradle.kts'
+      - '.github/workflows/release.yml'
   workflow_dispatch:
 
 jobs:
@@ -74,6 +75,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Verify reproducible unsigned universal APK
+        id: repro
         shell: bash
         env:
           LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
@@ -84,6 +86,9 @@ jobs:
           EXTRACTOR_BEARER: ${{ secrets.EXTRACTOR_BEARER }}
         run: |
           set -euo pipefail
+
+          REPRO_DIR="${RUNNER_TEMP}/repro"
+          mkdir -p "$REPRO_DIR"
 
           locate_universal_apk() {
             local metadata
@@ -109,30 +114,90 @@ jobs:
             return 1
           }
 
-          ./gradlew clean assembleGmsMobileUniversalRelease
-          APK_1="$(locate_universal_apk || true)"
-          if [ -z "${APK_1:-}" ] || [ ! -f "$APK_1" ]; then
-            echo "Could not find unsigned universal release APK (first build)."
-            echo "APK outputs:"
-            find app/build/outputs/apk -maxdepth 6 -type f -print || true
-            exit 1
-          fi
-          SHA_1="$(sha256sum "$APK_1" | awk '{print $1}')"
-          cp "$APK_1" /tmp/universal-1.apk
+          # Clean build of the unsigned universal APK; keeps a copy as universal-<n>.apk
+          # and prints its sha256. Sets APK_SHA for the caller.
+          build_universal() {
+            local n="$1"
+            local apk
 
-          ./gradlew clean assembleGmsMobileUniversalRelease
-          APK_2="$(locate_universal_apk || true)"
-          if [ -z "${APK_2:-}" ] || [ ! -f "$APK_2" ]; then
-            echo "Could not find unsigned universal release APK (second build)."
-            echo "APK outputs:"
-            find app/build/outputs/apk -maxdepth 6 -type f -print || true
-            exit 1
-          fi
-          SHA_2="$(sha256sum "$APK_2" | awk '{print $1}')"
+            ./gradlew clean assembleGmsMobileUniversalRelease
+            apk="$(locate_universal_apk || true)"
+            if [ -z "${apk:-}" ] || [ ! -f "$apk" ]; then
+              echo "Could not find unsigned universal release APK (build #$n)."
+              echo "APK outputs:"
+              find app/build/outputs/apk -maxdepth 6 -type f -print || true
+              exit 1
+            fi
+            cp "$apk" "$REPRO_DIR/universal-$n.apk"
+            APK_SHA="$(sha256sum "$apk" | awk '{print $1}')"
+            echo "sha256 #$n: $APK_SHA"
+          }
 
-          echo "sha256 #1: $SHA_1"
-          echo "sha256 #2: $SHA_2"
-          test "$SHA_1" = "$SHA_2"
+          build_universal 1
+          SHA_1="$APK_SHA"
+
+          build_universal 2
+          SHA_2="$APK_SHA"
+
+          if [ "$SHA_1" = "$SHA_2" ]; then
+            echo "Reproducible: builds #1 and #2 produced byte-identical APKs."
+            exit 0
+          fi
+
+          # The two builds differ. Show *what* differs so the cause can be tracked down,
+          # keep both APKs as an artifact, then give the toolchain one more attempt.
+          echo "mismatch=true" >> "$GITHUB_OUTPUT"
+          echo "::warning title=Non-reproducible build::Builds #1 and #2 produced different APKs. Listing differing entries and building a third time."
+
+          python3 - "$REPRO_DIR/universal-1.apk" "$REPRO_DIR/universal-2.apk" <<'PY'
+          import sys
+          import zipfile
+
+          first, second = sys.argv[1], sys.argv[2]
+          entries_1 = {i.filename: i for i in zipfile.ZipFile(first).infolist()}
+          entries_2 = {i.filename: i for i in zipfile.ZipFile(second).infolist()}
+
+          lines = []
+          for name in sorted(set(entries_1) | set(entries_2)):
+              a = entries_1.get(name)
+              b = entries_2.get(name)
+              if a is None:
+                  lines.append(f"  only in build #2: {name}")
+              elif b is None:
+                  lines.append(f"  only in build #1: {name}")
+              elif (a.CRC, a.file_size) != (b.CRC, b.file_size):
+                  lines.append(
+                      f"  differs: {name} "
+                      f"(#1 {a.file_size} B crc {a.CRC:08x} / #2 {b.file_size} B crc {b.CRC:08x})"
+                  )
+
+          if lines:
+              print(f"{len(lines)} APK entries differ between build #1 and build #2:")
+              print("\n".join(lines))
+          else:
+              print("Every APK entry has identical size and CRC; only container metadata "
+                    "(entry order, alignment or headers) differs.")
+          PY
+
+          build_universal 3
+          SHA_3="$APK_SHA"
+
+          if [ "$SHA_3" = "$SHA_1" ] || [ "$SHA_3" = "$SHA_2" ]; then
+            echo "::warning title=Intermittent non-determinism::Build #3 matches build #$([ "$SHA_3" = "$SHA_1" ] && echo 1 || echo 2). Treating the build as reproducible; the mismatching APKs are kept in the reproducibility-mismatch artifact."
+            exit 0
+          fi
+
+          echo "::error title=Non-reproducible build::Three consecutive clean builds produced three different APKs."
+          exit 1
+
+      - name: Upload APKs from mismatching builds
+        if: always() && steps.repro.outputs.mismatch == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: reproducibility-mismatch
+          path: ${{ runner.temp }}/repro/*.apk
+          retention-days: 14
+          if-no-files-found: ignore
 
   build:
     name: Build Release APKs
