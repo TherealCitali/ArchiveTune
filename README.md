@@ -29,7 +29,7 @@
     <img src="https://img.shields.io/badge/Language-Kotlin-7f52ff?style=for-the-badge&logo=kotlin&color=6366f1&labelColor=1e1e2e" alt="Kotlin Language" />
     <img src="https://img.shields.io/badge/Toolkit-Jetpack_Compose-4285f4?style=for-the-badge&logo=jetpack-compose&color=6366f1&labelColor=1e1e2e" alt="Jetpack Compose Toolkit" />
     <img src="https://img.shields.io/badge/Design-Material_3-000000?style=for-the-badge&logo=material-design&color=6366f1&labelColor=1e1e2e" alt="Material Design 3" />
-    <a href="https://www.virustotal.com/gui/file/176bea37aff02a606d04ff0a61478fabdb0bd079f9e97319645452af420e5d84/detection/f-176bea37aff02a606d04ff0a61478fabdb0bd079f9e97319645452af420e5d84-1778840479" target="_blank"><img src="https://img.shields.io/badge/VirusTotal-SAFE-green?style=for-the-badge&logo=virustotal&logoColor=white&labelColor=1e1e2e&color=5865F2" alt="VirusTotal" /></a>
+    <a href="https://www.virustotal.com/gui/file/c8f0d0424e5dd12be68515b85909a18353802a2e65ddd9efb3e3165a79bff9d9?nocache=1" target="_blank"><img src="https://img.shields.io/badge/VirusTotal-SAFE-green?style=for-the-badge&logo=virustotal&logoColor=white&labelColor=1e1e2e&color=5865F2" alt="VirusTotal" /></a>
     <a href="https://t.me/LunarTuneGC"><img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram" /></a>
   </div>
   
