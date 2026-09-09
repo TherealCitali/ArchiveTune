@@ -42,9 +42,9 @@ val discordApplicationId =
     (
         localProperties.getProperty("DISCORD_APPLICATION_ID")
             ?: System.getenv("DISCORD_APPLICATION_ID")
-            ?: "1165706613961789445"
+            ?: "1547164645817585684"
         ).trim()
-val discordApplicationIdLong = discordApplicationId.toLongOrNull() ?: 1165706613961789445L
+val discordApplicationIdLong = discordApplicationId.toLongOrNull() ?: 1547164645817585684L
 val discordRedirectScheme = "discord-$discordApplicationId"
 val releaseKeystoreFile = file("keystore/release.keystore")
 val releaseStorePassword =

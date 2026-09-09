@@ -41,6 +41,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import dev.citali.lunartune.canvas.LunarTuneCanvas
 import dev.citali.lunartune.constants.*
+import dev.citali.lunartune.discord.DiscordOAuthRepository
 import dev.citali.lunartune.extensions.*
 import dev.citali.lunartune.gatekeeper.GatekeeperResult
 import dev.citali.lunartune.gatekeeper.RunGatekeeperCheckUseCase
@@ -189,6 +190,10 @@ class App :
             MoriCipherRuntime
                 .refresh(force = false)
                 .onFailure { Timber.w(it, "Mori cipher background initialization failed") }
+        }
+        applicationScope.launch(Dispatchers.IO) {
+            runCatching { DiscordOAuthRepository.clearSessionFromOtherApplication(this@App) }
+                .onFailure { Timber.w(it, "Failed to check the Discord session's application") }
         }
         applicationScope.launch(Dispatchers.IO) {
             try {

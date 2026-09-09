@@ -18,6 +18,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import dev.citali.lunartune.BuildConfig
+import dev.citali.lunartune.constants.DiscordApplicationIdKey
 import dev.citali.lunartune.constants.DiscordAvatarUrlKey
 import dev.citali.lunartune.constants.DiscordNameKey
 import dev.citali.lunartune.constants.DiscordRefreshTokenKey
@@ -207,10 +208,31 @@ object DiscordOAuthRepository {
             )
         }
 
+    /**
+     * Discord tokens are bound to the application that issued them. When the app
+     * ships with a different application ID than the one a stored session was
+     * created with, that session can no longer be refreshed or used for presence,
+     * so it is dropped and the user is asked to link Discord again.
+     */
+    suspend fun clearSessionFromOtherApplication(context: Context) {
+        withContext(Dispatchers.IO) {
+            val prefs = context.dataStore.data.first()
+            if (prefs[DiscordTokenKey]?.isNotBlank() != true) {
+                return@withContext
+            }
+            val issuingApplicationId = prefs[DiscordApplicationIdKey]?.trim().orEmpty()
+            if (issuingApplicationId == BuildConfig.DISCORD_APPLICATION_ID) {
+                return@withContext
+            }
+            clearSession(context)
+        }
+    }
+
     suspend fun clearSession(context: Context) {
         withContext(Dispatchers.IO) {
             context.dataStore.edit { prefs ->
                 prefs.remove(DiscordTokenKey)
+                prefs.remove(DiscordApplicationIdKey)
                 prefs.remove(DiscordRefreshTokenKey)
                 prefs.remove(DiscordTokenExpiresAtKey)
                 prefs.remove(DiscordUsernameKey)
@@ -266,6 +288,7 @@ object DiscordOAuthRepository {
     ) {
         context.dataStore.edit { prefs ->
             prefs[DiscordTokenKey] = session.accessToken
+            prefs[DiscordApplicationIdKey] = BuildConfig.DISCORD_APPLICATION_ID
             session.refreshToken?.takeIf { it.isNotBlank() }?.let {
                 prefs[DiscordRefreshTokenKey] = it
             }
