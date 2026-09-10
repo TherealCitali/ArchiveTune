@@ -240,6 +240,7 @@
     <string name="unknown">Unknown</string>
     <string name="copied">Copied to clipboard</string>
     <string name="search_lyrics">Search lyrics</string>
+    <string name="lyrics_back_to_player">Back to player</string>
     <string name="lyrics_synced_badge">Synced</string>
     <string name="lyrics_search_plain_badge">Plain</string>
     <string name="lyrics_searching_providers">Searching providers</string>
