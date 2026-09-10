@@ -10,6 +10,7 @@ package dev.citali.lunartune.viewmodels
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.OpenableColumns
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
@@ -84,10 +85,19 @@ enum class BackupCategory {
     DOWNLOADS,
 }
 
+/** Which app produced a backup archive. */
+enum class BackupSource {
+    LUNARTUNE,
+
+    /** Backup written by ArchiveTune (same archive layout, different settings root tag and DB version). */
+    ARCHIVETUNE,
+}
+
 data class BackupValidationResult(
     val isValid: Boolean,
     val availableCategories: Set<BackupCategory>,
     val errorMessage: String?,
+    val source: BackupSource = BackupSource.LUNARTUNE,
 )
 
 sealed interface ScheduledBackupScreenState {
@@ -399,7 +409,7 @@ class BackupRestoreViewModel
                     val includeAccount = BackupCategory.ACCOUNT in categories
                     val includeLibrary = BackupCategory.LIBRARY in categories
                     val includeDownloads = BackupCategory.DOWNLOADS in categories
-                    val settingsExcludedKeys = if (includeAccount) emptySet() else ACCOUNT_PREF_KEYS
+                    val baseSettingsExcludedKeys = if (includeAccount) emptySet() else ACCOUNT_PREF_KEYS
                     emitProgress(
                         title = title,
                         step = context.getString(R.string.restore_step_verifying),
@@ -409,17 +419,30 @@ class BackupRestoreViewModel
 
                     val entryNames = ArrayList<String>()
                     var hasDb = false
+                    var xmlSource: BackupSource? = null
                     context.applicationContext.contentResolver.openInputStream(uri)?.use { stream ->
                         stream.zipInputStream().use { zip ->
                             var entry = zip.nextEntry
                             while (entry != null) {
                                 entryNames.add(entry.name)
                                 if (entry.name == InternalDatabase.DB_NAME) hasDb = true
+                                if (entry.name == SETTINGS_XML_FILENAME) {
+                                    xmlSource = detectSettingsXmlSource(zip)
+                                }
                                 entry = zip.nextEntry
                             }
                         }
                     }
                     if (includeLibrary && !hasDb) throw IllegalStateException("Backup missing database")
+
+                    val source = resolveBackupSource(context, uri, xmlSource)
+                    val isForeignBackup = source == BackupSource.ARCHIVETUNE
+                    val settingsExcludedKeys =
+                        if (isForeignBackup) {
+                            baseSettingsExcludedKeys + BackupArchiveRepository.FOREIGN_BACKUP_EXCLUDED_PREFERENCE_KEYS
+                        } else {
+                            baseSettingsExcludedKeys
+                        }
 
                     val restoreEntries =
                         entryNames.filter { name ->
@@ -453,6 +476,11 @@ class BackupRestoreViewModel
                         runCatching { database.awaitIdle() }
                         runCatching { database.checkpoint() }
                         runCatching { database.close() }
+                        // Never let a leftover -wal/-shm of the old database be replayed on
+                        // top of the freshly restored file.
+                        listOf("-wal", "-shm", "-journal").forEach { suffix ->
+                            runCatching { context.getDatabasePath("${InternalDatabase.DB_NAME}$suffix").delete() }
+                        }
                         completedUnits++
                     }
 
@@ -501,6 +529,19 @@ class BackupRestoreViewModel
                         }
                     }
 
+                    var databasePrepared = true
+                    if (includeLibrary) {
+                        // Must run before Room touches the file: a database with a higher
+                        // user_version (ArchiveTune, or a newer LunarTune) would otherwise be
+                        // wiped by fallbackToDestructiveMigrationOnDowngrade on next launch.
+                        emit(context.getString(R.string.backup_step_checkpoint_database), indeterminate = true)
+                        databasePrepared =
+                            InternalDatabase.prepareRestoredDatabaseFile(
+                                context = context,
+                                foreign = isForeignBackup,
+                            )
+                    }
+
                     emitProgress(
                         title = title,
                         step = context.getString(R.string.restore_step_restarting),
@@ -509,7 +550,14 @@ class BackupRestoreViewModel
                     )
 
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(context, R.string.restore_success, Toast.LENGTH_SHORT).show()
+                        if (databasePrepared) {
+                            Toast.makeText(context, R.string.restore_success, Toast.LENGTH_SHORT).show()
+                        } else {
+                            // The file is left in place: when its version was already stamped Room
+                            // reports an identity mismatch on relaunch and SchemaTools gets one more
+                            // repair attempt; otherwise the app starts with an empty library.
+                            Toast.makeText(context, R.string.restore_database_incompatible, Toast.LENGTH_LONG).show()
+                        }
                     }
 
                     try {
@@ -538,6 +586,57 @@ class BackupRestoreViewModel
                 }
             }
         }
+
+        /**
+         * Decides which app wrote the archive. The `settings.xml` root tag is
+         * authoritative; when the archive has no settings (library-only backup) the
+         * file name is used, since ArchiveTune names its archives `ArchiveTune_….backup`.
+         */
+        private fun resolveBackupSource(
+            context: Context,
+            uri: Uri,
+            xmlSource: BackupSource?,
+        ): BackupSource {
+            xmlSource?.let { return it }
+            val displayName =
+                runCatching {
+                    context.applicationContext.contentResolver
+                        .query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+                        ?.use { cursor ->
+                            val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                            if (index >= 0 && cursor.moveToFirst()) cursor.getString(index) else null
+                        }
+                }.getOrNull() ?: uri.lastPathSegment.orEmpty()
+            return if (displayName.substringAfterLast('/').startsWith(ARCHIVETUNE_FILE_PREFIX, ignoreCase = true)) {
+                BackupSource.ARCHIVETUNE
+            } else {
+                BackupSource.LUNARTUNE
+            }
+        }
+
+        /**
+         * Identifies the app that wrote a `settings.xml` by its document root
+         * (`LunarTuneBackup` vs ArchiveTune's `ArchiveTuneBackup`). Only the first
+         * start tag is read; unknown roots are treated as LunarTune so older archives
+         * keep restoring unchanged. The stream is left open (the caller owns the zip).
+         */
+        private fun detectSettingsXmlSource(inputStream: java.io.InputStream): BackupSource =
+            runCatching {
+                val parser = android.util.Xml.newPullParser()
+                parser.setInput(inputStream, Charsets.UTF_8.name())
+                var eventType = parser.eventType
+                while (eventType != XmlPullParser.END_DOCUMENT) {
+                    if (eventType == XmlPullParser.START_TAG) {
+                        return@runCatching if (parser.name.equals(ARCHIVETUNE_SETTINGS_ROOT_TAG, ignoreCase = true)) {
+                            BackupSource.ARCHIVETUNE
+                        } else {
+                            BackupSource.LUNARTUNE
+                        }
+                    }
+                    eventType = parser.next()
+                }
+                BackupSource.LUNARTUNE
+            }.getOrDefault(BackupSource.LUNARTUNE)
 
         private suspend fun restoreSettingsFromXml(
             context: Context,
@@ -801,13 +900,18 @@ class BackupRestoreViewModel
                     stream.use { inputStream ->
                         val zipStream = inputStream.zipInputStream()
                         val entryNames = mutableSetOf<String>()
+                        var xmlSource: BackupSource? = null
                         zipStream.use { zip ->
                             var entry = zip.nextEntry
                             while (entry != null) {
                                 entryNames.add(entry.name)
+                                if (entry.name == SETTINGS_XML_FILENAME) {
+                                    xmlSource = detectSettingsXmlSource(zip)
+                                }
                                 entry = zip.nextEntry
                             }
                         }
+                        val source = resolveBackupSource(context, uri, xmlSource)
                         if (entryNames.isEmpty()) {
                             return@withContext BackupValidationResult(
                                 isValid = false,
@@ -837,6 +941,7 @@ class BackupRestoreViewModel
                             isValid = true,
                             availableCategories = categories,
                             errorMessage = null,
+                            source = source,
                         )
                     }
                 } catch (e: Exception) {
@@ -852,6 +957,8 @@ class BackupRestoreViewModel
         companion object {
             const val SETTINGS_FILENAME = "settings.preferences_pb"
             const val SETTINGS_XML_FILENAME = BackupArchiveRepository.SETTINGS_XML_FILENAME
+            const val ARCHIVETUNE_SETTINGS_ROOT_TAG = "ArchiveTuneBackup"
+            const val ARCHIVETUNE_FILE_PREFIX = "ArchiveTune"
 
             val ACCOUNT_PREF_KEYS: Set<String> = BackupArchiveRepository.ACCOUNT_PREFERENCE_KEYS
         }

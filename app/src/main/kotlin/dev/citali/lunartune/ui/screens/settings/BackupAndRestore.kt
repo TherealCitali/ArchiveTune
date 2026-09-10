@@ -10,6 +10,7 @@
 package dev.citali.lunartune.ui.screens.settings
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -88,6 +89,7 @@ import dev.citali.lunartune.ui.utils.backToMain
 import dev.citali.lunartune.utils.rememberPreference
 import dev.citali.lunartune.viewmodels.BackupCategory
 import dev.citali.lunartune.viewmodels.BackupRestoreViewModel
+import dev.citali.lunartune.viewmodels.BackupSource
 import dev.citali.lunartune.viewmodels.ScheduledBackupScreenState
 import dev.citali.lunartune.viewmodels.ScheduledBackupUiData
 import java.time.Instant
@@ -163,6 +165,11 @@ fun BackupAndRestore(
                 coroutineScope.launch {
                     val result = viewModel.validateBackup(context, uri)
                     if (result.isValid) {
+                        if (result.source == BackupSource.ARCHIVETUNE) {
+                            Toast
+                                .makeText(context, R.string.restore_archivetune_backup_detected, Toast.LENGTH_LONG)
+                                .show()
+                        }
                         pendingRestoreCategories = result.availableCategories
                         pendingRestoreUri = uri
                         showRestoreOptionsDialog = true
