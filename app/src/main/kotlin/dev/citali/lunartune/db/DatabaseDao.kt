@@ -1486,6 +1486,10 @@ interface DatabaseDao {
     @Query("SELECT songId FROM event ORDER BY rowId DESC LIMIT 1")
     fun lastEventSongId(): Flow<String?>
 
+    /** Timestamp of the most recent play, or `null` when there is no listening history at all. */
+    @Query("SELECT MAX(timestamp) FROM event")
+    fun latestEventTimestamp(): Flow<Long?>
+
     @Transaction
     @Query("DELETE FROM event")
     fun clearListenHistory()

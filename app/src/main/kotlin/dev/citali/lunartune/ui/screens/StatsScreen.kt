@@ -341,6 +341,13 @@ fun StatsScreen(
                     }
                 }
 
+                if (!data.hasPlaysInPeriod) {
+                    item(key = "periodEmpty", contentType = "status") {
+                        StatsPeriodEmptyMessage(modifier = Modifier.animateItem())
+                    }
+                    return@LazyColumn
+                }
+
                 item(key = "overview", contentType = "overview") {
                     StatsSummarySection(
                         summary = listeningSummary,
@@ -660,6 +667,30 @@ private fun StatsStatusScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun StatsPeriodEmptyMessage(modifier: Modifier = Modifier) {
+    Column(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 48.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.stats_period_empty_title),
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            text = stringResource(R.string.stats_period_empty_message),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 

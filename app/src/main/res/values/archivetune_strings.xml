@@ -575,6 +575,8 @@
     <string name="stats_show_top_songs">Show top 5</string>
     <string name="stats_empty_title">No listening stats yet</string>
     <string name="stats_empty_message">Songs you play will appear here with listening trends and rankings.</string>
+    <string name="stats_period_empty_title">No plays in this time range</string>
+    <string name="stats_period_empty_message">Choose a longer range above to see your listening stats.</string>
     <string name="stats_time_range">Time range</string>
     <string name="stats_listening_patterns">Listening patterns</string>
     <string name="stats_artist_breakdown">Artist breakdown</string>
