@@ -906,16 +906,27 @@ private fun AppleMusicTrackHeader(
             mediaMetadata.artists.joinToString { it.name }
         }
 
+    val backToPlayerDescription = stringResource(R.string.lyrics_back_to_player)
+
     Row(
         modifier = modifier.heightIn(min = 64.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        // Tapping the shrunken artwork brings the user back to the main player,
+        // mirroring the close button so the large target is reachable one-handed.
         Box(
             modifier =
                 Modifier
                     .size(58.dp)
                     .clip(RoundedCornerShape(7.dp))
-                    .background(foregroundColor.copy(alpha = 0.18f)),
+                    .background(foregroundColor.copy(alpha = 0.18f))
+                    .semantics { contentDescription = backToPlayerDescription }
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = ripple(),
+                        role = Role.Button,
+                        onClick = onDismissClick,
+                    ),
             contentAlignment = Alignment.Center,
         ) {
             AsyncImage(
