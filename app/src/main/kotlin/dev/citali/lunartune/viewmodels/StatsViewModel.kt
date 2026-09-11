@@ -19,11 +19,14 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import dev.citali.lunartune.R
+import dev.citali.lunartune.constants.StatPeriod
 import dev.citali.lunartune.constants.statToPeriod
 import dev.citali.lunartune.db.MusicDatabase
 import dev.citali.lunartune.db.entities.Album
@@ -71,6 +74,8 @@ data class StatsUiData(
     val firstEvent: EventWithSong?,
     val isSongListExpanded: Boolean,
     val canExpandSongList: Boolean,
+    /** False when the library has listening history but none of it falls inside the selected range. */
+    val hasPlaysInPeriod: Boolean,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -85,6 +90,9 @@ class StatsViewModel
         private val isSongListExpanded = MutableStateFlow(false)
         private val isYearPickerOpen = MutableStateFlow(false)
         private val refreshRequest = MutableStateFlow(0L)
+
+        /** Set once the opening time range has been chosen from the actual history. */
+        private val initialPeriodResolved = MutableStateFlow(false)
 
         val yearPickerOpen: StateFlow<Boolean> = isYearPickerOpen
 
@@ -205,6 +213,10 @@ class StatsViewModel
             database
                 .firstEvent()
 
+        private val latestEventTimestamp =
+            database
+                .latestEventTimestamp()
+
         private val primaryStats =
             combine(
                 mostPlayedSongsStats,
@@ -226,17 +238,22 @@ class StatsViewModel
                 listeningByDayOfWeek,
                 listeningTotals,
                 firstEvent,
-            ) { byHour, byDay, totals, first ->
+                latestEventTimestamp,
+            ) { byHour, byDay, totals, first, latest ->
                 ListeningStats(
                     byHour = byHour,
                     byDay = byDay,
                     totals = totals,
                     firstEvent = first,
+                    latestEventTimestamp = latest,
                 )
             }
 
         val screenState: StateFlow<StatsScreenState> =
-            refreshRequest
+            combine(refreshRequest, initialPeriodResolved) { request, resolved -> request to resolved }
+                // Hold the first frame until the opening range is known, so the screen
+                // never flashes an empty "last week" before jumping to the right period.
+                .filter { (_, resolved) -> resolved }
                 .flatMapLatest {
                     combine(
                         primaryStats,
@@ -253,7 +270,10 @@ class StatsViewModel
                                 uniqueArtistsCount = primary.artists.size,
                                 uniqueAlbumsCount = primary.albums.size,
                             )
-                        if (summary.totalPlayCount == 0 && primary.rankedSongs.isEmpty()) {
+                        // Only a library with no history at all is "empty". A range without
+                        // plays keeps the full screen (and its range chips) so the user can
+                        // widen the period instead of being told there are no stats.
+                        if (listening.latestEventTimestamp == null) {
                             StatsScreenState.Empty
                         } else {
                             StatsScreenState.Success(
@@ -276,6 +296,7 @@ class StatsViewModel
                                     firstEvent = listening.firstEvent,
                                     isSongListExpanded = expanded,
                                     canExpandSongList = primary.rankedSongs.size > COLLAPSED_SONG_COUNT,
+                                    hasPlaysInPeriod = summary.totalPlayCount > 0 || primary.rankedSongs.isNotEmpty(),
                                 ),
                             )
                         }
@@ -291,6 +312,18 @@ class StatsViewModel
                 )
 
         init {
+            viewModelScope.launch {
+                // Open on the shortest continuous range that actually contains plays. A
+                // library restored from a backup, or simply a listening break, would
+                // otherwise greet the user with an empty last-week view and no hint that
+                // older stats exist.
+                val latest = runCatching { database.latestEventTimestamp().first() }.getOrNull()
+                if (latest != null && selectedOption.value == OptionStats.CONTINUOUS && indexChips.value == 0) {
+                    val period = StatPeriod.entries.firstOrNull { it.toTimeMillis() < latest } ?: StatPeriod.ALL
+                    indexChips.value = period.ordinal
+                }
+                initialPeriodResolved.value = true
+            }
             viewModelScope.launch {
                 mostPlayedArtists.collect { artists ->
                     artists
@@ -346,6 +379,7 @@ class StatsViewModel
             val byDay: List<ListeningBySlot>,
             val totals: ListeningTotals,
             val firstEvent: EventWithSong?,
+            val latestEventTimestamp: Long?,
         )
 
         private companion object {
