@@ -17,6 +17,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -27,8 +28,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -70,6 +73,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.ColorUtils
@@ -1215,10 +1219,16 @@ private fun MostPlayedAlbumSpotlightCard(
                 .padding(horizontal = 24.dp)
                 .clip(RoundedCornerShape(32.dp))
                 .background(backgroundBrush)
-                .clickable(onClick = onOpenAlbum)
-                .padding(16.dp),
+                .clickable(onClick = onOpenAlbum),
     ) {
-        Column {
+        CardWatermarkIcon(
+            iconRes = R.drawable.star,
+            color = primaryColor,
+            size = 164.dp,
+            endBleed = 46.dp,
+        )
+
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -1410,9 +1420,17 @@ fun ShortcutCard(
                 .clickable(
                     interactionSource = interactionSource,
                     onClick = onClick,
-                ).padding(12.dp),
+                ),
     ) {
+        CardWatermarkIcon(
+            iconRes = iconRes,
+            color = iconColor,
+            size = 116.dp,
+            endBleed = 28.dp,
+        )
+
         Column(
+            modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Box(
@@ -1443,5 +1461,34 @@ fun ShortcutCard(
                 )
             }
         }
+    }
+}
+
+private const val CARD_WATERMARK_ALPHA = 0.44f
+
+/**
+ * Oversized copy of a card's Solar (broken) icon, drawn behind the card content as a
+ * theme-tinted watermark at 44% opacity. It is anchored to the end edge and pushed
+ * past it by [endBleed] so the parent's rounded clip crops it, matching the hub design.
+ * The watermark is measured against the parent's size and never grows the card.
+ */
+@Composable
+private fun BoxScope.CardWatermarkIcon(
+    iconRes: Int,
+    color: Color,
+    size: Dp,
+    endBleed: Dp,
+) {
+    Box(modifier = Modifier.matchParentSize()) {
+        Icon(
+            painter = painterResource(id = iconRes),
+            contentDescription = null,
+            tint = color.copy(alpha = CARD_WATERMARK_ALPHA),
+            modifier =
+                Modifier
+                    .align(Alignment.CenterEnd)
+                    .offset(x = endBleed)
+                    .requiredSize(size),
+        )
     }
 }
