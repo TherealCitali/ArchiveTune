@@ -165,6 +165,39 @@ abstract class InternalDatabase : RoomDatabase() {
     companion object {
         const val DB_NAME = "song.db"
 
+        /**
+         * Prepares a database file that was just restored from a backup so Room can
+         * open it without falling back to destructive migration.
+         *
+         * Room wipes any database whose `user_version` is *higher* than this build's
+         * schema version ("downgrade"), which is exactly what happens with backups
+         * from ArchiveTune (same layout, newer version number) or from a newer
+         * LunarTune build. When [foreign] is `true`, or the stored version is higher
+         * than ours, the file is reconciled in place: columns unknown to this build
+         * are dropped, missing ones are added with their defaults, and the version
+         * plus Room identity hash are stamped. Rows are preserved.
+         *
+         * Returns `false` only when a reconcile was required but failed, so the caller
+         * can warn the user that the library could not be converted.
+         */
+        fun prepareRestoredDatabaseFile(
+            context: Context,
+            name: String = DB_NAME,
+            foreign: Boolean = false,
+        ): Boolean {
+            val storedVersion =
+                runCatching { SchemaTools.readDatabaseFileVersion(context, name) }
+                    .onFailure { Log.w(TAG, "Could not read version of restored database $name", it) }
+                    .getOrNull()
+            val needsReconcile = foreign || (storedVersion != null && storedVersion > CURRENT_VERSION)
+            if (!needsReconcile) return true
+
+            Log.i(TAG, "Reconciling restored database $name (version=$storedVersion, foreign=$foreign)")
+            return runCatching { SchemaTools.adoptForeignDatabaseFile(context = context, name = name) }
+                .onFailure { Log.e(TAG, "Failed to reconcile restored database $name", it) }
+                .isSuccess
+        }
+
         fun newInstance(context: Context): MusicDatabase {
             val universalMigrations =
                 (2 until CURRENT_VERSION)
@@ -341,35 +374,110 @@ private class UniversalMigration(
 private object SchemaTools {
     private val IGNORED_TABLES = setOf("android_metadata", "room_master_table", "sqlite_sequence")
 
+    /**
+     * Opens [name] with the plain framework helper at [CURRENT_VERSION] and no
+     * migration callbacks. Merely opening the file this way stamps `user_version`
+     * to [CURRENT_VERSION] (the framework does that after the no-op
+     * onUpgrade/onDowngrade), leaving only the schema itself to reconcile.
+     */
+    private fun openFileHelper(
+        context: Context,
+        name: String,
+    ): SupportSQLiteOpenHelper =
+        FrameworkSQLiteOpenHelperFactory()
+            .create(
+                SupportSQLiteOpenHelper.Configuration
+                    .builder(context)
+                    .name(name)
+                    .callback(
+                        object : SupportSQLiteOpenHelper.Callback(CURRENT_VERSION) {
+                            override fun onCreate(db: SupportSQLiteDatabase) = Unit
+
+                            override fun onUpgrade(
+                                db: SupportSQLiteDatabase,
+                                oldVersion: Int,
+                                newVersion: Int,
+                            ) = Unit
+
+                            override fun onDowngrade(
+                                db: SupportSQLiteDatabase,
+                                oldVersion: Int,
+                                newVersion: Int,
+                            ) = Unit
+                        },
+                    ).build(),
+            )
+
+    /** Reads `PRAGMA user_version` of an on-disk database (no version callbacks are run). */
+    fun readDatabaseFileVersion(
+        context: Context,
+        name: String,
+    ): Int {
+        val dbFile = context.getDatabasePath(name)
+        require(dbFile.exists()) { "Database file $name does not exist" }
+        return SQLiteDatabase
+            .openDatabase(dbFile.path, null, SQLiteDatabase.OPEN_READWRITE)
+            .use { it.version }
+    }
+
+    /**
+     * Brings a database written by a schema-compatible fork (ArchiveTune) or by a
+     * newer build in line with this build's schema so Room opens it as-is instead of
+     * destroying it. Runs in a single transaction: the WAL is folded into the main
+     * file, tables are reconciled (extra columns such as `song.isPodcast` dropped,
+     * missing ones added with defaults), and `room_master_table.identity_hash` is
+     * stamped with this build's hash. Throws if anything fails or the integrity
+     * check does not pass afterwards.
+     */
+    fun adoptForeignDatabaseFile(
+        context: Context,
+        name: String,
+    ) {
+        require(context.getDatabasePath(name).exists()) { "Database file $name does not exist" }
+
+        val expectedDb = Room.inMemoryDatabaseBuilder(context, InternalDatabase::class.java).build()
+        val fileHelper = openFileHelper(context, name)
+        try {
+            val expected = expectedDb.openHelper.writableDatabase
+            val identityHash = readIdentityHash(expected)
+            val db = fileHelper.writableDatabase
+            check(db.version == CURRENT_VERSION) { "Expected version $CURRENT_VERSION after open, found ${db.version}" }
+
+            // Fold a shipped -wal into the main file before rewriting the schema.
+            runCatching { db.query("PRAGMA wal_checkpoint(TRUNCATE)").use { it.moveToFirst() } }
+            // foreign_keys cannot be changed inside a transaction, so do it up front.
+            db.execSQL("PRAGMA foreign_keys=OFF")
+
+            db.beginTransaction()
+            try {
+                reconcileDatabase(db = db, expectedDb = expected)
+                if (identityHash != null) {
+                    updateIdentityHash(db = db, identityHash = identityHash)
+                }
+                db.setTransactionSuccessful()
+            } finally {
+                db.endTransaction()
+            }
+            db.execSQL("PRAGMA foreign_keys=ON")
+
+            val integrity =
+                db.query("PRAGMA integrity_check").use { cursor ->
+                    if (cursor.moveToFirst()) cursor.getString(0) else null
+                }
+            check(integrity == "ok") { "Integrity check failed after reconciling $name: $integrity" }
+            Log.i(TAG, "Reconciled database file $name to schema version ${db.version}")
+        } finally {
+            runCatching { fileHelper.close() }
+            runCatching { expectedDb.close() }
+        }
+    }
+
     fun repairDatabaseFile(
         context: Context,
         name: String,
     ) {
         val expectedDb = Room.inMemoryDatabaseBuilder(context, InternalDatabase::class.java).build()
-        val fileHelper =
-            FrameworkSQLiteOpenHelperFactory()
-                .create(
-                    SupportSQLiteOpenHelper.Configuration
-                        .builder(context)
-                        .name(name)
-                        .callback(
-                            object : SupportSQLiteOpenHelper.Callback(CURRENT_VERSION) {
-                                override fun onCreate(db: SupportSQLiteDatabase) = Unit
-
-                                override fun onUpgrade(
-                                    db: SupportSQLiteDatabase,
-                                    oldVersion: Int,
-                                    newVersion: Int,
-                                ) = Unit
-
-                                override fun onDowngrade(
-                                    db: SupportSQLiteDatabase,
-                                    oldVersion: Int,
-                                    newVersion: Int,
-                                ) = Unit
-                            },
-                        ).build(),
-                )
+        val fileHelper = openFileHelper(context, name)
 
         try {
             val expected = expectedDb.openHelper.writableDatabase
@@ -398,6 +506,14 @@ private object SchemaTools {
         val expectedTriggers = expectedMaster.filter { it.type == "trigger" && it.sql != null }
 
         db.execSQL("PRAGMA foreign_keys=OFF")
+        // ensureTableSchema() rebuilds a table via `ALTER TABLE x RENAME TO _old_x`.
+        // Since SQLite 3.26 that rename also rewrites `REFERENCES x` in every child
+        // table (even with foreign_keys off) unless legacy_alter_table is on, which
+        // would leave every child pointing at `_old_x` once it is dropped. Android
+        // compiles its SQLite with the legacy behaviour as default, but pin it
+        // explicitly so the rebuild is safe on any SQLite build; older versions
+        // that predate the pragma simply ignore it.
+        db.execSQL("PRAGMA legacy_alter_table=ON")
         dropNonTableObjects(db)
 
         expectedTables.forEach { table ->

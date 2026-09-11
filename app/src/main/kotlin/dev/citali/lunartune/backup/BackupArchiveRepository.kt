@@ -203,6 +203,38 @@ class BackupArchiveRepository
             const val SETTINGS_XML_FILENAME = "settings.xml"
             private const val BUFFER_SIZE = 64 * 1024
 
+            /**
+             * Preference keys that must never be imported from a backup written by
+             * another app (ArchiveTune). They cache the *other* project's GitHub
+             * release feed, update reminders and contributor list; importing them
+             * would make the updater offer ArchiveTune releases as LunarTune updates.
+             */
+            val FOREIGN_BACKUP_EXCLUDED_PREFERENCE_KEYS: Set<String> =
+                setOf(
+                    "github_releases_json",
+                    "github_releases_etag",
+                    "github_releases_fingerprint",
+                    "github_releases_last_checked_at",
+                    "daily_nightly_releases_json",
+                    "daily_nightly_releases_etag",
+                    "daily_nightly_releases_fingerprint",
+                    "daily_nightly_releases_last_checked_at",
+                    "github_contributors_json",
+                    "github_contributors_etag",
+                    "github_contributors_last_checked_at",
+                    "lastNotifiedVersion",
+                    "lastUpdateCheck",
+                    // Discord sessions are bound to the issuing application id; the
+                    // ArchiveTune token cannot be used with LunarTune's app id.
+                    "discordToken",
+                    "discordRefreshToken",
+                    "discordTokenExpiresAt",
+                    "discordApplicationId",
+                    "discordUsername",
+                    "discordName",
+                    "discordAvatarUrl",
+                )
+
             val ACCOUNT_PREFERENCE_KEYS: Set<String> =
                 setOf(
                     "innerTubeCookie",

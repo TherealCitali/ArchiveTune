@@ -54,6 +54,7 @@ import dev.citali.lunartune.ui.menu.LoadingScreen
 import dev.citali.lunartune.ui.theme.LunarTuneTheme
 import dev.citali.lunartune.viewmodels.BackupCategory
 import dev.citali.lunartune.viewmodels.BackupRestoreViewModel
+import dev.citali.lunartune.viewmodels.BackupSource
 
 @AndroidEntryPoint
 class RestoreBackupFileActivity : ComponentActivity() {
@@ -106,6 +107,9 @@ private fun RestoreBackupFileScreen(
     LaunchedEffect(uri) {
         val result = viewModel.validateBackup(context, uri)
         if (result.isValid) {
+            if (result.source == BackupSource.ARCHIVETUNE) {
+                Toast.makeText(context, R.string.restore_archivetune_backup_detected, Toast.LENGTH_LONG).show()
+            }
             selectedCategories = result.availableCategories
             screenState = BackupScreenState.Ready(availableCategories = result.availableCategories)
             showRestoreDialog = true
