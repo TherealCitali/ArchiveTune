@@ -69,10 +69,17 @@ object DiscordPresenceManager {
     ): DiscordRPC {
         val activeToken = DiscordOAuthRepository.getValidAccessToken(context) ?: token
         if (rpcInstance == null || rpcToken != activeToken) {
-            runCatching { rpcInstance?.stopActivity() }
-                .onFailure { Timber.tag(LOG_TAG).v(it, "failed to stop previous activity") }
-            runCatching { rpcInstance?.closeRPC() }
-                .onFailure { Timber.tag(LOG_TAG).v(it, "failed to close previous RPC instance") }
+            val previous = rpcInstance
+            if (previous != null) {
+                // The previous token may already be revoked (log-out, re-login), so it is only
+                // used to clear over a socket that is still open, never to open a new one.
+                if (DiscordSocialPresenceClient.isStarted) {
+                    runCatching { previous.stopActivity() }
+                        .onFailure { Timber.tag(LOG_TAG).v(it, "failed to stop previous activity") }
+                }
+                runCatching { previous.closeRPC() }
+                    .onFailure { Timber.tag(LOG_TAG).v(it, "failed to close previous RPC instance") }
+            }
 
             rpcInstance = DiscordRPC(context.applicationContext, activeToken)
             rpcToken = activeToken
@@ -207,8 +214,22 @@ object DiscordPresenceManager {
             startedState.value = true
         }
 
-        if (token.isNotBlank()) {
-            rpcToken = token
+        if (token.isNotBlank() && token != rpcToken) {
+            // A session with a different token than the live instance was built with: that
+            // instance must not be reused (its token is most likely revoked). It is closed and
+            // the next update or clear connects with the current token.
+            val stale = rpcInstance
+            rpcInstance = null
+            rpcToken = null
+            if (stale != null) {
+                Timber.tag(LOG_TAG).d("start: dropping RPC instance built with a previous token")
+                cleanupScope.launch {
+                    rpcMutex.withLock {
+                        runCatching { withTimeout(STOP_TIMEOUT_MS) { stale.closeRPC() } }
+                            .onFailure { Timber.tag(LOG_TAG).v(it, "stale instance close failed or timed out") }
+                    }
+                }
+            }
         }
         Timber.tag(LOG_TAG).d("started manager runtime; awaiting external sync trigger")
     }
@@ -238,8 +259,30 @@ object DiscordPresenceManager {
         context: Context,
         token: String? = null,
     ): Boolean {
+        val activeToken = DiscordOAuthRepository.getValidAccessToken(context) ?: token.orEmpty()
         val existingRpc = rpcInstance
-        if (existingRpc != null) {
+
+        if (existingRpc != null && activeToken.isBlank()) {
+            // Logged out. The instance's token is revoked, so it must never dial the gateway
+            // again — that is what produced a 4004 "Authentication failed" on every clear.
+            // One empty presence still goes over the socket if it is open, then it is closed;
+            // a presence whose session is gone is dropped by Discord on its own.
+            Timber.tag(LOG_TAG).d("clearPresenceLocked closing RPC instance after log-out")
+            if (DiscordSocialPresenceClient.isStarted) {
+                DiscordSocialPresenceClient.clearPresence().onFailure {
+                    Timber.tag(LOG_TAG).v(it, "final clear over the open socket failed")
+                }
+            }
+            runCatching { existingRpc.closeRPC() }
+                .onFailure { Timber.tag(LOG_TAG).v(it, "failed to close RPC instance after log-out") }
+            rpcInstance = null
+            rpcToken = null
+            setLastRpcTimestamps(null, null)
+            consecutiveFailures = 0
+            return true
+        }
+
+        if (existingRpc != null && rpcToken == activeToken) {
             Timber.tag(LOG_TAG).d("clearPresenceLocked using existing RPC instance")
             existingRpc.stopActivity()
             setLastRpcTimestamps(null, null)
@@ -247,12 +290,13 @@ object DiscordPresenceManager {
             return true
         }
 
-        val activeToken = DiscordOAuthRepository.getValidAccessToken(context) ?: token.orEmpty()
         if (activeToken.isBlank()) {
             Timber.tag(LOG_TAG).w("clearPresenceLocked skipped because token is missing")
             return false
         }
 
+        // No instance, or one built with a token that is no longer current (re-login):
+        // getOrCreateRpc closes the stale one and connects with the current token.
         Timber.tag(LOG_TAG).d("clearPresenceLocked creating RPC instance for clear")
         val rpc = getOrCreateRpc(context, activeToken)
         rpc.stopActivity()
@@ -280,7 +324,9 @@ object DiscordPresenceManager {
                 rpcMutex.withLock {
                     runCatching {
                         withTimeout(STOP_TIMEOUT_MS) {
-                            if (clearActivity) {
+                            // Clearing is only worth a send over a socket that is still open;
+                            // reconnecting for it would fail outright once the token is revoked.
+                            if (clearActivity && DiscordSocialPresenceClient.isStarted) {
                                 rpcToClose.stopActivity()
                             }
                             rpcToClose.closeRPC()
