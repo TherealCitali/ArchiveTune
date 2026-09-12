@@ -140,11 +140,14 @@ fun LyricsMenu(
     onLyricsSyncOffsetChange: (Int) -> Unit,
     showPlayerControlsState: State<Boolean>,
     onShowPlayerControlsChange: (Boolean) -> Unit,
+    autoHidePlayerControlsState: State<Boolean>,
+    onAutoHidePlayerControlsChange: (Boolean) -> Unit,
     onDismiss: () -> Unit,
     viewModel: LyricsMenuViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val showPlayerControls by showPlayerControlsState
+    val autoHidePlayerControls by autoHidePlayerControlsState
 
     var showEditDialog by rememberSaveable {
         mutableStateOf(false)
@@ -776,17 +779,47 @@ fun LyricsMenu(
                 )
                 NewMenuItem(
                     headlineContent = {
-                        Text(stringResource(R.string.show_lyrics_player_controls))
+                        Text(stringResource(R.string.lyrics_auto_hide_player_controls))
                     },
                     trailingContent = {
                         Switch(
-                            checked = showPlayerControls,
+                            checked = autoHidePlayerControls,
+                            onCheckedChange = onAutoHidePlayerControlsChange,
+                        )
+                    },
+                    onClick = {
+                        onAutoHidePlayerControlsChange(!autoHidePlayerControls)
+                    },
+                    modifier =
+                        Modifier.padding(
+                            start = 8.dp,
+                            end = 8.dp,
+                        ),
+                )
+                // Auto-hide implies the controls are shown (and then faded), so the plain
+                // toggle is forced on and locked while it is active; the user's own choice
+                // is kept and comes back as soon as auto-hide is switched off again.
+                NewMenuItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(R.string.show_lyrics_player_controls),
+                            color =
+                                MaterialTheme.colorScheme.onSurface.copy(
+                                    alpha = if (autoHidePlayerControls) 0.38f else 1f,
+                                ),
+                        )
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = showPlayerControls || autoHidePlayerControls,
                             onCheckedChange = onShowPlayerControlsChange,
+                            enabled = !autoHidePlayerControls,
                         )
                     },
                     onClick = {
                         onShowPlayerControlsChange(!showPlayerControls)
                     },
+                    enabled = !autoHidePlayerControls,
                     modifier =
                         Modifier.padding(
                             start = 8.dp,
