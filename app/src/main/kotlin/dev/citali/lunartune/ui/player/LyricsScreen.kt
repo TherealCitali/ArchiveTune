@@ -12,7 +12,14 @@ package dev.citali.lunartune.ui.player
 import android.content.res.Configuration
 import android.view.HapticFeedbackConstants
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -51,6 +58,7 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -108,6 +116,7 @@ import dev.citali.lunartune.R
 import dev.citali.lunartune.constants.BlurRadiusKey
 import dev.citali.lunartune.constants.DisableBlurKey
 import dev.citali.lunartune.constants.EnableHapticFeedbackKey
+import dev.citali.lunartune.constants.LyricsAutoHidePlayerControlsKey
 import dev.citali.lunartune.constants.LyricsBackgroundStyle
 import dev.citali.lunartune.constants.LyricsBackgroundStyleKey
 import dev.citali.lunartune.constants.UseGpuBlurKey
@@ -140,6 +149,37 @@ private val AppleMusicFallbackGradient =
         Color(0xFF141414),
         Color(0xFF050505),
     )
+
+/** How long the player controls stay on screen after the last touch before they fade. */
+private const val LYRICS_CONTROLS_AUTO_HIDE_DELAY_MS = 5_000L
+
+/**
+ * Timing for the controls leaving and returning. The opacity always runs ahead of the height:
+ * on the way out the controls are gone before the lyrics have taken much of their space, and on
+ * the way back the space opens first and the controls then fade into it — so neither direction
+ * ever shows a clipped edge, only a soft fade while the lyrics settle. Fresh specs per call
+ * because the animation apis keep the type open (Float for opacity, IntSize for height).
+ */
+private val ControlsFadeEasing = CubicBezierEasing(0.4f, 0f, 0.2f, 1f)
+private val ControlsLayoutEasing = CubicBezierEasing(0.2f, 0f, 0f, 1f)
+private const val CONTROLS_FADE_OUT_MS = 300
+private const val CONTROLS_COLLAPSE_MS = 520
+private const val CONTROLS_FADE_IN_MS = 450
+private const val CONTROLS_FADE_IN_DELAY_MS = 60
+private const val CONTROLS_EXPAND_MS = 320
+
+private fun controlsFadeOutSpec() = tween<Float>(durationMillis = CONTROLS_FADE_OUT_MS, easing = ControlsFadeEasing)
+
+private fun controlsFadeInSpec() =
+    tween<Float>(
+        durationMillis = CONTROLS_FADE_IN_MS,
+        delayMillis = CONTROLS_FADE_IN_DELAY_MS,
+        easing = ControlsFadeEasing,
+    )
+
+private fun <T> controlsCollapseSpec() = tween<T>(durationMillis = CONTROLS_COLLAPSE_MS, easing = ControlsLayoutEasing)
+
+private fun <T> controlsExpandSpec() = tween<T>(durationMillis = CONTROLS_EXPAND_MS, easing = ControlsLayoutEasing)
 
 @Suppress("UNUSED_PARAMETER")
 @Composable
@@ -198,6 +238,32 @@ fun LyricsScreen(
                 showPlayerControlsState.value = showControls
             }
         }
+    val autoHidePlayerControlsState =
+        rememberPreference(LyricsAutoHidePlayerControlsKey, false)
+    val autoHidePlayerControls by autoHidePlayerControlsState
+    val onAutoHidePlayerControlsChange =
+        remember(autoHidePlayerControlsState) {
+            { autoHide: Boolean ->
+                autoHidePlayerControlsState.value = autoHide
+            }
+        }
+    // Auto-hide implies the controls exist (and then fade), so it overrides a switched-off
+    // "Show player controls" without touching the stored preference.
+    val controlsEnabled = showPlayerControls || autoHidePlayerControls
+
+    // Apple Music style auto-hide: the controls stay for a few seconds after the last
+    // interaction and then fade away; any tap on the page brings them back and restarts
+    // the timer. `controlsRevealed` is the visible/hidden state, `controlsInteraction`
+    // only exists to restart the countdown while the controls are already showing.
+    var controlsRevealed by remember { mutableStateOf(true) }
+    var controlsInteraction by remember { mutableIntStateOf(0) }
+    val revealControls: () -> Unit =
+        remember {
+            {
+                controlsInteraction++
+                controlsRevealed = true
+            }
+        }
 
     val hapticClick =
         remember(enableHapticFeedback, view) {
@@ -250,6 +316,20 @@ fun LyricsScreen(
     val durationState = remember(mediaMetadata.id) { mutableLongStateOf(C.TIME_UNSET) }
     var sliderPosition by remember(mediaMetadata.id) { mutableStateOf<Long?>(null) }
     var gradientColors by remember(mediaMetadata.thumbnailUrl) { mutableStateOf(AppleMusicFallbackGradient) }
+
+    val isScrubbing = sliderPosition != null
+    LaunchedEffect(autoHidePlayerControls, controlsRevealed, controlsInteraction, isScrubbing) {
+        if (!autoHidePlayerControls) {
+            controlsRevealed = true
+            return@LaunchedEffect
+        }
+        // A finger on the progress slider keeps the controls up; the countdown starts over
+        // once it lifts.
+        if (!controlsRevealed || isScrubbing) return@LaunchedEffect
+        delay(LYRICS_CONTROLS_AUTO_HIDE_DELAY_MS)
+        controlsRevealed = false
+    }
+    val controlsVisible = controlsEnabled && controlsRevealed
 
     val gradientColorsCache =
         remember {
@@ -336,6 +416,8 @@ fun LyricsScreen(
                 onLyricsSyncOffsetChange = onLyricsSyncOffsetChange,
                 showPlayerControlsState = showPlayerControlsState,
                 onShowPlayerControlsChange = onShowPlayerControlsChange,
+                autoHidePlayerControlsState = autoHidePlayerControlsState,
+                onAutoHidePlayerControlsChange = onAutoHidePlayerControlsChange,
                 onDismiss = menuState::dismiss,
             )
         }
@@ -349,7 +431,8 @@ fun LyricsScreen(
     Box(
         modifier =
             modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .observeTaps(onTap = revealControls),
     ) {
         LyricsScreenBackground(
             style = lyricsBackground,
@@ -389,7 +472,7 @@ fun LyricsScreen(
                         .padding(horizontal = 24.dp),
             )
 
-            if (orientation == Configuration.ORIENTATION_LANDSCAPE && showPlayerControls) {
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE && controlsEnabled) {
                 Row(
                     modifier =
                         Modifier
@@ -410,10 +493,21 @@ fun LyricsScreen(
                                 .padding(end = 32.dp),
                     )
 
+                    // Landscape keeps the two-pane layout and only fades the controls in place,
+                    // so the lyrics column does not reflow sideways every time they come and go.
+                    // Faded-out controls stop taking touches; a tap there just brings them back.
+                    val controlsAlpha by animateFloatAsState(
+                        targetValue = if (controlsVisible) 1f else 0f,
+                        animationSpec = if (controlsVisible) controlsFadeInSpec() else controlsFadeOutSpec(),
+                        label = "lyricsPlayerControlsAlpha",
+                    )
                     Column(
-                Modifier
+                        modifier =
+                            Modifier
                                 .weight(0.85f)
-                                .widthIn(max = 420.dp),
+                                .widthIn(max = 420.dp)
+                                .graphicsLayer { alpha = controlsAlpha }
+                                .blockPointerInput(enabled = !controlsVisible),
                         verticalArrangement = Arrangement.Center,
                     ) {
                         AppleMusicControls(
@@ -430,18 +524,25 @@ fun LyricsScreen(
                                     positionState.longValue = it
                                 }
                                 sliderPosition = null
+                                revealControls()
                             },
-                            onVolumeChange = onVolumeChange,
+                            onVolumeChange = {
+                                revealControls()
+                                onVolumeChange(it)
+                            },
                             onPreviousClick = {
                                 hapticClick()
+                                revealControls()
                                 playerConnection.seekToPrevious()
                             },
                             onPlayPauseClick = {
                                 hapticClick()
+                                revealControls()
                                 player.togglePlayPause()
                             },
                             onNextClick = {
                                 hapticClick()
+                                revealControls()
                                 playerConnection.seekToNext()
                             },
                             foregroundColor = foregroundColor,
@@ -461,7 +562,19 @@ fun LyricsScreen(
                             .fillMaxWidth(),
                 )
 
-                if (showPlayerControls) {
+                // The controls fade in place while the lyrics pane above grows into the space
+                // they leave — the same soft hand-off Apple Music does — and come back the
+                // same way. The lyrics list re-anchors its focused line as the pane resizes.
+                AnimatedVisibility(
+                    visible = controlsVisible,
+                    enter =
+                        fadeIn(controlsFadeInSpec()) +
+                            expandVertically(controlsExpandSpec(), expandFrom = Alignment.Bottom),
+                    exit =
+                        fadeOut(controlsFadeOutSpec()) +
+                            shrinkVertically(controlsCollapseSpec(), shrinkTowards = Alignment.Bottom),
+                    label = "lyricsPlayerControls",
+                ) {
                     AppleMusicControls(
                         positionProvider = { positionState.longValue },
                         durationProvider = { durationState.longValue },
@@ -476,18 +589,25 @@ fun LyricsScreen(
                                 positionState.longValue = it
                             }
                             sliderPosition = null
+                            revealControls()
                         },
-                        onVolumeChange = onVolumeChange,
+                        onVolumeChange = {
+                            revealControls()
+                            onVolumeChange(it)
+                        },
                         onPreviousClick = {
                             hapticClick()
+                            revealControls()
                             playerConnection.seekToPrevious()
                         },
                         onPlayPauseClick = {
                             hapticClick()
+                            revealControls()
                             player.togglePlayPause()
                         },
                         onNextClick = {
                             hapticClick()
+                            revealControls()
                             playerConnection.seekToNext()
                         },
                         foregroundColor = foregroundColor,

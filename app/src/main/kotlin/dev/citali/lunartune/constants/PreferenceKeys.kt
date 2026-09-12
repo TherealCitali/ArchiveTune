@@ -757,6 +757,7 @@ val LyricsTextSizeKey = floatPreferencesKey("lyricsTextSize")
 val LyricsLineSpacingKey = floatPreferencesKey("lyricsLineSpacing")
 val LyricsLineBlurKey = booleanPreferencesKey("lyricsLineBlur")
 val ShowLyricsPlayerControlsKey = booleanPreferencesKey("showLyricsPlayerControls")
+val LyricsAutoHidePlayerControlsKey = booleanPreferencesKey("lyricsAutoHidePlayerControls")
 
 val TopSize = stringPreferencesKey("topSize")
 

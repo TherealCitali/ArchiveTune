@@ -50,6 +50,7 @@ import dev.citali.lunartune.constants.HideVideoKey
 import dev.citali.lunartune.constants.EnableHapticFeedbackKey
 import dev.citali.lunartune.constants.ListenBrainzEnabledKey
 import dev.citali.lunartune.constants.LowDataModeKey
+import dev.citali.lunartune.constants.LyricsAutoHidePlayerControlsKey
 import dev.citali.lunartune.constants.LyricsClickKey
 import dev.citali.lunartune.constants.LyricsScrollKey
 import dev.citali.lunartune.constants.NetworkMeteredKey
@@ -258,6 +259,7 @@ fun buildSettingsGroups(
                 SettingsChild("Lyrics click to seek", "lyrics_click", listOf("click lyrics", "tap lyrics", "seek lyrics")) { SearchResultSwitch(LyricsClickKey, false) },
                 SettingsChild("Lyrics auto-scroll", "lyrics_scroll", listOf("scroll", "auto scroll", "lyrics scroll")) { SearchResultSwitch(LyricsScrollKey, true) },
                 SettingsChild("Show lyrics player controls", "show_lyrics_player_controls", listOf("player controls", "lyrics controls")) { SearchResultSwitch(ShowLyricsPlayerControlsKey, true) },
+                SettingsChild("Hide lyrics player controls after 5 seconds", "lyrics_auto_hide_player_controls", listOf("auto hide", "hide controls", "fade controls", "lyrics controls")) { SearchResultSwitch(LyricsAutoHidePlayerControlsKey, false) },
                 SettingsChild("Preload queue lyrics", "preload_queue_lyrics", listOf("preload", "preload lyrics", "queue lyrics", "preload count", "queue lyrics count", "preload amount", "preload size")),
                 SettingsChild("Lyrics background style", "lyrics_background_style", listOf("lyrics background", "lyrics bg")),
                 SettingsChild("BetterLyrics", "betterlyrics", listOf("betterlyrics", "better lyrics", "better lyrics provider")),
