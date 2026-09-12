@@ -451,6 +451,12 @@ class MusicService :
     private var pausedPresenceGate = PausedPresenceGate.FollowPreference
 
     @Volatile
+    /**
+     * Set on the way out (task removed, destroy) so the last Discord sync clears the presence
+     * instead of publishing one. Android does not always honour the stop — a client re-binding
+     * or the media session keeps the same service instance alive — so this is reset again the
+     * moment playback comes back, otherwise every later sync would stay Hidden(ServiceStopping).
+     */
     private var discordServiceStopping = false
 
     @Volatile
@@ -2189,6 +2195,24 @@ class MusicService :
 
             currentMediaMetadata.value = player.currentMetadata.takeIf { player.mediaItemCount > 0 }
             updateNotification()
+        }
+    }
+
+    /**
+     * Lifts the "service is stopping" Discord gate when the service turns out to still be in
+     * use. Called from the paths that prove it: a new start command, a client binding, and a
+     * new media item / play request. Cheap no-op while the flag is already clear.
+     */
+    private fun clearDiscordServiceStoppingIfRevived(reason: String) {
+        if (!discordServiceStopping) return
+        discordServiceStopping = false
+        Timber.tag(DISCORD_SYNC_TAG).i("service revived (%s); lifting stopping gate", reason)
+        // With nothing loaded there is nothing to publish yet; the first playback event syncs.
+        if (::player.isInitialized && player.currentMediaItem != null) {
+            requestDiscordSync(
+                reason = "service_revived:$reason",
+                force = true,
+            )
         }
     }
 
@@ -7075,6 +7099,11 @@ class MusicService :
             if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION)) {
                 currentMediaMetadata.value = player.currentMetadata
             }
+            // A stopping service does not start playing something new: if it does, the stop
+            // never happened and the presence gate must come off before this sync runs.
+            if (player.playWhenReady && player.currentMediaItem != null) {
+                clearDiscordServiceStoppingIfRevived("playback_resumed")
+            }
             requestDiscordSync(
                 reason = "is_playing_or_media_item_transition",
                 force = true,
@@ -8645,6 +8674,7 @@ class MusicService :
     override fun onBind(intent: Intent?): android.os.IBinder? {
         hasBoundClients = true
         cancelIdleStop()
+        clearDiscordServiceStoppingIfRevived("bind")
         val result = super.onBind(intent) ?: binder
         if (player.mediaItemCount > 0 && player.currentMediaItem != null) {
             currentMediaMetadata.value = player.currentMetadata
@@ -8665,6 +8695,7 @@ class MusicService :
     override fun onRebind(intent: Intent?) {
         hasBoundClients = true
         cancelIdleStop()
+        clearDiscordServiceStoppingIfRevived("rebind")
         super.onRebind(intent)
     }
 
@@ -8761,6 +8792,7 @@ class MusicService :
         }
 
         ensureStartedAsForeground()
+        clearDiscordServiceStoppingIfRevived("start_command")
         when (intent?.action) {
             "dev.citali.lunartune.WIDGET_PLAY_PAUSE" -> {
                 if (player.isPlaying) player.pause() else player.play()
