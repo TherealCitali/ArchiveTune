@@ -538,10 +538,6 @@ object YTPlayerUtils {
                 WEB_REMIX
             }
 
-            PlayerStreamClient.ARCHIVETUNE_EXTRACTOR -> {
-                if (authState.hasPlaybackLoginContext) ANDROID_MUSIC else WEB_REMIX
-            }
-
             PlayerStreamClient.HI_RES_LOSSLESS -> {
                 WEB_REMIX
             }

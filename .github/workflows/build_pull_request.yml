@@ -56,7 +56,6 @@ jobs:
           LASTFM_SECRET: ${{ secrets.LASTFM_SECRET }}
           API_BEARER_TOKEN: ${{ secrets.API_BEARER_TOKEN }}
           CANVAS_BEARER_TOKEN: ${{ secrets.CANVAS_BEARER_TOKEN }}
-          EXTRACTOR_BEARER: ${{ secrets.EXTRACTOR_BEARER }}
 
       - name: Upload APK
         uses: actions/upload-artifact@v7

@@ -65,7 +65,6 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.DefaultDataSource
-import androidx.media3.datasource.HttpDataSource
 import androidx.media3.datasource.ResolvingDataSource
 import androidx.media3.datasource.TransferListener
 import androidx.media3.datasource.cache.Cache
@@ -102,10 +101,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -226,9 +223,6 @@ import dev.citali.lunartune.models.MediaMetadata
 import dev.citali.lunartune.models.PersistPlayerState
 import dev.citali.lunartune.models.PersistQueue
 import dev.citali.lunartune.models.toMediaMetadata
-import moe.rukamori.archivetune.moriextractor.ArchiveTuneExtractorException
-import moe.rukamori.archivetune.moriextractor.InMemoryBearerTokenRepository
-import moe.rukamori.archivetune.moriextractor.StreamingExtractionManager
 import dev.citali.lunartune.playback.queues.EmptyQueue
 import dev.citali.lunartune.playback.queues.ListQueue
 import dev.citali.lunartune.playback.queues.Queue
@@ -267,7 +261,6 @@ import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.io.Serializable
 import java.net.ConnectException
-import java.net.Proxy
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.time.LocalDateTime
@@ -368,22 +361,8 @@ class MusicService :
     )
     private val playbackUrlCache = ConcurrentHashMap<String, AuthScopedCacheValue>()
     private var nextMediaItemPrefetchJob: Job? = null
-    private val extractorPlaybackUrlCache = ConcurrentHashMap<String, AuthScopedCacheValue>()
     private val remotePlaybackTrackingUrlCache = ConcurrentHashMap<String, String>()
     private val contentLengthCache = ConcurrentHashMap<String, Long>()
-    private val extractorTokenRepository by lazy {
-        InMemoryBearerTokenRepository(dev.citali.lunartune.BuildConfig.EXTRACTOR_BEARER)
-    }
-    private val _extractorAuthenticationEvents = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    val extractorAuthenticationEvents = _extractorAuthenticationEvents.asSharedFlow()
-    private val streamingExtractionManagerDelegate =
-        lazy {
-            StreamingExtractionManager(
-                tokenRepository = extractorTokenRepository,
-                authenticationCallback = { notifyExtractorAuthenticationRequired() },
-            )
-        }
-    private val streamingExtractionManager by streamingExtractionManagerDelegate
     private val mediaOkHttpClient: OkHttpClient by lazy {
         OkHttpClient
             .Builder()
@@ -414,17 +393,6 @@ class MusicService :
                 )
             }.build()
     }
-    private val extractorMediaOkHttpClient: OkHttpClient by lazy {
-        OkHttpClient
-            .Builder()
-            .proxy(Proxy.NO_PROXY)
-            .followRedirects(true)
-            .followSslRedirects(true)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .build()
-    }
-
     private var currentQueue: Queue = EmptyQueue
     var queueTitle: String? = null
     private var blockedArtistIds: Set<String> = emptySet()
@@ -3678,9 +3646,7 @@ class MusicService :
         val failedUrl = responseException.dataSpec.uri.toString()
         val requestProfile = StreamClientUtils.resolveRequestProfile(failedUrl)
         val authFingerprint = YouTube.currentPlaybackAuthState().fingerprint
-        val extractorAuthFingerprint = LunarTuneExtractorCacheFingerprintPrefix + authFingerprint
         val cachedFailedUrl = playbackUrlCache[mediaId]?.takeIf { it.url == failedUrl }
-        val cachedExtractorFailedUrl = extractorPlaybackUrlCache[mediaId]?.takeIf { it.url == failedUrl }
         val failedExpiredUrl =
             YTPlayerUtils.isExpiredOrNearExpiredStreamUrl(failedUrl) ||
                 (
@@ -3690,20 +3656,11 @@ class MusicService :
                             minimumRemainingMs = YTPlayerUtils.STREAM_URL_EXPIRY_SAFETY_MS,
                         )
                     } == true
-                ) ||
-                (
-                    cachedExtractorFailedUrl?.let {
-                        !it.isValidFor(
-                            authFingerprint = extractorAuthFingerprint,
-                            minimumRemainingMs = 0L,
-                        )
-                    } == true
                 )
 
         playbackUrlCache.remove(mediaId)
-        extractorPlaybackUrlCache.remove(mediaId)
         YTPlayerUtils.invalidateCachedStreamUrls(mediaId)
-        if (!failedExpiredUrl && cachedExtractorFailedUrl == null && requestProfile.clientKey.isNotEmpty()) {
+        if (!failedExpiredUrl && requestProfile.clientKey.isNotEmpty()) {
             YTPlayerUtils.markStreamClientFailed(mediaId, requestProfile.clientKey, responseException.responseCode)
         }
 
@@ -3729,7 +3686,6 @@ class MusicService :
         val recoverySnapshot = capturePlaybackRecoverySnapshot()
 
         playbackUrlCache.remove(mediaId)
-        extractorPlaybackUrlCache.remove(mediaId)
         YTPlayerUtils.invalidateCachedStreamUrls(mediaId)
 
         if (!playbackStreamRecoveryTracker.registerRetryAttempt(mediaId)) {
@@ -3786,52 +3742,6 @@ class MusicService :
         player.prepare()
         player.playWhenReady = snapshot.playWhenReady
         return true
-    }
-
-    private fun handleExtractorStreamHttpFailure(
-        mediaId: String,
-        isFullyDownloadedMedia: Boolean,
-        responseException: HttpDataSource.InvalidResponseCodeException,
-    ): Boolean {
-        if (isFullyDownloadedMedia || !isExtractorPlaybackUri(responseException.dataSpec.uri)) return false
-
-        return when (responseException.responseCode) {
-            401 -> {
-                Timber.tag(TAG).w("Extractor bearer token was rejected during playback")
-                notifyExtractorAuthenticationRequired()
-                stopOnError()
-                true
-            }
-
-            403 -> {
-                Timber.tag(TAG).w("Extractor rejected a tampered or invalid signed playback URL")
-                stopOnError()
-                true
-            }
-
-            410 -> {
-                val retryStarted = retryPlaybackAfterStreamFailure(
-                    mediaId = mediaId,
-                    isFullyDownloadedMedia = false,
-                    responseException = responseException,
-                )
-                if (!retryStarted) stopOnError()
-                true
-            }
-
-            else -> false
-        }
-    }
-
-    private fun notifyExtractorAuthenticationRequired() {
-        extractorTokenRepository.clearToken()
-        extractorPlaybackUrlCache.clear()
-        _extractorAuthenticationEvents.tryEmit(Unit)
-    }
-
-    fun updateExtractorBearerToken(token: String) {
-        extractorTokenRepository.updateToken(token)
-        extractorPlaybackUrlCache.clear()
     }
 
     private fun updateNotification() {
@@ -6782,7 +6692,6 @@ class MusicService :
     private fun prefetchNextMediaItemStream() {
         nextMediaItemPrefetchJob?.cancel()
         if (player.mediaItemCount == 0 || player.currentTimeline.isEmpty) return
-        if (preferredStreamClient == PlayerStreamClient.ARCHIVETUNE_EXTRACTOR) return
         val nextIndex = player.nextMediaItemIndex
         if (nextIndex == C.INDEX_UNSET || nextIndex < 0 || nextIndex >= player.mediaItemCount) return
         val nextItem = player.getMediaItemAt(nextIndex)
@@ -7300,9 +7209,6 @@ class MusicService :
 
         val streamHttpFailure = findStreamHttpFailure(error)
         if (streamHttpFailure != null) {
-            if (handleExtractorStreamHttpFailure(currentMediaId, isFullyDownloadedMedia, streamHttpFailure)) {
-                return
-            }
             if (streamHttpFailure.responseCode in RETRYABLE_STREAM_RESPONSE_CODES &&
                 retryPlaybackAfterStreamFailure(currentMediaId, isFullyDownloadedMedia, streamHttpFailure)
             ) {
@@ -7321,7 +7227,6 @@ class MusicService :
             )
 
             playbackUrlCache.remove(currentMediaId)
-            extractorPlaybackUrlCache.remove(currentMediaId)
             contentLengthCache.remove(currentMediaId)
             YTPlayerUtils.invalidateCachedStreamUrls(currentMediaId)
 
@@ -7361,7 +7266,6 @@ class MusicService :
         if (!isLocalMedia && !isFullyDownloadedMedia && YTPlayerUtils.isBotDetectionException(error)) {
             val recoverySnapshot = capturePlaybackRecoverySnapshot()
             playbackUrlCache.remove(currentMediaId)
-            extractorPlaybackUrlCache.remove(currentMediaId)
             YTPlayerUtils.invalidateCachedStreamUrls(currentMediaId)
             YTPlayerUtils.clearPlaybackAuthCaches()
             if (playbackStreamRecoveryTracker.registerRetryAttempt(currentMediaId)) {
@@ -7373,7 +7277,6 @@ class MusicService :
         if (!isLocalMedia && !isFullyDownloadedMedia && YTPlayerUtils.isBadStreamPlayerResponseException(error)) {
             val recoverySnapshot = capturePlaybackRecoverySnapshot()
             playbackUrlCache.remove(currentMediaId)
-            extractorPlaybackUrlCache.remove(currentMediaId)
             YTPlayerUtils.invalidateCachedStreamUrls(currentMediaId)
             if (playbackStreamRecoveryTracker.registerRetryAttempt(currentMediaId)) {
                 scope.launch(Dispatchers.IO) {
@@ -7403,11 +7306,8 @@ class MusicService :
 
         if (!isLocalMedia && !isFullyDownloadedMedia && isRetryableRemoteParserFailure(error)) {
             val recoverySnapshot = capturePlaybackRecoverySnapshot()
-            val failedUrl =
-                playbackUrlCache[currentMediaId]?.url
-                    ?: extractorPlaybackUrlCache[currentMediaId]?.url
+            val failedUrl = playbackUrlCache[currentMediaId]?.url
             playbackUrlCache.remove(currentMediaId)
-            extractorPlaybackUrlCache.remove(currentMediaId)
             contentLengthCache.remove(currentMediaId)
             YTPlayerUtils.invalidateCachedStreamUrls(currentMediaId)
             failedUrl
@@ -7524,21 +7424,8 @@ class MusicService :
                 this,
                 OkHttpDataSource.Factory(mediaOkHttpClient),
             )
-        val extractorMediaFactory =
-            DefaultDataSource.Factory(
-                this,
-                OkHttpDataSource.Factory(extractorMediaOkHttpClient),
-            )
-        val routingFactory =
-            DataSource.Factory {
-                ResolvedUrlRoutingDataSource(
-                    defaultFactory = youtubeMediaFactory,
-                    extractorFactory = extractorMediaFactory,
-                    shouldUseExtractorFactory = ::isExtractorPlaybackUri,
-                )
-            }
 
-        return ResolvingDataSource.Factory(routingFactory) { dataSpec ->
+        return ResolvingDataSource.Factory(youtubeMediaFactory) { dataSpec ->
             resolvePlaybackDataSpec(
                 dataSpec = dataSpec,
                 allowCacheShortCircuit = false,
@@ -7635,13 +7522,6 @@ class MusicService :
         }
 
         val lowDataModeActive = isLowDataModeActive()
-        if (preferredStreamClient == PlayerStreamClient.ARCHIVETUNE_EXTRACTOR) {
-            return resolveLunarTuneExtractorDataSpec(
-                dataSpec = dataSpec,
-                mediaId = mediaId,
-            )
-        }
-
         val authFingerprint = YouTube.currentPlaybackAuthState().fingerprint
         playbackUrlCache[mediaId]
             ?.takeUnless { lowDataModeActive }
@@ -7849,110 +7729,6 @@ class MusicService :
         }
     }
 
-    private fun resolveLunarTuneExtractorDataSpec(
-        dataSpec: DataSpec,
-        mediaId: String,
-    ): DataSpec {
-        val authState = YouTube.currentPlaybackAuthState()
-        val authFingerprint = LunarTuneExtractorCacheFingerprintPrefix + authState.fingerprint
-        extractorPlaybackUrlCache[mediaId]
-            ?.takeIf {
-                it.isValidFor(
-                    authFingerprint = authFingerprint,
-                    minimumRemainingMs = LunarTuneExtractorExpirySafetyMs,
-                )
-            }?.let { cached ->
-                scope.launch(Dispatchers.IO) { recoverSong(mediaId) }
-                return dataSpec.withUri(cached.url.toUri())
-            }
-
-        val extraction =
-            runCatching {
-                runBlocking(Dispatchers.IO) {
-                    streamingExtractionManager.extractAudio(
-                        videoUrl = mediaId.toYouTubeWatchUrl(),
-                        userPoToken = authState.resolveExtractorPoToken(),
-                        cookies = authState.resolveExtractorCookies(),
-                        userGvsToken = authState.resolveExtractorGvsToken(),
-                    )
-                }
-            }.getOrElse { throwable ->
-                when {
-                    throwable.isNetworkConnectionFailure() -> {
-                        throw PlaybackException(
-                            getString(R.string.error_no_internet),
-                            throwable,
-                            PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED,
-                        )
-                    }
-
-                    throwable.isRequestTimeout() -> {
-                        throw PlaybackException(
-                            getString(R.string.error_timeout),
-                            throwable,
-                            PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT,
-                        )
-                    }
-
-                    throwable is ArchiveTuneExtractorException -> {
-                        throw PlaybackException(
-                            getString(R.string.error_no_stream),
-                            throwable,
-                            PlaybackException.ERROR_CODE_REMOTE_ERROR,
-                        )
-                    }
-
-                    throwable is PlaybackException -> {
-                        throw throwable
-                    }
-
-                    else -> {
-                        throw PlaybackException(
-                            getString(R.string.error_unknown),
-                            throwable,
-                            PlaybackException.ERROR_CODE_REMOTE_ERROR,
-                        )
-                    }
-                }
-            }
-
-        val streamUrl = extraction.streamUrl
-        extractorPlaybackUrlCache[mediaId] =
-            AuthScopedCacheValue(
-                url = streamUrl,
-                expiresAtMs = extraction.streamExpiresAt.coerceAtMost(Long.MAX_VALUE / 1_000L) * 1_000L,
-                authFingerprint = authFingerprint,
-            )
-        scope.launch(Dispatchers.IO) { recoverSong(mediaId) }
-        return dataSpec.withUri(streamUrl.toUri())
-    }
-
-    private fun PlaybackAuthState.resolveExtractorPoToken(): String? = poTokenPlayer.normalizeExtractorRequestValue()
-
-    private fun PlaybackAuthState.resolveExtractorGvsToken(): String? =
-        resolveGvsPoToken().normalizeExtractorRequestValue()
-            ?: poTokenGvs.normalizeExtractorRequestValue()
-            ?: poToken.normalizeExtractorRequestValue()
-
-    private fun PlaybackAuthState.resolveExtractorCookies(): String? = cookie.normalizeExtractorRequestValue()
-
-    private fun String?.normalizeExtractorRequestValue(): String? {
-        val trimmed = this?.trim()
-        return trimmed?.takeIf { it.isNotEmpty() && !it.equals("null", ignoreCase = true) }
-    }
-
-    private fun String.toYouTubeWatchUrl(): String = "https://music.youtube.com/watch?v=$this"
-
-    private fun isExtractorPlaybackUri(uri: Uri): Boolean {
-        val url = uri.toString()
-        return extractorPlaybackUrlCache.values.any { it.url == url } ||
-            (
-                uri.scheme.equals("https", ignoreCase = true) &&
-                    uri.host.equals(LunarTuneExtractorHost, ignoreCase = true) &&
-                    uri.path?.startsWith("/api/play/") == true
-            )
-    }
-
     private fun resolveCachedDataSpec(
         dataSpec: DataSpec,
         mediaId: String,
@@ -8072,48 +7848,6 @@ class MusicService :
                     directFactory
                 } else {
                     cachedFactory
-                }
-            val selectedDataSource = selectedFactory.createDataSource()
-            transferListeners.forEach(selectedDataSource::addTransferListener)
-            delegate = selectedDataSource
-            return selectedDataSource.open(dataSpec)
-        }
-
-        override fun read(
-            buffer: ByteArray,
-            offset: Int,
-            length: Int,
-        ): Int = checkNotNull(delegate).read(buffer, offset, length)
-
-        override fun getUri(): Uri? = delegate?.uri
-
-        override fun getResponseHeaders(): Map<String, List<String>> = delegate?.responseHeaders ?: emptyMap()
-
-        override fun close() {
-            delegate?.close()
-            delegate = null
-        }
-    }
-
-    private class ResolvedUrlRoutingDataSource(
-        private val defaultFactory: DataSource.Factory,
-        private val extractorFactory: DataSource.Factory,
-        private val shouldUseExtractorFactory: (Uri) -> Boolean,
-    ) : DataSource {
-        private val transferListeners = mutableListOf<TransferListener>()
-        private var delegate: DataSource? = null
-
-        override fun addTransferListener(transferListener: TransferListener) {
-            transferListeners += transferListener
-            delegate?.addTransferListener(transferListener)
-        }
-
-        override fun open(dataSpec: DataSpec): Long {
-            val selectedFactory =
-                if (shouldUseExtractorFactory(dataSpec.uri)) {
-                    extractorFactory
-                } else {
-                    defaultFactory
                 }
             val selectedDataSource = selectedFactory.createDataSource()
             transferListeners.forEach(selectedDataSource::addTransferListener)
@@ -8665,9 +8399,6 @@ class MusicService :
             player.release()
         } catch (_: Exception) {
         }
-        if (streamingExtractionManagerDelegate.isInitialized()) {
-            runCatching { streamingExtractionManagerDelegate.value.close() }
-        }
         scopeJob.cancel()
     }
 
@@ -8934,8 +8665,5 @@ class MusicService :
         const val MIN_AUDIBLE_EFFECTIVE_VOLUME = 0.01f
         const val STUCK_MUTED_VOLUME_EPSILON = 0.001f
         const val AUDIBLE_PLAYBACK_VOLUME_CHECK_MS = 2_000L
-        private const val LunarTuneExtractorHost = "moriextractor.koyeb.app"
-        private const val LunarTuneExtractorCacheFingerprintPrefix = "lunartune_extractor:"
-        private const val LunarTuneExtractorExpirySafetyMs = 30_000L
     }
 }

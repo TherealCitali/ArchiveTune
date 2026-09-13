@@ -20,7 +20,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,8 +51,6 @@ import dev.citali.lunartune.constants.LowDataModeKey
 import dev.citali.lunartune.constants.PauseOnDeviceMuteKey
 import dev.citali.lunartune.constants.PermanentShuffleKey
 import dev.citali.lunartune.constants.PersistentQueueKey
-import dev.citali.lunartune.constants.PlayerStreamClient
-import dev.citali.lunartune.constants.PlayerStreamClientKey
 import dev.citali.lunartune.constants.SeekExtraSeconds
 import dev.citali.lunartune.constants.SkipSilenceKey
 import dev.citali.lunartune.constants.StopMusicOnTaskClearKey
@@ -79,11 +76,6 @@ fun PlayerSettings(navController: NavController) {
         rememberEnumPreference(
             AudioQualityKey,
             defaultValue = AudioQuality.AUTO,
-        )
-    val (playerStreamClient, onPlayerStreamClientChange) =
-        rememberEnumPreference(
-            PlayerStreamClientKey,
-            defaultValue = PlayerStreamClient.WEB_REMIX,
         )
     val (lowDataMode, onLowDataModeChange) =
         rememberPreference(
@@ -198,16 +190,9 @@ fun PlayerSettings(navController: NavController) {
             WakelockKey,
             defaultValue = false,
         )
-    val audioQualityEnabled = playerStreamClient != PlayerStreamClient.ARCHIVETUNE_EXTRACTOR
 
     var showArtistSeparatorsDialog by remember { mutableStateOf(false) }
     var showExternalDownloaderPackageDialog by remember { mutableStateOf(false) }
-
-    LaunchedEffect(playerStreamClient) {
-        if (playerStreamClient == PlayerStreamClient.ARCHIVETUNE_EXTRACTOR) {
-            onPlayerStreamClientChange(PlayerStreamClient.WEB_REMIX)
-        }
-    }
 
     if (showArtistSeparatorsDialog) {
         ArtistSeparatorsDialog(
@@ -269,7 +254,6 @@ fun PlayerSettings(navController: NavController) {
                         icon = { Icon(painterResource(R.drawable.graphic_eq), null) },
                         selectedValue = audioQuality,
                         onValueSelected = onAudioQualityChange,
-                        isEnabled = audioQualityEnabled,
                         valueText = {
                             when (it) {
                                 AudioQuality.HIGHEST -> stringResource(R.string.audio_quality_max)
