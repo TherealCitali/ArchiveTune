@@ -301,7 +301,6 @@ enum class PlayerStreamClient {
     WEB_REMIX,
     TVHTML5,
     WEB_CREATOR,
-    ARCHIVETUNE_EXTRACTOR,
     HI_RES_LOSSLESS,
     IOS,
     ANDROID_MUSIC,
