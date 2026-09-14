@@ -160,8 +160,7 @@ fun Queue(
 
     val currentWindowIndex by playerConnection.currentWindowIndex.collectAsState()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
-    val currentSong by playerConnection.currentSong.collectAsState(initial = null)
-    val currentSongLiked = currentSong?.song?.liked == true
+    val currentSongLiked by playerConnection.currentSongLiked.collectAsState()
 
     val currentFormat by playerConnection.currentFormat.collectAsState(initial = null)
     val queueTitle by playerConnection.queueTitle.collectAsState()
@@ -860,7 +859,8 @@ fun Queue(
                     backgroundColor = backgroundColor,
                     onBackgroundColor = onBackgroundColor,
                     onToggleLike = {
-                        playerConnection.service.toggleLike()
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        playerConnection.toggleLike()
                     },
                     onMenuClick = {
                         menuState.show {

@@ -120,6 +120,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
@@ -462,7 +464,7 @@ fun BottomSheetPlayer(
     val playbackState by playerConnection.playbackState.collectAsState()
     val isPlaying by playerConnection.isPlaying.collectAsState()
     val currentSong by playerConnection.currentSong.collectAsState(initial = null)
-    val currentSongLiked = currentSong?.song?.liked == true
+    val currentSongLiked by playerConnection.currentSongLiked.collectAsState()
     val queueTitle by playerConnection.queueTitle.collectAsState()
     val currentFormat by playerConnection.currentFormat.collectAsState(initial = null)
     val queueWindows by playerConnection.queueWindows.collectAsState()
@@ -2967,9 +2969,10 @@ private fun LittlePlayerContent(
 
                 Spacer(Modifier.weight(1f))
 
+                val littleHaptic = LocalHapticFeedback.current
                 Icon(
                     painter = painterResource(if (liked) R.drawable.favorite else R.drawable.favorite_border),
-                    contentDescription = null,
+                    contentDescription = stringResource(if (liked) R.string.action_remove_like else R.string.action_like),
                     tint =
                         if (liked) {
                             MaterialTheme.colorScheme.error.copy(alpha = 0.9f)
@@ -2982,7 +2985,10 @@ private fun LittlePlayerContent(
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,
-                                onClick = onToggleLike,
+                                onClick = {
+                                    littleHaptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onToggleLike()
+                                },
                             ),
                 )
 
