@@ -22,15 +22,21 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
@@ -63,7 +69,7 @@ class PlayerConnection(
     context: Context,
     binder: MusicBinder,
     val database: MusicDatabase,
-    scope: CoroutineScope,
+    private val scope: CoroutineScope,
 ) : Player.Listener {
     val service = binder.service
     val player = service.player
@@ -78,6 +84,41 @@ class PlayerConnection(
         mediaMetadata.flatMapLatest {
             database.song(it?.id)
         }
+
+    /**
+     * Like state the player UI should render for the current item.
+     *
+     * The database is the source of truth, but the round trip through
+     * [MusicService.toggleLike] (mutex + transaction + Room invalidation) takes a
+     * few frames. Without an optimistic value the heart lags behind the tap, and
+     * users tap it a second time, which undoes the like. The pending value is
+     * keyed on the media id, so it is dropped as soon as the track changes or
+     * the database catches up.
+     */
+    private data class PendingLike(
+        val mediaId: String,
+        val liked: Boolean,
+    )
+
+    private val pendingLike = MutableStateFlow<PendingLike?>(null)
+
+    val currentSongLiked: StateFlow<Boolean> =
+        combine(
+            mediaMetadata.map { it?.id },
+            currentSong.map { it?.song?.liked == true },
+            pendingLike,
+        ) { mediaId, dbLiked, pending ->
+            when {
+                pending == null || pending.mediaId != mediaId -> dbLiked
+                pending.liked == dbLiked -> {
+                    // The database caught up; stop overriding it so later
+                    // changes from menus or sync are reflected again.
+                    pendingLike.compareAndSet(pending, null)
+                    dbLiked
+                }
+                else -> pending.liked
+            }
+        }.stateIn(scope, SharingStarted.WhileSubscribed(5_000), false)
     val currentLyrics =
         mediaMetadata.flatMapLatest { mediaMetadata ->
             database.lyrics(mediaMetadata?.id)
@@ -261,6 +302,17 @@ class PlayerConnection(
     }
 
     fun toggleLike() {
+        val mediaId = mediaMetadata.value?.id
+        if (mediaId != null) {
+            val pending = PendingLike(mediaId, !currentSongLiked.value)
+            pendingLike.value = pending
+            scope.launch {
+                // Safety net: never keep an optimistic value around if the
+                // service could not persist the change.
+                delay(PENDING_LIKE_TIMEOUT_MS)
+                pendingLike.compareAndSet(pending, null)
+            }
+        }
         service.toggleLike()
     }
 
@@ -414,5 +466,9 @@ class PlayerConnection(
         player.removeListener(this)
         metadataExtractionJob?.cancel()
         metadataExtractionJob = null
+    }
+
+    private companion object {
+        const val PENDING_LIKE_TIMEOUT_MS = 4_000L
     }
 }

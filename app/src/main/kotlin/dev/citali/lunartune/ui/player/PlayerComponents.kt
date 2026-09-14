@@ -13,6 +13,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
@@ -331,6 +332,7 @@ fun PlayerTopActions(
                             .clip(favShape)
                             .background(textButtonColor)
                             .clickable {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 playerConnection.toggleLike()
                             },
                 ) {
@@ -343,8 +345,8 @@ fun PlayerTopActions(
                                     R.drawable.favorite_border
                                 },
                             ),
-                        contentDescription = null,
-                        colorFilter = ColorFilter.tint(iconButtonColor),
+                        contentDescription = stringResource(if (currentSongLiked) R.string.action_remove_like else R.string.action_like),
+                        colorFilter = ColorFilter.tint(if (currentSongLiked) MaterialTheme.colorScheme.error else iconButtonColor),
                         modifier =
                             Modifier
                                 .align(Alignment.Center)
@@ -390,7 +392,10 @@ fun PlayerTopActions(
                         Modifier
                             .size(36.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .clickable { playerConnection.toggleLike() },
+                            .clickable {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                playerConnection.toggleLike()
+                            },
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
@@ -451,7 +456,10 @@ fun PlayerTopActions(
                 }
 
                 Surface(
-                    onClick = { playerConnection.toggleLike() },
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        playerConnection.toggleLike()
+                    },
                     shape = RoundedCornerShape(14.dp),
                     color =
                         if (currentSongLiked) {
@@ -632,7 +640,10 @@ fun PlayerTopActions(
                 }
 
                 Surface(
-                    onClick = { playerConnection.toggleLike() },
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        playerConnection.toggleLike()
+                    },
                     shape = RoundedCornerShape(50),
                     color =
                         if (currentSongLiked) {
@@ -721,16 +732,19 @@ fun PlayerTopActions(
                             .size(42.dp)
                             .clip(CircleShape)
                             .background(
-                                if (currentSongLiked) textBackgroundColor.copy(alpha = 0.2f)
+                                if (currentSongLiked) MaterialTheme.colorScheme.error.copy(alpha = 0.2f)
                                 else Color.Transparent,
                             )
-                            .clickable { playerConnection.toggleLike() },
+                            .clickable {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                playerConnection.toggleLike()
+                            },
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         painter = painterResource(if (currentSongLiked) R.drawable.favorite else R.drawable.favorite_border),
-                        contentDescription = null,
-                        tint = textBackgroundColor.copy(alpha = if (currentSongLiked) 1f else 0.7f),
+                        contentDescription = stringResource(if (currentSongLiked) R.string.action_remove_like else R.string.action_like),
+                        tint = if (currentSongLiked) MaterialTheme.colorScheme.error else textBackgroundColor.copy(alpha = 0.7f),
                         modifier = Modifier.size(22.dp),
                     )
                 }
@@ -1585,7 +1599,10 @@ fun PlayerPlaybackControls(
                                 .size(32.dp)
                                 .padding(4.dp)
                                 .align(Alignment.Center),
-                        onClick = playerConnection::toggleLike,
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            playerConnection.toggleLike()
+                        },
                     )
                 }
             }
@@ -1946,8 +1963,7 @@ fun PlayerControlsContent(
     onSliderValueChangeFinished: () -> Unit,
     currentFormat: FormatEntity? = null,
 ) {
-    val currentSong by playerConnection.currentSong.collectAsState(initial = null)
-    val currentSongLiked = currentSong?.song?.liked == true
+    val currentSongLiked by playerConnection.currentSongLiked.collectAsState()
 
     val playPauseRoundness by animateDpAsState(
         targetValue = if (isPlaying) 24.dp else 36.dp,
@@ -2757,6 +2773,7 @@ private fun V8MetadataActions(
     onTitleClick: () -> Unit,
     onArtistClick: (artistId: String) -> Unit,
 ) {
+    val haptic = LocalHapticFeedback.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -2802,13 +2819,27 @@ private fun V8MetadataActions(
                 iconSize = 24.dp,
                 onClick = onMenuClick,
             )
+            val likedColor = MaterialTheme.colorScheme.error
+            val likeIconColor by animateColorAsState(
+                targetValue = if (liked) likedColor else foreground,
+                animationSpec = tween(durationMillis = 220),
+                label = "v8LikeIconColor",
+            )
+            val likeContainerColor by animateColorAsState(
+                targetValue = if (liked) likedColor.copy(alpha = 0.22f) else foreground.copy(alpha = 0.16f),
+                animationSpec = tween(durationMillis = 220),
+                label = "v8LikeContainerColor",
+            )
             V8ActionButton(
                 iconRes = if (liked) R.drawable.favorite else R.drawable.favorite_border,
-                contentDescription = stringResource(R.string.action_like),
-                foreground = foreground,
-                containerColor = foreground.copy(alpha = 0.16f),
+                contentDescription = stringResource(if (liked) R.string.action_remove_like else R.string.action_like),
+                foreground = likeIconColor,
+                containerColor = likeContainerColor,
                 iconSize = 26.dp,
-                onClick = onToggleLike,
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onToggleLike()
+                },
             )
         }
     }
@@ -3197,8 +3228,7 @@ fun V9PlayerContent(
 
     val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsState()
     val repeatMode by playerConnection.repeatMode.collectAsState()
-    val currentSong by playerConnection.currentSong.collectAsState(initial = null)
-    val liked = currentSong?.song?.liked == true
+    val liked by playerConnection.currentSongLiked.collectAsState()
     val onToggleLike = playerConnection::toggleLike
     val menuState = LocalMenuState.current
 
@@ -3425,14 +3455,18 @@ private fun V9PortraitContent(
                 Spacer(Modifier.width(16.dp))
 
                 // Heart / Like Action Button (replaces lyrics button)
+                val v9Haptic = LocalHapticFeedback.current
                 IconButton(
-                    onClick = onToggleLike,
+                    onClick = {
+                        v9Haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onToggleLike()
+                    },
                     modifier = Modifier.size(48.dp)
                 ) {
                     Icon(
                         painter = painterResource(if (liked) R.drawable.favorite else R.drawable.favorite_border),
                         contentDescription = stringResource(if (liked) R.string.action_remove_like else R.string.action_like),
-                        tint = if (liked) MaterialTheme.colorScheme.primary else textBackgroundColor,
+                        tint = if (liked) MaterialTheme.colorScheme.error else textBackgroundColor,
                         modifier = Modifier.size(32.dp)
                     )
                 }
