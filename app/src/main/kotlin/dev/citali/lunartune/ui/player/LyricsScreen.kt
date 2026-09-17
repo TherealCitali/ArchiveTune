@@ -12,7 +12,6 @@ package dev.citali.lunartune.ui.player
 import android.content.res.Configuration
 import android.view.HapticFeedbackConstants
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -55,6 +54,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -763,10 +763,9 @@ private fun AppleMusicBackground(
     ) {
         // Keyed on the bitmap, not the url: the outgoing artwork stays on screen until the incoming
         // one is actually ready, so a track change never flashes an empty backdrop.
-        Crossfade(
-            targetState = blurredArt,
-            animationSpec = tween(BACKDROP_FADE_MS),
-            label = "appleMusicBackdrop",
+        ArtworkFade(
+            artwork = blurredArt,
+            durationMillis = BACKDROP_FADE_MS,
             modifier =
                 Modifier
                     .fillMaxSize()
@@ -775,14 +774,12 @@ private fun AppleMusicBackground(
                         scaleY = AppleMusicBackdropScale
                     },
         ) { art ->
-            if (art != null) {
-                Image(
-                    bitmap = art.asImageBitmap(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
+            Image(
+                bitmap = art.asImageBitmap(),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+            )
         }
         Box(
             modifier =
@@ -807,6 +804,132 @@ private const val AppleMusicScrimAlpha = 0.52f
  * as a glitch rather than as a finish.
  */
 private const val BACKDROP_FADE_MS = 700
+
+/** The header thumbnail is small and sharp, so it trades faster than the backdrop. */
+private const val HEADER_ART_FADE_MS = 350
+
+/**
+ * Fades a new artwork in *over* the previous one instead of cross-fading the two.
+ *
+ * `Crossfade` runs the outgoing layer 1 -> 0 while the incoming runs 0 -> 1, and with two opaque
+ * images over black the sum of the two alphas over the midpoint is visibly darker than either —
+ * the backdrop dips, which is the glitch. Here the outgoing bitmap stays at full alpha
+ * underneath and only the incoming one animates, so every frame is at least as bright as the
+ * artwork it is replacing. The outgoing layer is dropped once the fade finishes.
+ *
+ * A `null` [artwork] keeps the last one on screen: the callers hand over `null` while the next
+ * cover is still being decoded and blurred, and that gap is exactly when a hole would flash.
+ */
+@Composable
+private fun <T : Any> ArtworkFade(
+    artwork: T?,
+    durationMillis: Int,
+    modifier: Modifier = Modifier,
+    content: @Composable (T) -> Unit,
+) {
+    var current by remember { mutableStateOf(artwork) }
+    var previous by remember { mutableStateOf<T?>(null) }
+    val progress = remember { Animatable(1f) }
+
+    LaunchedEffect(artwork) {
+        val incoming = artwork ?: return@LaunchedEffect
+        if (incoming == current) return@LaunchedEffect
+        // On a skip mid-fade the half-visible layer is dropped and the one still fully on screen
+        // stays as the outgoing layer; promoting the half-faded one to full alpha would pop.
+        if (progress.value >= 1f) previous = current
+        current = incoming
+        progress.snapTo(0f)
+        progress.animateTo(1f, tween(durationMillis, easing = ArtworkFadeEasing))
+        previous = null
+    }
+
+    Box(modifier = modifier) {
+        previous?.let { outgoing ->
+            key(outgoing) {
+                Box(modifier = Modifier.fillMaxSize()) { content(outgoing) }
+            }
+        }
+        current?.let { incoming ->
+            key(incoming) {
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .graphicsLayer { alpha = progress.value },
+                ) {
+                    content(incoming)
+                }
+            }
+        }
+    }
+}
+
+/**
+ * [ArtworkFade] for a Coil request: the incoming layer is mounted invisibly, and the fade only
+ * starts on `onSuccess` — once there is a decoded bitmap to fade. Until then the previous artwork
+ * holds the frame, so a slow network never shows an empty or half-loaded layer.
+ */
+@Composable
+private fun LoadedArtworkFade(
+    request: ImageRequest?,
+    durationMillis: Int,
+    modifier: Modifier = Modifier,
+    colorFilter: ColorFilter? = null,
+) {
+    var current by remember { mutableStateOf<ImageRequest?>(null) }
+    var previous by remember { mutableStateOf<ImageRequest?>(null) }
+    var currentLoaded by remember { mutableStateOf(false) }
+    val progress = remember { Animatable(0f) }
+
+    LaunchedEffect(request) {
+        val incoming = request ?: return@LaunchedEffect
+        if (incoming.data == current?.data) return@LaunchedEffect
+        // Only a layer that is fully on screen becomes the outgoing one; a still-loading or
+        // half-faded current is simply replaced.
+        if (currentLoaded && progress.value >= 1f) previous = current
+        current = incoming
+        currentLoaded = false
+        progress.snapTo(0f)
+    }
+
+    LaunchedEffect(currentLoaded, current) {
+        if (!currentLoaded) return@LaunchedEffect
+        progress.animateTo(1f, tween(durationMillis, easing = ArtworkFadeEasing))
+        previous = null
+    }
+
+    Box(modifier = modifier) {
+        previous?.let { outgoing ->
+            key(outgoing.data) {
+                AsyncImage(
+                    model = outgoing,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    colorFilter = colorFilter,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        }
+        current?.let { incoming ->
+            key(incoming.data) {
+                AsyncImage(
+                    model = incoming,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    colorFilter = colorFilter,
+                    onSuccess = { currentLoaded = true },
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .graphicsLayer { alpha = progress.value },
+                )
+            }
+        }
+    }
+}
+
+/** Ease-out: most of the new cover arrives early and settles, rather than lingering half-mixed. */
+private val ArtworkFadeEasing = CubicBezierEasing(0.2f, 0f, 0f, 1f)
 
 @Composable
 private fun MovingBlurBackground(
@@ -893,32 +1016,27 @@ private fun MovingBlurBackground(
                         Modifier
                     }
 
-                // The crossfade sits under the blur, so what fades is the artwork and not the
-                // finished blurred result — no sharp edge is ever visible mid-transition. The blur
-                // is applied inside the walk's transform, so the artwork is blurred while it is
-                // still centred and only then moved: the blur never samples the transparent area
-                // behind the layer's trailing edge.
-                Crossfade(
-                    targetState = gpuRequest,
-                    animationSpec = tween(BACKDROP_FADE_MS),
-                    label = "movingBlurBackdrop",
+                // The fade sits under the blur, so what fades is the artwork and not the finished
+                // blurred result — no sharp edge is ever visible mid-transition. The blur is
+                // applied inside the walk's transform, so the artwork is blurred while it is still
+                // centred and only then moved: the blur never samples the transparent area behind
+                // the layer's trailing edge.
+                //
+                // The incoming request only starts fading once Coil has actually decoded it: a
+                // plain Crossfade of requests fades in an empty layer first and then pops the
+                // bitmap into it part-way through, which reads as a flash.
+                LoadedArtworkFade(
+                    request = gpuRequest,
+                    durationMillis = BACKDROP_FADE_MS,
+                    colorFilter = vibrancyColorFilter,
                     modifier = Modifier.fillMaxSize().then(blurModifier),
-                ) { request ->
-                    AsyncImage(
-                        model = request,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        colorFilter = vibrancyColorFilter,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                }
+                )
             } else if (blurredArt != null) {
                 // Keyed on the bitmap, so the old artwork holds the frame until the new one has
                 // been blurred and cached — the CPU path is the one that would otherwise flash.
-                Crossfade(
-                    targetState = blurredArt,
-                    animationSpec = tween(BACKDROP_FADE_MS),
-                    label = "movingBlurBackdrop",
+                ArtworkFade(
+                    artwork = blurredArt,
+                    durationMillis = BACKDROP_FADE_MS,
                     modifier = Modifier.fillMaxSize(),
                 ) { art ->
                     Image(
@@ -1069,6 +1187,7 @@ private fun AppleMusicTrackHeader(
         }
 
     val backToPlayerDescription = stringResource(R.string.lyrics_back_to_player)
+    val headerContext = LocalContext.current
 
     Row(
         modifier = modifier.heightIn(min = 64.dp),
@@ -1091,10 +1210,18 @@ private fun AppleMusicTrackHeader(
                     ),
             contentAlignment = Alignment.Center,
         ) {
-            AsyncImage(
-                model = mediaMetadata.thumbnailUrl,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
+            val headerRequest =
+                remember(headerContext, mediaMetadata.thumbnailUrl) {
+                    mediaMetadata.thumbnailUrl?.let { url ->
+                        ImageRequest
+                            .Builder(headerContext)
+                            .data(url)
+                            .build()
+                    }
+                }
+            LoadedArtworkFade(
+                request = headerRequest,
+                durationMillis = HEADER_ART_FADE_MS,
                 modifier = Modifier.fillMaxSize(),
             )
             if (mediaMetadata.thumbnailUrl == null) {
