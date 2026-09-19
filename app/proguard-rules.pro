@@ -16,6 +16,14 @@
 # debugging stack traces.
 #-keepattributes SourceFile,LineNumberTable
 
+# Move every class R8 is allowed to rename into one short 'r8' package. This shortens the class
+# name strings in the DEX constant pool and drops per-package directory entries (~1-3% DEX). It
+# never touches a class covered by a -keep rule (media3, kuromoji, jaudiotagger, ktor, guava,
+# Glance widgets, queue persistence models, @Serializable companions) and reflection by system
+# class name (Class.forName("android.os.SystemProperties")) is unaffected. A non-empty package
+# name avoids default-package edge cases in some class loaders.
+-repackageclasses 'r8'
+
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile

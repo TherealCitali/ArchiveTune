@@ -238,6 +238,18 @@ android {
             excludes += "META-INF/NOTICE.md"
             excludes += "META-INF/CONTRIBUTORS.md"
             excludes += "META-INF/LICENSE.md"
+            // Build-tool metadata that is never read at runtime. Deliberately NOT excluded:
+            // META-INF/services/** (ServiceLoader), META-INF/MANIFEST.MF, *.kotlin_module.
+            excludes += "META-INF/DEPENDENCIES"
+            excludes += "META-INF/INDEX.LIST"
+            excludes += "META-INF/io.netty.versions.properties"
+            excludes += "META-INF/*.version"
+            excludes += "DebugProbesKt.bin"
+            excludes += "kotlin-tooling-metadata.json"
+            excludes += "META-INF/buildinfo.properties"
+            excludes += "META-INF/build.archives"
+            excludes += "META-INF/com.android.tools/**"
+            excludes += "META-INF/proguard/**"
         }
     }
 
