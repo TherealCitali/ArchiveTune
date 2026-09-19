@@ -457,13 +457,12 @@ class HomeViewModel
                 quickPicksMode
                     .flatMapLatest { mode ->
                         when (mode) {
-                            // Online recommendations lead, the listening history is only
-                            // a safety net for when YouTube Music gives us nothing.
+                            // Quick picks are online only: they come from YouTube Music
+                            // (see loadPersonalizedQuickPicks). Emitting the local history
+                            // here would show it while the online shelf is still loading
+                            // and then swap it out from under the user.
                             QuickPicks.QUICK_PICKS -> {
-                                database
-                                    .quickPicks()
-                                    .distinctUntilSongIdsChanged()
-                                    .map { songs -> quickPicksWithFallback(songs) }
+                                flowOf<List<Song>?>(null)
                             }
 
                             QuickPicks.LAST_LISTEN -> {
@@ -488,7 +487,7 @@ class HomeViewModel
             val picks =
                 when (quickPicksMode.first()) {
                     QuickPicks.QUICK_PICKS -> {
-                        quickPicksWithFallback(database.quickPicks().first())
+                        null
                     }
 
                     QuickPicks.LAST_LISTEN -> {
