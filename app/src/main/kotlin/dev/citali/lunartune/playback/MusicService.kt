@@ -4262,6 +4262,12 @@ class MusicService :
         abandonAudioFocus()
         closeAudioEffectSession()
         consecutivePlaybackErr = 0
+        // A full stop leaves no active media, so these per-track entries are stale.
+        // Clear them to keep long-lived service sessions bounded; they repopulate on demand.
+        playbackUrlCache.clear()
+        remotePlaybackTrackingUrlCache.clear()
+        contentLengthCache.clear()
+        audioNormalizationFactorCache.clear()
         if (clearPersistentState) {
             clearPersistedQueueFiles()
         }

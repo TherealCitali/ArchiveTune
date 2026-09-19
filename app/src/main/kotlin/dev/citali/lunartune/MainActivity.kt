@@ -312,6 +312,7 @@ import dev.citali.lunartune.ui.screens.settings.NavigationTab
 import dev.citali.lunartune.ui.theme.LunarTuneTheme
 import dev.citali.lunartune.ui.theme.ColorSaver
 import dev.citali.lunartune.ui.theme.DefaultThemeColor
+import dev.citali.lunartune.ui.theme.PlayerColorExtractor
 import dev.citali.lunartune.ui.theme.extractThemeColor
 import dev.citali.lunartune.ui.utils.appBarScrollBehavior
 import dev.citali.lunartune.ui.utils.backToMain
@@ -386,10 +387,7 @@ class MainActivity : FragmentActivity() {
 
             override fun onServiceDisconnected(name: ComponentName?) {
                 isMusicServiceBound = false
-                pendingAodModeJob?.cancel()
-                pendingAodModeJob = null
-                playerConnection?.dispose()
-                playerConnection = null
+                disposePlayerConnection()
             }
         }
 
@@ -476,8 +474,20 @@ class MainActivity : FragmentActivity() {
         openPendingAodModeIfReady()
     }
 
+    /** Dispose the listener bridge as well as the Android binding. Clean unbinds do not
+     * deliver onServiceDisconnected, so leaving this to that callback leaks each Activity. */
+    private fun disposePlayerConnection() {
+        pendingAodModeJob?.cancel()
+        pendingAodModeJob = null
+        playerConnection?.dispose()
+        playerConnection = null
+    }
+
     private fun safeUnbindMusicService() {
-        if (!isMusicServiceBound) return
+        if (!isMusicServiceBound) {
+            disposePlayerConnection()
+            return
+        }
         try {
             unbindService(serviceConnection)
         } catch (e: IllegalArgumentException) {
@@ -485,6 +495,7 @@ class MainActivity : FragmentActivity() {
             reportException(e)
         } finally {
             isMusicServiceBound = false
+            disposePlayerConnection()
         }
     }
 
@@ -851,6 +862,8 @@ class MainActivity : FragmentActivity() {
                                             .Builder(this@MainActivity)
                                             .data(song.thumbnailUrl)
                                             .allowHardware(false)
+                                            // Dominant-color extraction only needs a thumbnail.
+                                            .size(PlayerColorExtractor.Config.IMAGE_SIZE, PlayerColorExtractor.Config.IMAGE_SIZE)
                                             .build(),
                                     )
                                 val extractedColor = result.image?.toBitmap()?.extractThemeColor()
