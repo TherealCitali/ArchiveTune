@@ -13,7 +13,6 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.snap
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.DraggableState
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -37,6 +36,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -90,11 +90,15 @@ fun BottomSheet(
                         topStart = if (!state.isExpanded) 16.dp else 0.dp,
                         topEnd = if (!state.isExpanded) 16.dp else 0.dp,
                     ),
-                ).background(
-                    backgroundColor.copy(
+                ).drawBehind {
+                    // drawRect's primitive alpha instead of Modifier.background(color.copy(alpha)):
+                    // the latter allocated a new Color and a new background element on every
+                    // drag/animation frame of the sheet; this one only re-runs the draw lambda.
+                    drawRect(
+                        color = backgroundColor,
                         alpha = backgroundColor.alpha * state.progress.coerceIn(0f, 1f),
-                    ),
-                ),
+                    )
+                },
     ) {
         if (state.isExpandedOrExpanding && backHandlerEnabled) {
             BackHandler(onBack = state::collapseSoft)
