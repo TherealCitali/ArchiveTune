@@ -44,9 +44,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -73,6 +73,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -134,9 +135,9 @@ fun Thumbnail(
     val context = LocalContext.current
 
     // States
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
-    val isPlaying by playerConnection.isPlaying.collectAsState()
-    val queueTitle by playerConnection.queueTitle.collectAsState()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
+    val isPlaying by playerConnection.isPlaying.collectAsStateWithLifecycle()
+    val queueTitle by playerConnection.queueTitle.collectAsStateWithLifecycle()
 
     val swipeThumbnail by rememberPreference(SwipeThumbnailKey, true)
 
@@ -169,8 +170,8 @@ fun Thumbnail(
     val (disableBlur) = rememberPreference(DisableBlurKey, false)
     val (backdropEnabled) = rememberPreference(BackdropEnabledKey, defaultValue = true)
     val (backdropBlurAmount) = rememberPreference(BackdropBlurAmountKey, defaultValue = 60)
-    val canSkipPrevious by playerConnection.canSkipPrevious.collectAsState()
-    val canSkipNext by playerConnection.canSkipNext.collectAsState()
+    val canSkipPrevious by playerConnection.canSkipPrevious.collectAsStateWithLifecycle()
+    val canSkipNext by playerConnection.canSkipNext.collectAsStateWithLifecycle()
 
     // Player background style for consistent theming
     val playerBackground by rememberEnumPreference(
@@ -386,7 +387,7 @@ fun Thumbnail(
                     ) { page ->
                         val item = page.mediaItem
                         val incrementalSeekSkipEnabled by rememberPreference(SeekExtraSeconds, defaultValue = false)
-                        var skipMultiplier by remember { mutableStateOf(1) }
+                        var skipMultiplier by remember { mutableIntStateOf(1) }
                         var lastTapTime by remember { mutableLongStateOf(0L) }
                         val itemMetadata = remember(item) { item.metadata }
                         val storefront =

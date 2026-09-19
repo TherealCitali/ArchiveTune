@@ -92,6 +92,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mocharealm.accompanist.lyrics.core.model.ISyncedLine
 import com.mocharealm.accompanist.lyrics.core.model.SyncedLyrics
 import com.mocharealm.accompanist.lyrics.core.model.karaoke.KaraokeAlignment
@@ -148,6 +149,7 @@ import kotlin.math.roundToLong
 private const val LRC_LEAD_MS = 300L
 private const val TTML_LEAD_MS = 0L
 private const val LYRIC_VISUAL_TUNING_OFFSET_MS = 150L
+private val WHITESPACE_REGEX = Regex("\\s+")
 private const val MANUAL_SCROLL_TIMEOUT_MS = 3000L
 private const val MANUAL_SCROLL_DEBOUNCE_MS = 50L
 private const val LYRIC_FOCUS_ANCHOR_RATIO = 0.42f
@@ -190,8 +192,8 @@ fun LyricsEnhanced(
     val context = LocalContext.current
     val animationsDisabled = LocalAnimationsDisabled.current
 
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
-    val playbackParameters by playerConnection.playbackParameters.collectAsState()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
+    val playbackParameters by playerConnection.playbackParameters.collectAsStateWithLifecycle()
 
     val (lyricsClick) = rememberPreference(LyricsClickKey, defaultValue = true)
     val (lyricsTextSize) = rememberPreference(LyricsTextSizeKey, defaultValue = 26f)
@@ -1383,7 +1385,7 @@ private fun buildWrappingKaraokeSyllables(
     end: Int,
 ): List<KaraokeSyllable> {
     val contentUnits = content.toLyricsWrappingUnits().ifEmpty { listOf(content) }
-    val phoneticWords = romanizedText.split(Regex("\\s+")).filter(String::isNotEmpty)
+    val phoneticWords = romanizedText.split(WHITESPACE_REGEX).filter(String::isNotEmpty)
     val phoneticAnchorIndices =
         contentUnits.indices.filter { index ->
             contentUnits[index].any(Char::isLetterOrDigit)

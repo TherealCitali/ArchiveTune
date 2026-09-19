@@ -67,13 +67,13 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.citali.lunartune.ui.component.LocalMenuState
 import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
@@ -271,7 +271,7 @@ fun PlayerTopActions(
     currentSongLiked: Boolean,
 ) {
     val haptic = LocalHapticFeedback.current
-    val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsState()
+    val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsStateWithLifecycle()
 
     when (playerDesignStyle) {
         PlayerDesignStyle.V2 -> {
@@ -979,7 +979,7 @@ fun PlayerPlaybackControls(
     currentSongLiked: Boolean,
 ) {
     val haptic = LocalHapticFeedback.current
-    val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsState()
+    val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsStateWithLifecycle()
     val view = LocalView.current
     val (enableHapticFeedback) = rememberPreference(EnableHapticFeedbackKey, true)
 
@@ -1963,7 +1963,7 @@ fun PlayerControlsContent(
     onSliderValueChangeFinished: () -> Unit,
     currentFormat: FormatEntity? = null,
 ) {
-    val currentSongLiked by playerConnection.currentSongLiked.collectAsState()
+    val currentSongLiked by playerConnection.currentSongLiked.collectAsStateWithLifecycle()
 
     val playPauseRoundness by animateDpAsState(
         targetValue = if (isPlaying) 24.dp else 36.dp,
@@ -3226,9 +3226,9 @@ fun V9PlayerContent(
         }
     }
 
-    val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsState()
-    val repeatMode by playerConnection.repeatMode.collectAsState()
-    val liked by playerConnection.currentSongLiked.collectAsState()
+    val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsStateWithLifecycle()
+    val repeatMode by playerConnection.repeatMode.collectAsStateWithLifecycle()
+    val liked by playerConnection.currentSongLiked.collectAsStateWithLifecycle()
     val onToggleLike = playerConnection::toggleLike
     val menuState = LocalMenuState.current
 

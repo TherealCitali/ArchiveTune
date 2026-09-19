@@ -8,11 +8,16 @@
 package dev.citali.lunartune.repository
 
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import dev.citali.lunartune.db.MusicDatabase
 import dev.citali.lunartune.db.entities.Artist
@@ -42,7 +47,76 @@ class SearchDiscoveryRepository
     constructor(
         private val database: MusicDatabase,
     ) {
-        suspend fun loadDiscovery(): Result<SearchDiscoveryData> =
+        private class CachedSnapshot(
+            val data: SearchDiscoveryData,
+            val expiresAtMs: Long,
+        )
+
+        // The screen's ViewModel is destination-scoped, so without this every visit to the
+        // Search tab re-ran the whole fan-out (explore + charts + one search and up to
+        // 2 × MaxSuggestionSeedItems related-content requests). Snapshot rules:
+        //  - fresh (< CACHE_TTL_MS): returned as is;
+        //  - expired but within STALE_GRACE_MS: returned immediately while a background
+        //    refresh replaces it for the next visit;
+        //  - the mutex keeps concurrent callers (two quick visits, or a visit during the
+        //    background refresh) on ONE network load instead of duplicating it.
+        @Volatile
+        private var snapshot: CachedSnapshot? = null
+        private val loadMutex = Mutex()
+        private val refreshScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+        suspend fun loadDiscovery(forceRefresh: Boolean = false): Result<SearchDiscoveryData> =
+            withContext(Dispatchers.IO) {
+                if (!forceRefresh) {
+                    val now = System.currentTimeMillis()
+                    snapshot?.let { cached ->
+                        if (cached.expiresAtMs > now) {
+                            return@withContext Result.success(cached.data)
+                        }
+                        if (cached.expiresAtMs > now - STALE_GRACE_MS) {
+                            refreshScope.launch { revalidate() }
+                            return@withContext Result.success(cached.data)
+                        }
+                    }
+                }
+                loadLocked(reuseFresh = !forceRefresh)
+            }
+
+        /** Background refresh of a stale snapshot; a no-op if another caller already refreshed it. */
+        private suspend fun revalidate() {
+            runCatching { loadLocked(reuseFresh = true) }
+        }
+
+        private suspend fun loadLocked(reuseFresh: Boolean): Result<SearchDiscoveryData> =
+            loadMutex.withLock {
+                if (reuseFresh) {
+                    // Re-check after waiting: whoever held the lock may have just filled it.
+                    snapshot?.let { cached ->
+                        if (cached.expiresAtMs > System.currentTimeMillis()) {
+                            return@withLock Result.success(cached.data)
+                        }
+                    }
+                }
+                loadDiscoveryFromNetwork().fold(
+                    onSuccess = { data ->
+                        snapshot =
+                            CachedSnapshot(
+                                data = data,
+                                expiresAtMs = System.currentTimeMillis() + CACHE_TTL_MS,
+                            )
+                        Result.success(data)
+                    },
+                    onFailure = { throwable ->
+                        // Serve the stale snapshot rather than an error state when the refresh fails.
+                        snapshot
+                            ?.takeIf { cached -> cached.expiresAtMs > System.currentTimeMillis() - STALE_GRACE_MS }
+                            ?.let { cached -> Result.success(cached.data) }
+                            ?: Result.failure(throwable)
+                    },
+                )
+            }
+
+        private suspend fun loadDiscoveryFromNetwork(): Result<SearchDiscoveryData> =
             withContext(Dispatchers.IO) {
                 try {
                     coroutineScope {
@@ -197,6 +271,8 @@ class SearchDiscoveryRepository
             )
 
         private companion object {
+            const val CACHE_TTL_MS = 5L * 60 * 1000
+            const val STALE_GRACE_MS = 30L * 60 * 1000
             const val AllHistoryTimestamp = 0L
             const val MaxHistoryLookupItems = 36
             const val MaxSuggestionSeedItems = 6

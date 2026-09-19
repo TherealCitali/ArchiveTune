@@ -972,7 +972,7 @@ fun PlayerMenu(
                                 )
                             },
                             supportingContent = {
-                                val playbackParameters by playerConnection.playbackParameters.collectAsState()
+                                val playbackParameters by playerConnection.playbackParameters.collectAsStateWithLifecycle()
                                 Text(
                                     text = "x${formatMultiplier(
                                         playbackParameters.speed,

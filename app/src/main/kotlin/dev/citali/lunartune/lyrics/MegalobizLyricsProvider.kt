@@ -19,6 +19,11 @@ import dev.citali.lunartune.constants.EnableMegalobizLyricsKey
 import dev.citali.lunartune.utils.dataStore
 import dev.citali.lunartune.utils.get
 
+// Compiled once: these were rebuilt on every lyrics lookup.
+private val LRC_PATH_REGEX = Regex("""href=["'](/lrc/maker/download/[^"']+)["']""")
+private val LRC_SPAN_REGEX = Regex("""id=["']lrc_[^"']*_details["'][^>]*>(.*?)</span>""", RegexOption.DOT_MATCHES_ALL)
+private val HTML_TAG_REGEX = Regex("""<[^>]+>""")
+
 object MegalobizLyricsProvider : LyricsProvider {
     override val name: String = "Megalobiz"
 
@@ -57,7 +62,7 @@ object MegalobizLyricsProvider : LyricsProvider {
                         response.body?.string()
                     } ?: return@runCatching null
 
-                val lrcPathRegex = Regex("""href=["'](/lrc/maker/download/[^"']+)["']""")
+                val lrcPathRegex = LRC_PATH_REGEX
                 val match = lrcPathRegex.find(searchHtml) ?: return@runCatching null
                 val lrcUrl = "https://www.megalobiz.com" + match.groupValues[1]
 
@@ -73,7 +78,7 @@ object MegalobizLyricsProvider : LyricsProvider {
                         response.body?.string()
                     } ?: return@runCatching null
 
-                val lrcSpanRegex = Regex("""id=["']lrc_[^"']*_details["'][^>]*>(.*?)</span>""", RegexOption.DOT_MATCHES_ALL)
+                val lrcSpanRegex = LRC_SPAN_REGEX
                 val rawLrcText = lrcSpanRegex.find(detailHtml)?.groupValues?.get(1) ?: detailHtml
 
                 val cleanedText =
@@ -84,7 +89,7 @@ object MegalobizLyricsProvider : LyricsProvider {
                         .replace("<br>", "\n")
                         .replace("<br/>", "\n")
                         .replace("<br />", "\n")
-                        .replace(Regex("""<[^>]+>"""), "")
+                        .replace(HTML_TAG_REGEX, "")
                         .trim()
 
                 if (LyricsUtils.isLineSyncedLrc(cleanedText)) {

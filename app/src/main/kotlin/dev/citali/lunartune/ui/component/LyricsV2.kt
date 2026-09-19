@@ -62,6 +62,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
@@ -97,6 +98,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -169,6 +171,9 @@ private const val LYRICS_FOCUS_HEIGHT_RATIO = 0.35f
 /** Height of the fade drawn over the top and bottom of the V2 list. */
 internal val LyricsV2EdgeFade = 80.dp
 
+/** Poll cadence for line-synced (LRC) lyrics; word-synced lyrics follow the frame clock. */
+private const val LINE_SYNC_POLL_INTERVAL_MS = 50L
+
 private fun isRtlText(text: String): Boolean {
     for (ch in text) {
         when (Character.getDirectionality(ch)) {
@@ -221,7 +226,7 @@ fun LyricsV2(
         }
     val scope = rememberCoroutineScope()
 
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
 
     // ── Preferences ──
     val (lyricsClick) = rememberPreference(LyricsClickKey, defaultValue = true)
@@ -371,7 +376,11 @@ fun LyricsV2(
 
     LaunchedEffect(entriesWithWords, isSynced, leadMs, lyricsSyncOffset) {
         if (!isSynced || entriesWithWords.isEmpty()) return@LaunchedEffect
-        val pollIntervalMs = if (isTtmlFormat) 16L else 50L
+        // Word-synced (TTML) lyrics poll once per frame. Tying the poll to the frame clock rather
+        // than a fixed delay(16) means that when the device drops to 30/24 fps under load (a
+        // canvas video compositing next to the lyrics, for instance) the position writes drop
+        // with it instead of queuing recompositions on top of the slow frames.
+        val useFrameClock = isTtmlFormat
         while (isActive) {
             val sliderPos = sliderPositionProvider()
             val pos = sliderPos ?: player.currentPosition
@@ -380,7 +389,11 @@ fun LyricsV2(
             currentPositionMs = (playbackPositionMs + leadMs + LYRIC_VISUAL_TUNING_OFFSET_MS).coerceAtLeast(0L)
 
             currentLineIndex = findCurrentLineIndex(entriesWithWords, currentPositionMs, 0L)
-            delay(pollIntervalMs)
+            if (useFrameClock) {
+                withFrameNanos { }
+            } else {
+                delay(LINE_SYNC_POLL_INTERVAL_MS)
+            }
         }
     }
 
@@ -857,7 +870,7 @@ fun LyricsV2(
                     ) {
                         val romanizedText =
                             if (romanizationPreferences.isEnabled) {
-                                val value by item.romanizedTextFlow.collectAsState()
+                                val value by item.romanizedTextFlow.collectAsStateWithLifecycle()
                                 value
                             } else {
                                 null
