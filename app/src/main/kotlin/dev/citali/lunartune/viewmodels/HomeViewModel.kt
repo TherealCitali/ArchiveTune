@@ -457,15 +457,15 @@ class HomeViewModel
                 quickPicksMode
                     .flatMapLatest { mode ->
                         when (mode) {
-                            // Quick picks are online only: they come from YouTube Music
-                            // (see loadPersonalizedQuickPicks). Emitting the local history
-                            // here would show it while the online shelf is still loading
-                            // and then swap it out from under the user.
-                            QuickPicks.QUICK_PICKS -> {
-                                flowOf<List<Song>?>(null)
-                            }
-
-                            QuickPicks.LAST_LISTEN -> {
+                            // The online picks (see loadPersonalizedQuickPicks) need several
+                            // YouTube Music round-trips, which on a slow connection is many
+                            // seconds of a missing shelf. Keep the local history picks as the
+                            // placeholder: the screen shows them right away and swaps to the
+                            // online shelf the moment it is ready (it always wins when
+                            // present), and they stay up when the device is offline.
+                            QuickPicks.QUICK_PICKS,
+                            QuickPicks.LAST_LISTEN,
+                            -> {
                                 lastListenQuickPicksFlow()
                             }
 
@@ -486,11 +486,9 @@ class HomeViewModel
         private suspend fun refreshQuickPicks() {
             val picks =
                 when (quickPicksMode.first()) {
-                    QuickPicks.QUICK_PICKS -> {
-                        null
-                    }
-
-                    QuickPicks.LAST_LISTEN -> {
+                    QuickPicks.QUICK_PICKS,
+                    QuickPicks.LAST_LISTEN,
+                    -> {
                         lastListenQuickPicksFlow().first()
                     }
 
