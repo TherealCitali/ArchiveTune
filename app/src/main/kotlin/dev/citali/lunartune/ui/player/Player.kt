@@ -510,13 +510,6 @@ fun BottomSheetPlayer(
     var duration by rememberSaveable(mediaMetadata?.id) {
         mutableLongStateOf(playerConnection.player.duration)
     }
-    // Stable lambdas for the mini player: it reads the position through these in its draw
-    // phase instead of taking the values as parameters, so the position tick no longer
-    // recomposes the whole collapsed row (see MiniPlayer).
-    val positionUpdatedState = rememberUpdatedState(position)
-    val durationUpdatedState = rememberUpdatedState(duration)
-    val miniPlayerPositionProvider = remember { { positionUpdatedState.value } }
-    val miniPlayerDurationProvider = remember { { durationUpdatedState.value } }
     var lyricsSyncOffset by rememberSaveable(mediaMetadata?.id) {
         mutableIntStateOf(0)
     }
@@ -1147,8 +1140,8 @@ fun BottomSheetPlayer(
         backHandlerEnabled = !aodModeEnabled,
         collapsedContent = {
             MiniPlayer(
-                positionProvider = miniPlayerPositionProvider,
-                durationProvider = miniPlayerDurationProvider,
+                position = position,
+                duration = duration,
                 pureBlack = pureBlack,
                 isPairedWithNavigation = isMiniPlayerPairedWithNavigation,
             )

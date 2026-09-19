@@ -53,23 +53,17 @@ import dev.citali.lunartune.utils.rememberPreference
 
 private const val MiniPlayerPaletteCacheSize = 24
 
-/**
- * [positionProvider] / [durationProvider] instead of plain Long parameters: the player's position
- * poll (see BottomSheetPlayer) would otherwise drive this whole row — artwork, title, transport
- * controls — through a full recomposition on every tick during playback. Only the progress ring
- * reads the lambdas, and it does so in its draw phase, so the tick now costs one redraw of the ring.
- */
 @Composable
 fun MiniPlayer(
-    positionProvider: () -> Long,
-    durationProvider: () -> Long,
+    position: Long,
+    duration: Long,
     modifier: Modifier = Modifier,
     pureBlack: Boolean,
     isPairedWithNavigation: Boolean = false,
 ) {
     NewMiniPlayer(
-        positionProvider = positionProvider,
-        durationProvider = durationProvider,
+        position = position,
+        duration = duration,
         modifier = modifier,
         pureBlack = pureBlack,
         isPairedWithNavigation = isPairedWithNavigation,
@@ -78,8 +72,8 @@ fun MiniPlayer(
 
 @Composable
 private fun NewMiniPlayer(
-    positionProvider: () -> Long,
-    durationProvider: () -> Long,
+    position: Long,
+    duration: Long,
     modifier: Modifier = Modifier,
     pureBlack: Boolean,
     isPairedWithNavigation: Boolean,
@@ -223,8 +217,8 @@ private fun NewMiniPlayer(
                 modifier = Modifier.fillMaxSize(),
             )
             NewMiniPlayerContent(
-                positionProvider = positionProvider,
-                durationProvider = durationProvider,
+                position = position,
+                duration = duration,
                 playerConnection = playerConnection,
                 colors = contentColors,
             )

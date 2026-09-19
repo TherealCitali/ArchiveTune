@@ -354,47 +354,18 @@ fun LyricsEnhanced(
     var lastManualScrollTime by remember { mutableLongStateOf(0L) }
     val listState = key(lyricsSessionKey) { rememberLazyListState() }
 
-    // Focus line index, maintained by the position loop below. It only changes on line
-    // boundaries, so the auto-scroll effect can watch it instead of re-deriving the line from
-    // the raw position on every frame.
-    val currentLineIndexState = remember { mutableIntStateOf(-1) }
-    // Read by the loop without restarting it when romanisation rebuilds the lyrics object.
-    val latestSyncedLyrics = rememberUpdatedState(syncedLyrics)
-
     LaunchedEffect(lyricsSessionKey) {
         playbackPositionMs.longValue = player.currentPosition.coerceAtLeast(0L)
         isManualScrolling = false
         lastManualScrollTime = 0L
         isSelectionModeActive = false
         selectedLineKeys.clear()
-        currentLineIndexState.intValue = -1
     }
 
     LaunchedEffect(player, lyricsSessionKey, animationsDisabled, playbackParameters.speed) {
         var wasSliderActive = false
         var anchorPlayerPositionMs = player.currentPosition.coerceAtLeast(0L)
         var anchorFrameNanos = 0L
-        // Same derivation the auto-scroll snapshotFlow used to run per frame (stable-focus clamp +
-        // the library's first-highlight search); doing it here, once per loop iteration, means the
-        // scroll effect only wakes on line boundaries instead of on every position write.
-        fun updateCurrentLine(positionMs: Long) {
-            val lyrics = latestSyncedLyrics.value
-            if (lyrics.lines.isEmpty()) return
-            val syncPosition =
-                (
-                    positionMs +
-                        latestLyricsSyncOffset.value.toLong() +
-                        latestLeadMs.value +
-                        LYRIC_VISUAL_TUNING_OFFSET_MS
-                ).coerceIn(0L, Int.MAX_VALUE.toLong()).toInt()
-            val index =
-                lyrics.getCurrentFirstHighlightLineIndexByTime(
-                    lyrics.positionForStableLineFocus(syncPosition),
-                )
-            if (index != currentLineIndexState.intValue) {
-                currentLineIndexState.intValue = index
-            }
-        }
         while (isActive) {
             val sliderPosition = latestSliderPositionProvider.value()
             val isSliderActive = sliderPosition != null
@@ -410,7 +381,6 @@ fun LyricsEnhanced(
                 if (playbackPositionMs.longValue != rawPosition) {
                     playbackPositionMs.longValue = rawPosition
                 }
-                updateCurrentLine(rawPosition)
                 if (sliderPosition == null) {
                     delay(100L)
                 } else {
@@ -447,7 +417,6 @@ fun LyricsEnhanced(
                 if (playbackPositionMs.longValue != nextPosition) {
                     playbackPositionMs.longValue = nextPosition
                 }
-                updateCurrentLine(nextPosition)
             }
         }
     }
@@ -464,6 +433,13 @@ fun LyricsEnhanced(
                     .toInt()
             }
         }
+    val lineFocusPosition: () -> Int =
+        remember(syncedLyrics) {
+            {
+                syncedLyrics.positionForStableLineFocus(playbackSyncPosition())
+            }
+        }
+
     val nestedScrollConnection =
         remember {
             var lastUserScrollEventMs = 0L
@@ -513,15 +489,12 @@ fun LyricsEnhanced(
         }.first { it }
 
         var forceNextScroll = true
-        // Previously this block read the live position, so snapshotFlow re-evaluated it (with its
-        // read-tracking setup) on every 16 ms frame to produce an index that changes a few times
-        // a minute. currentLineIndexState is maintained by the position loop with the same
-        // derivation and only changes on line boundaries.
         snapshotFlow {
             if (isManualScrolling || isSelectionModeActive) {
                 null
             } else {
-                currentLineIndexState.intValue
+                syncedLyrics
+                    .getCurrentFirstHighlightLineIndexByTime(lineFocusPosition())
                     .takeIf { index -> index in syncedLyrics.lines.indices }
             }
         }.distinctUntilChanged()
