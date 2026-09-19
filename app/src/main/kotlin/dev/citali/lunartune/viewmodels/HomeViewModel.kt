@@ -18,6 +18,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
@@ -456,15 +457,15 @@ class HomeViewModel
                 quickPicksMode
                     .flatMapLatest { mode ->
                         when (mode) {
-                            // Keep the shelf useful while the online recommendation request
-                            // is in flight. The local history is also the previous-session
-                            // fallback; loadPersonalizedQuickPicks replaces it atomically when
-                            // fresh online picks arrive, so the user never sees an empty gap.
-                            QuickPicks.QUICK_PICKS -> {
-                                lastListenQuickPicksFlow().map { it as List<Song>? }
-                            }
-
-                            QuickPicks.LAST_LISTEN -> {
+                            // The online picks (see loadPersonalizedQuickPicks) need several
+                            // YouTube Music round-trips, which on a slow connection is many
+                            // seconds of a missing shelf. Keep the local history picks as the
+                            // placeholder: the screen shows them right away and swaps to the
+                            // online shelf the moment it is ready (it always wins when
+                            // present), and they stay up when the device is offline.
+                            QuickPicks.QUICK_PICKS,
+                            QuickPicks.LAST_LISTEN,
+                            -> {
                                 lastListenQuickPicksFlow()
                             }
 
@@ -485,11 +486,9 @@ class HomeViewModel
         private suspend fun refreshQuickPicks() {
             val picks =
                 when (quickPicksMode.first()) {
-                    QuickPicks.QUICK_PICKS -> {
-                        null
-                    }
-
-                    QuickPicks.LAST_LISTEN -> {
+                    QuickPicks.QUICK_PICKS,
+                    QuickPicks.LAST_LISTEN,
+                    -> {
                         lastListenQuickPicksFlow().first()
                     }
 
@@ -551,10 +550,7 @@ class HomeViewModel
                 supervisorScope {
 
                     launch { loadSpeedDialItems() }
-                    // Do not hold the first home render on the network recommendation request.
-                    // The local/previous-session shelf is emitted immediately and this job swaps
-                    // in fresh online picks when it completes.
-                    viewModelScope.launch(Dispatchers.IO) { loadPersonalizedQuickPicks() }
+                    val personalizedQuickPicks = async { loadPersonalizedQuickPicks() }
                     launch {
                         forgottenFavorites.value =
                             database
@@ -614,11 +610,19 @@ class HomeViewModel
                                                 )
                                             },
                                     )
-                                val (pageWithoutQuickPicks, _) = filteredPage.extractQuickPicks()
+                                val (pageWithoutQuickPicks, quickPicksSection) = filteredPage.extractQuickPicks()
                                 homePage.value = pageWithoutQuickPicks
-                                // The local/previous-session shelf remains visible while the
-                                // personalized request runs. If it fails, keep that fallback;
-                                // a successful request replaces it from loadPersonalizedQuickPicks.
+                                // The shelves are up as fast as possible; the "Quick picks" shelf
+                                // of the home response is only used when YouTube Music gave us
+                                // nothing better from the recommendation seeds.
+                                if (
+                                    quickPicksMode.first() == QuickPicks.QUICK_PICKS &&
+                                    !personalizedQuickPicks.await()
+                                ) {
+                                    quickPicksSection?.takeIf { it.items.isNotEmpty() }?.let { fallback ->
+                                        remoteQuickPicks.value = fallback
+                                    }
+                                }
                             }.onFailure {
                                 reportException(it)
                                 loadError.value = R.string.error_unknown

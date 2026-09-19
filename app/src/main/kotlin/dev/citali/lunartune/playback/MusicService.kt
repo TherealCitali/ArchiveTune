@@ -17,7 +17,6 @@ import android.app.PendingIntent
 import android.bluetooth.BluetoothClass
 import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -85,11 +84,8 @@ import androidx.media3.exoplayer.source.ShuffleOrder.DefaultShuffleOrder
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.extractor.DefaultExtractorsFactory
 import androidx.media3.session.CommandButton
-import androidx.media3.session.MediaController
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
-import androidx.media3.session.SessionToken
-import com.google.common.util.concurrent.MoreExecutors
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
@@ -98,6 +94,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -343,6 +340,7 @@ class MusicService :
     private val binder = MusicBinder()
     private var hasBoundClients = false
     private var idleStopJob: Job? = null
+    private var queueSaveJob: Job? = null
 
     private lateinit var connectivityManager: ConnectivityManager
     lateinit var connectivityObserver: NetworkConnectivityObserver
@@ -1186,12 +1184,22 @@ class MusicService :
             ),
         )
 
+        // Arm the platform notification pipeline. MediaSessionService only creates its internal
+        // notification controller — the Player.Listener that drives onUpdateNotification() on
+        // every playback change — when a session is registered with it
+        // (MediaNotificationManager.addSession). This app's UI talks to the service through the
+        // plain local binder instead of a MediaController, so without an explicit registration
+        // nothing would arm the pipeline. The self-referential MediaController that used to be
+        // built here did this as a side effect, at the cost of a permanent in-process binding
+        // that pinned hasBoundClients (and the whole service graph) for the life of the process,
+        // so scheduleStopIfIdle could never stop the service. addSession() registers the session
+        // directly, with no binding side effects, so idle-stop keeps working. Must run before the
+        // first updateNotification().
+        addSession(mediaSession)
+
         updateNotification()
         player.repeatMode = REPEAT_MODE_OFF
 
-        val sessionToken = SessionToken(this, ComponentName(this, MusicService::class.java))
-        val controllerFuture = MediaController.Builder(this, sessionToken).buildAsync()
-        controllerFuture.addListener({ controllerFuture.get() }, MoreExecutors.directExecutor())
         scope.launch(Dispatchers.IO) {
             val prefs = dataStore.data.first()
             val repeatMode = prefs[RepeatModeKey] ?: REPEAT_MODE_OFF
@@ -1262,12 +1270,11 @@ class MusicService :
                     .lyrics(mediaMetadata.id)
                     .first() == null
             ) {
-                val fetchedLyrics = lyricsHelper.getLyricsWithSource(mediaMetadata)
+                val lyrics = lyricsHelper.getLyrics(mediaMetadata)
                 database.query {
                     insertLyricsIfAbsent(
                         id = mediaMetadata.id,
-                        lyrics = fetchedLyrics.lyrics,
-                        source = fetchedLyrics.providerName,
+                        lyrics = lyrics,
                     )
                 }
             }
@@ -1525,12 +1532,17 @@ class MusicService :
             }
         }
 
+        // The periodic save only exists to keep the resume *position* roughly current for a
+        // process death; every change to the queue itself already calls saveQueueToDisk from the
+        // event handlers that cause one. So this writes the small player-state file only — the
+        // full snapshot it used to take mapped every media item on the main thread and wrote both
+        // files, six times a minute, for a queue that had not changed.
         scope.launch {
             while (isActive) {
-                delay(if (player.isPlaying) 10.seconds else 30.seconds)
+                delay(PERSISTENT_POSITION_SAVE_INTERVAL)
                 val shouldSave = withContext(Dispatchers.IO) { dataStore.get(PersistentQueueKey, true) }
                 if (shouldSave && player.mediaItemCount > 0) {
-                    saveQueueToDisk()
+                    savePlayerStateToDisk()
                 }
             }
         }
@@ -4263,8 +4275,10 @@ class MusicService :
         abandonAudioFocus()
         closeAudioEffectSession()
         consecutivePlaybackErr = 0
-        // A full stop leaves no active media, so these per-track entries are stale.
-        // Clear them to keep long-lived service sessions bounded; they repopulate on demand.
+        // Per-media-id resolution caches grow one entry per unique track played and are never
+        // pruned, so a long listening session keeps them indefinitely. A full stop clears the
+        // queue and leaves no active track, so every entry is now stale — drop them here. They
+        // repopulate on the next resolve at no correctness cost.
         playbackUrlCache.clear()
         remotePlaybackTrackingUrlCache.clear()
         contentLengthCache.clear()
@@ -7003,6 +7017,12 @@ class MusicService :
         if (events.contains(EVENT_TIMELINE_CHANGED) && !isCrossfading) {
             scheduleCrossfade()
         }
+        if (events.contains(EVENT_TIMELINE_CHANGED)) {
+            // Queue edits (add / remove / reorder) only surface as a timeline change. The periodic
+            // save no longer snapshots the queue, so persist it here — debounced, because a
+            // single user action can produce a burst of timeline updates.
+            scheduleQueueSave()
+        }
 
         // Also handle immediate update for play state and media item transition events explicitly
         if (events.containsAny(
@@ -8295,6 +8315,68 @@ class MusicService :
         )
     }
 
+    /**
+     * Last player state actually written, compared ignoring [PersistPlayerState.timestamp] so a
+     * paused player — whose position does not move — stops rewriting an identical file every tick.
+     */
+    @Volatile
+    private var lastPersistedPlayerState: PersistPlayerState? = null
+
+    /**
+     * Writes just the resume position and transport flags, skipping the queue snapshot.
+     *
+     * Deliberately not [saveQueueToDisk]: that maps every media item to persistable metadata on
+     * the main thread and writes two files. For the periodic save none of that changes between
+     * ticks — only the position does — and the queue file is already written by every handler that
+     * can change it.
+     */
+    private suspend fun savePlayerStateToDisk() {
+        val saveGeneration = persistentSaveGeneration.get()
+        val state =
+            withContext(Dispatchers.Main.immediate) {
+                if (
+                    saveGeneration != persistentSaveGeneration.get() ||
+                    isRestoringPersistentState ||
+                    isHydratingRestoredQueue ||
+                    player.mediaItemCount == 0
+                ) {
+                    return@withContext null
+                }
+                PersistPlayerState(
+                    playWhenReady = player.playWhenReady,
+                    repeatMode = player.repeatMode,
+                    shuffleModeEnabled = player.shuffleModeEnabled,
+                    volume = playerVolume.value,
+                    currentPosition = player.currentPosition,
+                    currentMediaItemIndex = player.currentMediaItemIndex,
+                    playbackState = player.playbackState,
+                )
+            } ?: return
+
+        // timestamp defaults to now, so it always differs — compare everything else.
+        val previous = lastPersistedPlayerState
+        if (previous != null && previous.copy(timestamp = 0L) == state.copy(timestamp = 0L)) return
+
+        withContext(Dispatchers.IO) {
+            if (saveGeneration != persistentSaveGeneration.get()) return@withContext
+            writePersistentObject(PERSISTENT_PLAYER_STATE_FILE, state)
+            lastPersistedPlayerState = state
+        }
+    }
+
+    /** Coalesces a burst of queue changes into one snapshot write. */
+    private fun scheduleQueueSave() {
+        queueSaveJob?.cancel()
+        queueSaveJob =
+            scope.launch {
+                delay(QUEUE_SAVE_DEBOUNCE_MS)
+                val shouldSave = withContext(Dispatchers.IO) { dataStore.get(PersistentQueueKey, true) }
+                if (shouldSave && player.mediaItemCount > 0) {
+                    saveQueueToDisk()
+                }
+            }
+    }
+
     private suspend fun saveQueueToDisk() {
         val saveGeneration = persistentSaveGeneration.get()
         val snapshot =
@@ -8338,6 +8420,7 @@ class MusicService :
             writePersistentObject(PERSISTENT_QUEUE_FILE, snapshot.first)
             if (saveGeneration != persistentSaveGeneration.get()) return@withContext
             writePersistentObject(PERSISTENT_PLAYER_STATE_FILE, snapshot.second)
+            lastPersistedPlayerState = snapshot.second
         }
     }
 
@@ -8369,7 +8452,9 @@ class MusicService :
             aodScreenOffReceiver = null
         }
         try {
-            scope.launch { stopTogetherInternal() }
+            // NonCancellable: this must survive the scopeJob.cancel() below — a plain
+            // scope.launch is cancelled before its body ever runs.
+            scope.launch(NonCancellable) { stopTogetherInternal() }
         } catch (_: Exception) {
         }
         try {
@@ -8404,6 +8489,14 @@ class MusicService :
             player.removeListener(this)
             player.removeListener(sleepTimer)
             player.release()
+        } catch (_: Exception) {
+        }
+        // The sync worker is a child of scopeJob and may be cancelled before it drains the
+        // service_destroy request queued above. Stop the manager directly so the static holder
+        // drops its callback (which captures this@MusicService) even if that race is lost.
+        // Idempotent.
+        try {
+            DiscordPresenceManager.stop()
         } catch (_: Exception) {
         }
         scopeJob.cancel()
@@ -8636,6 +8729,17 @@ class MusicService :
         const val PERSISTENT_QUEUE_FILE = "persistent_queue.data"
         const val PERSISTENT_AUTOMIX_FILE = "persistent_automix.data"
         const val PERSISTENT_PLAYER_STATE_FILE = "persistent_player_state.data"
+
+        /**
+         * How often the resume position is written while the service is alive.
+         *
+         * This only bounds how far back a restore lands after a process death, so 30s of accuracy
+         * is plenty; it used to be 10s while playing, which meant six wakeups and six pairs of file
+         * writes a minute for a queue that had not changed. Every event that changes the queue
+         * saves it directly, so nothing is lost by ticking less often.
+         */
+        private val PERSISTENT_POSITION_SAVE_INTERVAL = 30.seconds
+        private const val QUEUE_SAVE_DEBOUNCE_MS = 1_000L
         const val MAX_CONSECUTIVE_ERR = 5
         const val AUDIO_ROUTE_CHANGE_DEBOUNCE_MS = 350L
         const val AUDIO_EFFECT_ROUTE_REBIND_DELAY_MS = 200L
@@ -8671,6 +8775,15 @@ class MusicService :
         const val CROSSFADE_FRAME_MS = 32L
         const val MIN_AUDIBLE_EFFECTIVE_VOLUME = 0.01f
         const val STUCK_MUTED_VOLUME_EPSILON = 0.001f
-        const val AUDIBLE_PLAYBACK_VOLUME_CHECK_MS = 2_000L
+        /**
+         * How often the stuck-mute watchdog re-checks the player volume during active playback.
+         *
+         * This is only a backstop: ensureAudiblePlaybackVolume already runs from onEvents, so any
+         * state change that could mute the player is covered event-driven. The watchdog exists for
+         * a mute that arrives with no player event at all. It was 2s, which is 30 CPU wakeups a
+         * minute for a check that almost always does nothing, and background audio is exactly
+         * where that stops the SoC reaching deep idle between buffer fills.
+         */
+        const val AUDIBLE_PLAYBACK_VOLUME_CHECK_MS = 15_000L
     }
 }

@@ -72,11 +72,13 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -223,6 +225,9 @@ import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 private const val SeekbarSettleToleranceMs = 1_500L
+private const val ExpandedPositionTickMs = 100L
+private const val CollapsedPositionTickMs = 500L
+private const val SheetInFlightTickMs = 50L
 private const val V7LegacyBlurHeightFraction = 0.54f
 private const val V7BackdropMinArtworkSizePx = 1_024
 private const val V7BackdropMaxArtworkSizePx = 2_048
@@ -505,6 +510,13 @@ fun BottomSheetPlayer(
     var duration by rememberSaveable(mediaMetadata?.id) {
         mutableLongStateOf(playerConnection.player.duration)
     }
+    // Stable lambdas for the mini player: it reads the position through these in its draw
+    // phase instead of taking the values as parameters, so the position tick no longer
+    // recomposes the whole collapsed row (see MiniPlayer).
+    val positionUpdatedState = rememberUpdatedState(position)
+    val durationUpdatedState = rememberUpdatedState(duration)
+    val miniPlayerPositionProvider = remember { { positionUpdatedState.value } }
+    val miniPlayerDurationProvider = remember { { durationUpdatedState.value } }
     var lyricsSyncOffset by rememberSaveable(mediaMetadata?.id) {
         mutableIntStateOf(0)
     }
@@ -840,7 +852,20 @@ fun BottomSheetPlayer(
         val startTime = SystemClock.elapsedRealtime()
         if (playbackState == STATE_READY) {
             while (isActive) {
-                delay(if (aodModeEnabled) 500L else 100L)
+                // Cadence by surface. The expanded player (sliders, lyrics) needs the 100ms
+                // tick; the collapsed mini player only draws a thin progress bar, so a coarse
+                // 500ms tick carries it while cutting this whole subtree's recomposition rate
+                // by 5x — it stays composed behind the mini player, and its 10Hz ticks were the
+                // dominant cost of returning to the app and of the mini player's idle drain.
+                // While the sheet is mid-flight between the two, ticks pause entirely so the
+                // open/close animation frames never compete with a full-player recomposition.
+                val settledCollapsed = state.isCollapsed || state.isDismissed
+                val settledExpanded = state.isExpanded
+                if (!settledCollapsed && !settledExpanded) {
+                    delay(SheetInFlightTickMs)
+                    continue
+                }
+                delay(if (aodModeEnabled || settledCollapsed) CollapsedPositionTickMs else ExpandedPositionTickMs)
                 val isTransitioning = playerConnection.player.currentMediaItem?.mediaId != mediaMetadata?.id
                 val currentPlayerPosition = playerConnection.player.currentPosition
                 val currentPlayerDuration = playerConnection.player.duration
@@ -955,6 +980,15 @@ fun BottomSheetPlayer(
         }
     }
 
+    // Early canvas gate: the sheet's expanded content starts fading at progress 0.5 and is fully
+    // gone by 0.25, so pausing the (muted, purely visual) canvas video at the TOP of the fade
+    // removes the decode + surface compositing cost from the entire second half of the
+    // collapse/expand animation — the biggest contributor to "minimising the player janks while a
+    // canvas plays".
+    val playerSheetCanvasVisible by remember(state) {
+        derivedStateOf { state.progress > 0.5f }
+    }
+    CompositionLocalProvider(LocalPlayerSheetVisible provides playerSheetCanvasVisible) {
     BottomSheet(
         state = state,
         modifier =
@@ -1113,8 +1147,8 @@ fun BottomSheetPlayer(
         backHandlerEnabled = !aodModeEnabled,
         collapsedContent = {
             MiniPlayer(
-                position = position,
-                duration = duration,
+                positionProvider = miniPlayerPositionProvider,
+                durationProvider = miniPlayerDurationProvider,
                 pureBlack = pureBlack,
                 isPairedWithNavigation = isMiniPlayerPairedWithNavigation,
             )
@@ -2036,6 +2070,7 @@ fun BottomSheetPlayer(
                 lyricsText = currentLyricsEntity?.lyrics,
             )
         }
+    }
     }
 
     val activePlaybackError = playbackError
