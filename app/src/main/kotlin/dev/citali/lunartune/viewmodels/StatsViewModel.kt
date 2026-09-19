@@ -13,7 +13,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -325,11 +324,7 @@ class StatsViewModel
                 }
                 initialPeriodResolved.value = true
             }
-            // Dispatchers.IO: these refreshers call YouTube.artist / YouTube.album for every
-            // stale entry; on the default (Main) dispatcher the network round-trips and the
-            // per-item DB writes ran on the UI thread and froze the app for seconds when
-            // leaving the stats screen with a large history.
-            viewModelScope.launch(Dispatchers.IO) {
+            viewModelScope.launch {
                 mostPlayedArtists.collect { artists ->
                     artists
                         .map { it.artist }
@@ -347,7 +342,7 @@ class StatsViewModel
                         }
                 }
             }
-            viewModelScope.launch(Dispatchers.IO) {
+            viewModelScope.launch {
                 mostPlayedAlbums.collect { albums ->
                     albums
                         .filter {

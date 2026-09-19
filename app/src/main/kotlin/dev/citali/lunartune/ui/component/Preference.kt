@@ -181,27 +181,12 @@ fun PreferenceEntry(
         }
     val resolvedShape = shape ?: preferenceItemShape
     val interactionSource = remember { MutableInteractionSource() }
-    val clickable = isEnabled && onClick != null
-
-    // The press-scale animation is only built for rows that can actually be pressed. A settings
-    // page hosts dozens of entries and many are plain headers/values with no onClick; each of
-    // those used to run collectIsPressedAsState + animateFloatAsState + a graphicsLayer for a
-    // press that could never happen — measurable extra composition on the long settings screens.
-    val pressScale =
-        if (clickable) {
-            val isPressed by interactionSource.collectIsPressedAsState()
-            val scale by animateFloatAsState(
-                targetValue = if (isPressed) 0.98f else 1f,
-                animationSpec = spring(stiffness = Spring.StiffnessHigh),
-                label = "prefScale",
-            )
-            Modifier.graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-        } else {
-            Modifier
-        }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.98f else 1f,
+        animationSpec = spring(stiffness = Spring.StiffnessHigh),
+        label = "prefScale",
+    )
 
     val rowContent: @Composable () -> Unit = {
         Row(
@@ -210,11 +195,11 @@ fun PreferenceEntry(
                 Modifier
                     .fillMaxWidth()
                     .heightIn(min = PreferenceEntryMinHeight)
-                    .then(if (clickable) Modifier.focusable() else Modifier)
+                    .then(if (isEnabled && onClick != null) Modifier.focusable() else Modifier)
                     .clickable(
                         interactionSource = interactionSource,
                         indication = LocalIndication.current,
-                        enabled = clickable,
+                        enabled = isEnabled && onClick != null,
                         onClick = onClick ?: {},
                     ).alpha(if (isEnabled) 1f else 0.5f)
                     .padding(
@@ -278,7 +263,10 @@ fun PreferenceEntry(
                 .padding(
                     horizontal = if (inGroup) 0.dp else 16.dp,
                     vertical = if (inGroup) 0.dp else 3.dp,
-                ).then(pressScale),
+                ).graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                },
     ) {
         rowContent()
     }

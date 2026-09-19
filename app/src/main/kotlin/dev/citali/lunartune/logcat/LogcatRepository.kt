@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import dev.citali.lunartune.utils.GlobalLog
@@ -53,7 +52,7 @@ class LogcatRepository
 
         fun observeEntries(): Flow<List<LogEntry>> =
             combine(
-                GlobalLog.logs.onStart { GlobalLog.flush() },
+                GlobalLog.logs,
                 observeLogcatSnapshots(),
                 clearTimestamp,
             ) { capturedEntries, logcatEntries, clearedAt ->
@@ -106,9 +105,6 @@ class LogcatRepository
         private fun observeLogcatSnapshots(): Flow<List<LogEntry>> =
             flow {
                 while (currentCoroutineContext().isActive) {
-                    // GlobalLog publishes lazily (throttled, on append); piggyback on this poll so a
-                    // trailing entry with no follow-up append still shows within one poll interval.
-                    GlobalLog.flush()
                     emit(readLogcatEntries())
                     delay(LOGCAT_POLL_INTERVAL_MILLIS)
                 }

@@ -312,7 +312,6 @@ import dev.citali.lunartune.ui.screens.settings.NavigationTab
 import dev.citali.lunartune.ui.theme.LunarTuneTheme
 import dev.citali.lunartune.ui.theme.ColorSaver
 import dev.citali.lunartune.ui.theme.DefaultThemeColor
-import dev.citali.lunartune.ui.theme.PlayerColorExtractor
 import dev.citali.lunartune.ui.theme.extractThemeColor
 import dev.citali.lunartune.ui.utils.appBarScrollBehavior
 import dev.citali.lunartune.ui.utils.backToMain
@@ -376,9 +375,6 @@ class MainActivity : FragmentActivity() {
             ) {
                 isMusicServiceBound = true
                 if (service is MusicBinder) {
-                    // A rebind (background → foreground) replaces the connection; release the
-                    // previous one first so its player listener does not stay registered.
-                    playerConnection?.dispose()
                     playerConnection =
                         PlayerConnection(this@MainActivity, service, database, lifecycleScope)
                     playPendingDeepLinkQueueIfReady()
@@ -390,7 +386,10 @@ class MainActivity : FragmentActivity() {
 
             override fun onServiceDisconnected(name: ComponentName?) {
                 isMusicServiceBound = false
-                disposePlayerConnection()
+                pendingAodModeJob?.cancel()
+                pendingAodModeJob = null
+                playerConnection?.dispose()
+                playerConnection = null
             }
         }
 
@@ -477,22 +476,6 @@ class MainActivity : FragmentActivity() {
         openPendingAodModeIfReady()
     }
 
-    /**
-     * Drops the current [PlayerConnection]. Safe to call repeatedly.
-     *
-     * unbindService() does NOT trigger onServiceDisconnected — Android only delivers that
-     * callback when the service process dies — so every clean unbind path must dispose here, or
-     * the connection stays registered as a listener on the service's long-lived player and pins
-     * this Activity (plus its whole Compose tree) until the service itself dies. One leaked
-     * connection accumulated per background/foreground cycle without this.
-     */
-    private fun disposePlayerConnection() {
-        pendingAodModeJob?.cancel()
-        pendingAodModeJob = null
-        playerConnection?.dispose()
-        playerConnection = null
-    }
-
     private fun safeUnbindMusicService() {
         if (!isMusicServiceBound) return
         try {
@@ -503,7 +486,6 @@ class MainActivity : FragmentActivity() {
         } finally {
             isMusicServiceBound = false
         }
-        disposePlayerConnection()
     }
 
     override fun onStop() {
@@ -529,11 +511,8 @@ class MainActivity : FragmentActivity() {
             playerConnection?.service?.stopAndClearPlayback(clearPersistentState = true)
             safeUnbindMusicService()
             stopService(Intent(this, MusicService::class.java))
+            playerConnection = null
         }
-        // onStop's unbind normally disposed already; safety net for any path that reaches
-        // destruction with a live connection (AOD mode keeps the binding through onStop).
-        disposePlayerConnection()
-        safeUnbindMusicService()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -872,13 +851,7 @@ class MainActivity : FragmentActivity() {
                                             .Builder(this@MainActivity)
                                             .data(song.thumbnailUrl)
                                             .allowHardware(false)
-                                            // Palette only needs a thumbnail: without a size every
-                                            // track change decoded the full-resolution cover into a
-                                            // multi-megabyte software bitmap just to read its colours.
-                                            .size(
-                                                PlayerColorExtractor.Config.IMAGE_SIZE,
-                                                PlayerColorExtractor.Config.IMAGE_SIZE,
-                                            ).build(),
+                                            .build(),
                                     )
                                 val extractedColor = result.image?.toBitmap()?.extractThemeColor()
                                 withContext(Dispatchers.Main) {
