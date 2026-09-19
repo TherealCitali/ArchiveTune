@@ -342,15 +342,16 @@ fun LyricsScreen(
                 }
             if (existingLyrics != null) return@LaunchedEffect
 
-            val lyrics =
+            val fetchedLyrics =
                 withContext(Dispatchers.IO) {
-                    lyricsHelper.getLyrics(mediaMetadata)
+                    lyricsHelper.getLyricsWithSource(mediaMetadata)
                 }
             withContext(Dispatchers.IO) {
                 database.query {
                     insertLyricsIfAbsent(
                         id = mediaMetadata.id,
-                        lyrics = lyrics,
+                        lyrics = fetchedLyrics.lyrics,
+                        source = fetchedLyrics.providerName,
                     )
                 }
             }

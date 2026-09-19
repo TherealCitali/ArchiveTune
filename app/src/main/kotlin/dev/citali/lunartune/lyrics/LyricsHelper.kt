@@ -62,20 +62,26 @@ class LyricsHelper
             mediaMetadata: MediaMetadata,
             preferredProviderOnly: Boolean = false,
             forceRefresh: Boolean = false,
-        ): String {
+        ): String = getLyricsWithSource(mediaMetadata, preferredProviderOnly, forceRefresh).lyrics
+
+        suspend fun getLyricsWithSource(
+            mediaMetadata: MediaMetadata,
+            preferredProviderOnly: Boolean = false,
+            forceRefresh: Boolean = false,
+        ): LyricsFetchResult {
             val cacheKey = mediaMetadata.lyricsCacheKey
             if (forceRefresh) {
                 invalidateCache(cacheKey)
             } else {
                 singleLyricsCache.get(cacheKey)?.let { lyrics ->
                     GlobalLog.append(Log.DEBUG, "LyricsHelper", "Found lyrics in cache for ${mediaMetadata.title}")
-                    return lyrics
+                    return LyricsFetchResult(REMOTE_CACHE_SOURCE, lyrics)
                 }
 
                 val cached = cache.get(cacheKey)?.firstOrNull()
                 if (cached != null) {
                     GlobalLog.append(Log.DEBUG, "LyricsHelper", "Found lyrics in cache for ${mediaMetadata.title}")
-                    return cached.lyrics
+                    return LyricsFetchResult(cached.providerName, cached.lyrics)
                 }
             }
 
@@ -96,17 +102,17 @@ class LyricsHelper
 
             if (!isNetworkAvailable) {
                 GlobalLog.append(Log.WARN, "LyricsHelper", "Network unavailable, aborting lyrics fetch")
-                return LYRICS_NOT_FOUND
+                return LyricsFetchResult(REMOTE_CACHE_SOURCE, LYRICS_NOT_FOUND)
             }
 
             val ordered = orderedProviders().filter { it.isEnabled(context) }
             val providers = if (preferredProviderOnly) ordered.take(1) else ordered
-            val lyrics = fetchPriorityLyrics(providers, mediaMetadata)
-            if (isMeaningfulLyrics(lyrics)) {
-                singleLyricsCache.put(cacheKey, lyrics)
+            val result = fetchPriorityLyrics(providers, mediaMetadata)
+            if (result != null && isMeaningfulLyrics(result.lyrics)) {
+                singleLyricsCache.put(cacheKey, result.lyrics)
             }
 
-            return lyrics
+            result ?: LyricsFetchResult(REMOTE_CACHE_SOURCE, LYRICS_NOT_FOUND)
         }
 
         suspend fun getAllLyrics(
@@ -166,8 +172,8 @@ class LyricsHelper
         private suspend fun fetchPriorityLyrics(
             providers: List<LyricsProvider>,
             mediaMetadata: MediaMetadata,
-        ): String {
-            if (providers.isEmpty()) return LYRICS_NOT_FOUND
+        ): LyricsFetchResult? {
+            if (providers.isEmpty()) return null
 
             val artist = mediaMetadata.artists.joinToString { it.name }
             val results =
@@ -180,18 +186,20 @@ class LyricsHelper
                         }.mapNotNull { it.await() }
                 }
 
-            if (results.isEmpty()) return LYRICS_NOT_FOUND
+            if (results.isEmpty()) return null
 
-            results.firstOrNull { LyricsUtils.hasWordSyncedLyrics(it) }?.let { return it }
-            results.firstOrNull { LyricsUtils.isLineSyncedLrc(it) }?.let { return it }
-            return results.first()
+            val selected =
+                results.firstOrNull { LyricsUtils.hasWordSyncedLyrics(it.lyrics) }
+                    ?: results.firstOrNull { LyricsUtils.isLineSyncedLrc(it.lyrics) }
+                    ?: results.first()
+            return LyricsFetchResult(selected.providerName, selected.lyrics)
         }
 
         private suspend fun fetchProviderLyrics(
             provider: LyricsProvider,
             mediaMetadata: MediaMetadata,
             artist: String,
-        ): String? =
+        ): LyricsResult? =
             try {
                 provider
                     .getLyrics(
@@ -202,7 +210,10 @@ class LyricsHelper
                         mediaMetadata.duration,
                     ).fold(
                         onSuccess = { lyrics ->
-                            LyricsUtils.lyricsOrNotFound(lyrics).takeIf { it != LYRICS_NOT_FOUND }
+                            LyricsUtils
+                                .lyricsOrNotFound(lyrics)
+                                .takeIf { it != LYRICS_NOT_FOUND }
+                                ?.let { LyricsResult(provider.name, it) }
                         },
                         onFailure = {
                             reportException(it)
@@ -273,3 +284,10 @@ data class LyricsResult(
     val providerName: String,
     val lyrics: String,
 )
+
+data class LyricsFetchResult(
+    val providerName: String,
+    val lyrics: String,
+)
+
+private const val REMOTE_CACHE_SOURCE = "Remote lyrics cache"
