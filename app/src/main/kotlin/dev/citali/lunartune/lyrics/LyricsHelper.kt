@@ -112,7 +112,7 @@ class LyricsHelper
                 singleLyricsCache.put(cacheKey, result.lyrics)
             }
 
-            result ?: LyricsFetchResult(REMOTE_CACHE_SOURCE, LYRICS_NOT_FOUND)
+            return result ?: LyricsFetchResult(REMOTE_CACHE_SOURCE, LYRICS_NOT_FOUND)
         }
 
         suspend fun getAllLyrics(
