@@ -334,7 +334,7 @@ fun BottomSheetPlayer(
     val bottomSheetPageState = LocalBottomSheetPageState.current
 
     val playerConnection = LocalPlayerConnection.current ?: return
-    val rawMediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val rawMediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
     val (albumArtOverrides) = rememberPreference(PerSongAlbumArtOverridesKey, "")
     val mediaMetadata =
         remember(rawMediaMetadata, albumArtOverrides) {
@@ -419,7 +419,7 @@ fun BottomSheetPlayer(
     val (backdropBlurAmount) = rememberPreference(BackdropBlurAmountKey, defaultValue = 60)
     val (showCodecOnPlayer) = rememberPreference(booleanPreferencesKey("show_codec_on_player"), false)
     val (incrementalSeekSkipEnabled) = rememberPreference(dev.citali.lunartune.constants.SeekExtraSeconds, defaultValue = false)
-    var keyboardSkipMultiplier by remember { mutableStateOf(1) }
+    var keyboardSkipMultiplier by remember { mutableIntStateOf(1) }
     var lastKeyboardTapTime by remember { mutableLongStateOf(0L) }
 
     val playerButtonsStyle by rememberEnumPreference(
@@ -466,14 +466,14 @@ fun BottomSheetPlayer(
             MaterialTheme.colorScheme.surfaceContainer.copy(alpha = progress)
         }
 
-    val playbackState by playerConnection.playbackState.collectAsState()
-    val isPlaying by playerConnection.isPlaying.collectAsState()
+    val playbackState by playerConnection.playbackState.collectAsStateWithLifecycle()
+    val isPlaying by playerConnection.isPlaying.collectAsStateWithLifecycle()
     val currentSong by playerConnection.currentSong.collectAsState(initial = null)
-    val currentSongLiked by playerConnection.currentSongLiked.collectAsState()
-    val queueTitle by playerConnection.queueTitle.collectAsState()
+    val currentSongLiked by playerConnection.currentSongLiked.collectAsStateWithLifecycle()
+    val queueTitle by playerConnection.queueTitle.collectAsStateWithLifecycle()
     val currentFormat by playerConnection.currentFormat.collectAsState(initial = null)
-    val queueWindows by playerConnection.queueWindows.collectAsState()
-    val currentWindowIndex by playerConnection.currentWindowIndex.collectAsState()
+    val queueWindows by playerConnection.queueWindows.collectAsStateWithLifecycle()
+    val currentWindowIndex by playerConnection.currentWindowIndex.collectAsStateWithLifecycle()
     val deviceMusicVolumeController = rememberDeviceMusicVolumeController()
     val onPlayerVolumeChange =
         remember(deviceMusicVolumeController) {
@@ -482,10 +482,10 @@ fun BottomSheetPlayer(
             }
         }
 
-    val repeatMode by playerConnection.repeatMode.collectAsState()
+    val repeatMode by playerConnection.repeatMode.collectAsStateWithLifecycle()
 
-    val canSkipPrevious by playerConnection.canSkipPrevious.collectAsState()
-    val canSkipNext by playerConnection.canSkipNext.collectAsState()
+    val canSkipPrevious by playerConnection.canSkipPrevious.collectAsStateWithLifecycle()
+    val canSkipNext by playerConnection.canSkipNext.collectAsStateWithLifecycle()
 
     val aodModeEnabled by playerConnection.aodModeEnabled.collectAsStateWithLifecycle()
     val currentLyricsEntity by playerConnection.currentLyrics.collectAsStateWithLifecycle(initialValue = null)

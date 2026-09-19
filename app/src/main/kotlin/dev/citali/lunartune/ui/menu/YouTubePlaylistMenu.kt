@@ -107,6 +107,8 @@ import dev.citali.lunartune.utils.rememberPreference
 import dev.citali.lunartune.utils.serializeSpeedDialPins
 import dev.citali.lunartune.utils.toggleSpeedDialPin
 
+private val DIGITS_REGEX = Regex("""\d+""")
+
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("MutableCollectionMutableState")
 @Composable
@@ -227,7 +229,7 @@ fun YouTubePlaylistMenu(
                                                         isEditable = false,
                                                         remoteSongCount =
                                                             playlist.songCountText?.let {
-                                                                Regex("""\d+""").find(it)?.value?.toIntOrNull()
+                                                                DIGITS_REGEX.find(it)?.value?.toIntOrNull()
                                                             },
                                                         playEndpointParams = playlist.playEndpoint?.params,
                                                         shuffleEndpointParams = playlist.shuffleEndpoint?.params,
@@ -244,7 +246,7 @@ fun YouTubePlaylistMenu(
                                                         isEditable = playlist.isEditable,
                                                         remoteSongCount =
                                                             playlist.songCountText?.let {
-                                                                Regex("""\d+""").find(it)?.value?.toIntOrNull()
+                                                                DIGITS_REGEX.find(it)?.value?.toIntOrNull()
                                                             },
                                                         playEndpointParams = playlist.playEndpoint?.params,
                                                         shuffleEndpointParams = playlist.shuffleEndpoint?.params,
@@ -706,7 +708,7 @@ fun YouTubePlaylistMenu(
                                                                     isEditable = false,
                                                                     remoteSongCount =
                                                                         playlist.songCountText?.let {
-                                                                            Regex("""\d+""").find(it)?.value?.toIntOrNull()
+                                                                            DIGITS_REGEX.find(it)?.value?.toIntOrNull()
                                                                         },
                                                                     playEndpointParams = playlist.playEndpoint?.params,
                                                                     shuffleEndpointParams = playlist.shuffleEndpoint?.params,
@@ -802,7 +804,7 @@ fun YouTubePlaylistMenu(
                                                             isAutoSync = newValue,
                                                             remoteSongCount =
                                                                 playlist.songCountText?.let {
-                                                                    Regex("""\d+""").find(it)?.value?.toIntOrNull()
+                                                                    DIGITS_REGEX.find(it)?.value?.toIntOrNull()
                                                                 },
                                                             playEndpointParams = playlist.playEndpoint?.params,
                                                             shuffleEndpointParams = playlist.shuffleEndpoint?.params,

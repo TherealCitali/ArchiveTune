@@ -97,7 +97,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.collectAsState
 import androidx.compose.animation.core.tween
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.C
@@ -742,7 +741,7 @@ private fun AppleMusicBackground(
 ) {
     val context = LocalContext.current
     val thumbnailUrl = mediaMetadata.thumbnailUrl
-    val cacheRevision by LyricsArtBlurCache.updates.collectAsState()
+    val cacheRevision by LyricsArtBlurCache.updates.collectAsStateWithLifecycle()
     val blurredArt =
         remember(thumbnailUrl, cacheRevision) {
             LyricsArtBlurCache.peek(thumbnailUrl)
@@ -973,7 +972,7 @@ private fun MovingBlurBackground(
 
     val context = LocalContext.current
     val thumbnailUrl = mediaMetadata.thumbnailUrl
-    val cacheRevision by LyricsArtBlurCache.updates.collectAsState()
+    val cacheRevision by LyricsArtBlurCache.updates.collectAsStateWithLifecycle()
     val blurredArt =
         remember(thumbnailUrl, cacheRevision) {
             LyricsArtBlurCache.peek(thumbnailUrl)

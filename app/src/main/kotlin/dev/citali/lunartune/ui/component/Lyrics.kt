@@ -122,6 +122,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -169,6 +170,8 @@ import dev.citali.lunartune.utils.reportException
 import kotlin.math.abs
 import kotlin.math.sin
 import kotlin.time.Duration.Companion.seconds
+
+private val LYRICS_WHITESPACE_REGEX = Regex("\\s+")
 
 private val AppleMusicEasing = CubicBezierEasing(0.25f, 0.1f, 0.25f, 1.0f)
 private val SmoothDecelerateEasing = CubicBezierEasing(0.0f, 0.0f, 0.2f, 1.0f)
@@ -465,7 +468,7 @@ fun Lyrics(
         }
     val scope = rememberCoroutineScope()
 
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
     val lyricsEntity by playerConnection.currentLyrics.collectAsState(initial = null)
     val lyrics = remember(lyricsEntity) { lyricsEntity?.lyrics?.trim() }
 
@@ -1081,7 +1084,7 @@ fun Lyrics(
                                     val hasWordTimings = remember(item.words) { item.words?.isNotEmpty() == true }
                                     val romanizedText: String? =
                                         if (romanizationPreferences.isEnabled) {
-                                            val value by item.romanizedTextFlow.collectAsState()
+                                            val value by item.romanizedTextFlow.collectAsStateWithLifecycle()
                                             value
                                         } else {
                                             null
@@ -1190,7 +1193,7 @@ fun Lyrics(
                                                         } else {
                                                             item.text
                                                                 .trim()
-                                                                .split(Regex("\\s+"))
+                                                                .split(LYRICS_WHITESPACE_REGEX)
                                                                 .filter { it.isNotBlank() }
                                                         }
                                                     val lengths =

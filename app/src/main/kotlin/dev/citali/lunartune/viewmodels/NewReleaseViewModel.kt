@@ -81,7 +81,16 @@ class NewReleaseViewModel
 
         private fun load() {
             viewModelScope.launch(Dispatchers.IO) {
-                _uiState.value = NewReleaseUiState.Loading
+                // The ViewModel is scoped to the destination, so every visit used to redo the
+                // browse request plus the play-time ranking query. Serve the last catalogue
+                // straight away and only go to the network once it is older than the TTL.
+                val cached = CachedCatalogue.get()
+                if (cached != null) {
+                    _uiState.value = cached.toUiState()
+                    if (CachedCatalogue.isFresh()) return@launch
+                } else {
+                    _uiState.value = NewReleaseUiState.Loading
+                }
                 try {
                     val albums = YouTube.newReleaseAlbums().getOrThrow()
                     val blockedArtistIds = database.getBlockedArtistIds().toSet()
@@ -113,17 +122,24 @@ class NewReleaseViewModel
                                 .filterBlockedArtists(blockedArtistIds),
                             aiContentFilterPolicy,
                         ).distinctBy { it.id }
-                    val content = filtered.toNewReleaseContent()
-                    _uiState.value =
-                        if (content.isEmpty) {
-                            NewReleaseUiState.Empty
-                        } else {
-                            NewReleaseUiState.Success(content)
-                        }
+                    CachedCatalogue.store(filtered)
+                    _uiState.value = filtered.toUiState()
                 } catch (t: Throwable) {
                     reportException(t)
-                    _uiState.value = NewReleaseUiState.Error
+                    // A stale catalogue beats an error screen when the refresh fails.
+                    if (cached == null) {
+                        _uiState.value = NewReleaseUiState.Error
+                    }
                 }
+            }
+        }
+
+        private fun List<AlbumItem>.toUiState(): NewReleaseUiState {
+            val content = toNewReleaseContent()
+            return if (content.isEmpty) {
+                NewReleaseUiState.Empty
+            } else {
+                NewReleaseUiState.Success(content)
             }
         }
 
@@ -133,4 +149,22 @@ class NewReleaseViewModel
                 singles = filter { it.releaseType == AlbumReleaseType.SINGLE },
                 eps = filter { it.releaseType == AlbumReleaseType.EP },
             )
+
+        /** Last filtered catalogue, shared across ViewModel instances for the life of the process. */
+        private object CachedCatalogue {
+            private const val TTL_MS = 5 * 60 * 1000L
+
+            @Volatile private var catalogue: List<AlbumItem>? = null
+
+            @Volatile private var storedAtMs = 0L
+
+            fun store(value: List<AlbumItem>) {
+                catalogue = value
+                storedAtMs = System.currentTimeMillis()
+            }
+
+            fun get(): List<AlbumItem>? = catalogue?.takeIf { it.isNotEmpty() }
+
+            fun isFresh(): Boolean = get() != null && System.currentTimeMillis() - storedAtMs < TTL_MS
+        }
     }

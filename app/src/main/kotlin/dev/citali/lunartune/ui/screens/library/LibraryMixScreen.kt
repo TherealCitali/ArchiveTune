@@ -67,6 +67,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -81,6 +83,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import coil3.request.CachePolicy
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import coil3.size.Size
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import dev.citali.lunartune.LocalDatabase
@@ -381,7 +387,7 @@ fun LibraryMixScreen(
                                                     .clip(RoundedCornerShape(28.dp)),
                                         ) {
                                             AsyncImage(
-                                                model = song.song.thumbnailUrl,
+                                                model = rememberSizedThumbnailRequest(song.song.thumbnailUrl, 110.dp),
                                                 contentDescription = null,
                                                 contentScale = ContentScale.Crop,
                                                 modifier = Modifier.fillMaxSize(),
@@ -540,7 +546,7 @@ fun LibraryMixScreen(
                                                     .clip(RoundedCornerShape(24.dp)),
                                         ) {
                                             AsyncImage(
-                                                model = playlist.thumbnails.getOrNull(0),
+                                                model = rememberSizedThumbnailRequest(playlist.thumbnails.getOrNull(0), 106.dp),
                                                 contentDescription = null,
                                                 contentScale = ContentScale.Crop,
                                                 modifier = Modifier.fillMaxSize(),
@@ -700,7 +706,7 @@ fun LibraryMixScreen(
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                     ) {
                                         AsyncImage(
-                                            model = artist.thumbnailUrl,
+                                            model = rememberSizedThumbnailRequest(artist.thumbnailUrl, 72.dp),
                                             contentDescription = null,
                                             contentScale = ContentScale.Crop,
                                             modifier =
@@ -813,7 +819,7 @@ private fun SpotifyPlaylistCompactCard(
                     .clip(RoundedCornerShape(24.dp)),
         ) {
             AsyncImage(
-                model = thumbnailUrl,
+                model = rememberSizedThumbnailRequest(thumbnailUrl, 106.dp),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
@@ -1145,7 +1151,7 @@ private fun LibraryTopMixCard(
                             )
                         } else {
                             AsyncImage(
-                                model = artworkUrl,
+                                model = rememberSizedThumbnailRequest(artworkUrl, 28.dp),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop,
                                 modifier =
@@ -1244,7 +1250,7 @@ private fun MostPlayedAlbumSpotlightCard(
                     val thumbnailUrl = album.thumbnailUrl
                     if (thumbnailUrl != null) {
                         AsyncImage(
-                            model = thumbnailUrl,
+                            model = rememberSizedThumbnailRequest(thumbnailUrl, 64.dp),
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize(),
@@ -1490,5 +1496,31 @@ private fun BoxScope.CardWatermarkIcon(
                     .offset(x = endBleed)
                     .requiredSize(size),
         )
+    }
+}
+
+/**
+ * Sized, cache-enabled request for artwork drawn at [sizeDp] square. Without an explicit size
+ * Coil downloads and decodes the original image (1280×720+ for YouTube thumbnails) to draw a
+ * 28–110 dp tile — and this screen fires a dozen such requests at once on first open. Sizing the
+ * request lets the CDN serve a small bucket and keeps the decode proportional to the tile.
+ */
+@Composable
+private fun rememberSizedThumbnailRequest(
+    url: String?,
+    sizeDp: Dp,
+): ImageRequest? {
+    if (url.isNullOrBlank()) return null
+    val context = LocalContext.current
+    val sizePx = with(LocalDensity.current) { sizeDp.roundToPx().coerceAtLeast(1) }
+    return remember(url, sizePx) {
+        ImageRequest
+            .Builder(context)
+            .data(url)
+            .size(Size(sizePx, sizePx))
+            .diskCachePolicy(CachePolicy.ENABLED)
+            .memoryCachePolicy(CachePolicy.ENABLED)
+            .crossfade(true)
+            .build()
     }
 }

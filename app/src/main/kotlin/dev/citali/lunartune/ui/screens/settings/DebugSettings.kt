@@ -52,6 +52,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -67,6 +69,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.Player
 import androidx.navigation.NavController
 import kotlinx.coroutines.delay
@@ -403,12 +406,12 @@ private fun NerdStatsSection(playerConnection: dev.citali.lunartune.playback.Pla
     if (playerConnection == null) return
 
     val currentFormat by playerConnection.currentFormat.collectAsState(initial = null)
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
     val player = playerConnection.player
 
-    var bufferPercentage by remember { mutableStateOf(0) }
-    var bufferedPosition by remember { mutableStateOf(0L) }
-    var currentPosition by remember { mutableStateOf(0L) }
+    var bufferPercentage by remember { mutableIntStateOf(0) }
+    var bufferedPosition by remember { mutableLongStateOf(0L) }
+    var currentPosition by remember { mutableLongStateOf(0L) }
     var playbackSpeed by remember { mutableStateOf(1.0f) }
 
     LaunchedEffect(Unit) {
