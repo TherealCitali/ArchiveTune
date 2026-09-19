@@ -82,6 +82,9 @@ interface DatabaseDao {
     @Query("SELECT * FROM song WHERE inLibrary IS NOT NULL ORDER BY rowId")
     fun songsByRowIdAsc(): Flow<List<Song>>
 
+    @Query("SELECT id FROM song WHERE inLibrary IS NOT NULL")
+    suspend fun librarySongIds(): List<String>
+
     @Transaction
     @Query("SELECT * FROM song WHERE inLibrary IS NOT NULL ORDER BY inLibrary")
     fun songsByCreateDateAsc(): Flow<List<Song>>
