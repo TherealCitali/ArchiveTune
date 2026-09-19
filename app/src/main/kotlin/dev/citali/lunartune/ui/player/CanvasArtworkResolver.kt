@@ -118,10 +118,6 @@ internal suspend fun refetchCanvasArtworkForPlayback(
     }
 }
 
-// Compiled once instead of per query normalisation (these run for every canvas lookup).
-private val BRACKET_SUFFIX_REGEX = Regex("\\s*\\[[^]]*]")
-private val WHITESPACE_REGEX = Regex("\\s+")
-
 private fun CanvasArtwork.hasRequiredCanvasVariant(requireVertical: Boolean): Boolean =
     if (requireVertical) {
         !preferredVerticalAnimationUrl.isNullOrBlank()
@@ -134,7 +130,7 @@ private const val CanvasArtworkLogTag = "CanvasArtwork"
 private fun normalizeCanvasSongTitle(raw: String): String {
     val stripped =
         raw
-            .replace(BRACKET_SUFFIX_REGEX, "")
+            .replace(Regex("\\s*\\[[^]]*]"), "")
             .replace(
                 Regex(
                     "\\s*\\((?:feat\\.?|ft\\.?|featuring|with)\\b[^)]*\\)",
@@ -153,12 +149,12 @@ private fun normalizeCanvasSongTitle(raw: String): String {
                     RegexOption.IGNORE_CASE,
                 ),
                 "",
-            ).replace(WHITESPACE_REGEX, " ")
+            ).replace(Regex("\\s+"), " ")
             .trim()
 
     return stripped
         .trim('-')
-        .replace(WHITESPACE_REGEX, " ")
+        .replace(Regex("\\s+"), " ")
         .trim()
 }
 
@@ -174,5 +170,5 @@ private fun normalizeCanvasArtistName(raw: String): String {
             ).firstOrNull()
             .orEmpty()
 
-    return first.replace(WHITESPACE_REGEX, " ").trim()
+    return first.replace(Regex("\\s+"), " ").trim()
 }

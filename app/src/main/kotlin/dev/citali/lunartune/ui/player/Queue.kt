@@ -65,7 +65,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -156,15 +155,15 @@ fun Queue(
     val bottomSheetPageState = LocalBottomSheetPageState.current
 
     val playerConnection = LocalPlayerConnection.current ?: return
-    val isPlaying by playerConnection.isPlaying.collectAsStateWithLifecycle()
-    val repeatMode by playerConnection.repeatMode.collectAsStateWithLifecycle()
+    val isPlaying by playerConnection.isPlaying.collectAsState()
+    val repeatMode by playerConnection.repeatMode.collectAsState()
 
-    val currentWindowIndex by playerConnection.currentWindowIndex.collectAsStateWithLifecycle()
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
-    val currentSongLiked by playerConnection.currentSongLiked.collectAsStateWithLifecycle()
+    val currentWindowIndex by playerConnection.currentWindowIndex.collectAsState()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val currentSongLiked by playerConnection.currentSongLiked.collectAsState()
 
     val currentFormat by playerConnection.currentFormat.collectAsState(initial = null)
-    val queueTitle by playerConnection.queueTitle.collectAsStateWithLifecycle()
+    val queueTitle by playerConnection.queueTitle.collectAsState()
 
     val selectedSongs = remember { mutableStateListOf<MediaMetadata>() }
     val selectedItems = remember { mutableStateListOf<Timeline.Window>() }
@@ -184,8 +183,8 @@ fun Queue(
 
     var locked by rememberPreference(QueueEditLockKey, defaultValue = true)
     var infiniteQueueEnabled by rememberPreference(AutoLoadMoreKey, defaultValue = true)
-    val infiniteQueueLoading by playerConnection.service.infiniteQueueLoading.collectAsStateWithLifecycle()
-    val togetherSessionState by playerConnection.service.togetherSessionState.collectAsStateWithLifecycle()
+    val infiniteQueueLoading by playerConnection.service.infiniteQueueLoading.collectAsState()
+    val togetherSessionState by playerConnection.service.togetherSessionState.collectAsState()
     val togetherForcesLock =
         togetherSessionState is dev.citali.lunartune.together.TogetherSessionState.Joined &&
             (togetherSessionState as dev.citali.lunartune.together.TogetherSessionState.Joined).role is dev.citali.lunartune.together.TogetherRole.Guest
@@ -303,7 +302,7 @@ fun Queue(
         )
     }
 
-    val queueWindows by playerConnection.queueWindows.collectAsStateWithLifecycle()
+    val queueWindows by playerConnection.queueWindows.collectAsState()
     val currentWindow =
         remember(currentWindowIndex, queueWindows) {
             queueWindows.getOrNull(currentWindowIndex)
@@ -384,7 +383,7 @@ fun Queue(
         ) {
             playerConnection.service.sleepTimer.isActive
         }
-    var sleepTimerTimeLeft by remember { mutableLongStateOf(0L) }
+    var sleepTimerTimeLeft by remember { mutableStateOf(0L) }
 
     val (showCodecOnPlayer) =
         rememberPreference(
@@ -600,7 +599,7 @@ fun Queue(
                 }
 
                 PlayerDesignStyle.V9 -> {
-                    val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsStateWithLifecycle()
+                    val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsState()
                     QueueCollapsedContentV9(
                         showCodecOnPlayer = showCodecOnPlayer,
                         currentFormat = currentFormat,
@@ -692,7 +691,7 @@ fun Queue(
             }
         },
     ) {
-        val queueWindows by playerConnection.queueWindows.collectAsStateWithLifecycle()
+        val queueWindows by playerConnection.queueWindows.collectAsState()
         val mutableQueueWindows =
             remember {
                 mutableStateListOf<Timeline.Window>().apply {

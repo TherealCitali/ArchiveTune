@@ -11,6 +11,7 @@ import android.os.Build
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -21,7 +22,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import dev.citali.lunartune.utils.LyricsArtBlurCache
 
@@ -73,7 +73,7 @@ internal fun BlurredArtwork(
     }
 
     val context = LocalContext.current
-    val revision by LyricsArtBlurCache.updates.collectAsStateWithLifecycle()
+    val revision by LyricsArtBlurCache.updates.collectAsState()
     val blurred =
         remember(url, cpuRadius, revision) {
             LyricsArtBlurCache.peek(url, cpuRadius)

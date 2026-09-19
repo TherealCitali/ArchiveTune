@@ -111,6 +111,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -953,8 +954,8 @@ class MainActivity : FragmentActivity() {
                     val coroutineScope = rememberCoroutineScope()
                     val homeViewModel: HomeViewModel = hiltViewModel()
                     val networkBannerViewModel: NetworkBannerViewModel = hiltViewModel()
-                    val allLocalItems by homeViewModel.allLocalItems.collectAsStateWithLifecycle()
-                    val allYtItems by homeViewModel.allYtItems.collectAsStateWithLifecycle()
+                    val allLocalItems by homeViewModel.allLocalItems.collectAsState()
+                    val allYtItems by homeViewModel.allYtItems.collectAsState()
                     val networkBannerState by networkBannerViewModel.bannerState.collectAsStateWithLifecycle()
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     val (previousTab) = rememberSaveable { mutableStateOf("home") }
@@ -1125,7 +1126,7 @@ class MainActivity : FragmentActivity() {
                     val currentPlayerMediaMetadata by remember(playerConnection) {
                         playerConnection?.mediaMetadata
                             ?: MutableStateFlow<dev.citali.lunartune.models.MediaMetadata?>(null)
-                    }.collectAsStateWithLifecycle()
+                    }.collectAsState()
                     val playerDesignStyle =
                         remember(settingsPlayerDesignStyle, playerStyleOverrides, currentPlayerMediaMetadata?.id) {
                             resolvePlayerDesignStyle(
@@ -1221,7 +1222,7 @@ class MainActivity : FragmentActivity() {
                         }
                     }
 
-                    var yearInMusicSavedPlayerAnchor by rememberSaveable { mutableIntStateOf(-1) }
+                    var yearInMusicSavedPlayerAnchor by rememberSaveable { mutableStateOf(-1) }
 
                     val shouldHideStatusBars =
                         isYearInMusicScreen ||
@@ -1704,7 +1705,7 @@ class MainActivity : FragmentActivity() {
                                         // Therefore: measure once here, then apply the limit to the
                                         // CURRENT route's state via LaunchedEffect so every route gets
                                         // its limit on entry (not just the first-measured one).
-                                        var headerHeightPx by remember { mutableIntStateOf(0) }
+                                        var headerHeightPx by remember { mutableStateOf(0) }
                                         LaunchedEffect(currentScrollBehavior, headerHeightPx) {
                                             if (headerHeightPx > 0 && !isLibraryRoute) {
                                                 val limit = -headerHeightPx.toFloat()
