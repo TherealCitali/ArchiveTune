@@ -533,8 +533,8 @@ private fun MiniPlayerTransportControls(
 
 @Composable
 fun NewMiniPlayerContent(
-    position: Long,
-    duration: Long,
+    positionProvider: () -> Long,
+    durationProvider: () -> Long,
     playerConnection: PlayerConnection,
     colors: MiniPlayerContentColors,
 ) {
@@ -546,9 +546,13 @@ fun NewMiniPlayerContent(
     val canSkipNext by playerConnection.canSkipNext.collectAsStateWithLifecycle()
 
     val isLoading = playbackState == Player.STATE_BUFFERING
+    // Stable across ticks: the ring reads position/duration through the lambda when it draws.
     val progressProvider =
-        remember(position, duration) {
-            { if (duration > 0) (position.toFloat() / duration).coerceIn(0f, 1f) else 0f }
+        remember(positionProvider, durationProvider) {
+            {
+                val duration = durationProvider()
+                if (duration > 0) (positionProvider().toFloat() / duration).coerceIn(0f, 1f) else 0f
+            }
         }
 
     Row(

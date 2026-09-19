@@ -55,17 +55,23 @@ import kotlin.math.roundToInt
 
 private const val MiniPlayerPaletteCacheSize = 24
 
+/**
+ * [positionProvider] / [durationProvider] instead of plain Long parameters: the player's position
+ * poll (see BottomSheetPlayer) would otherwise drive this whole row — artwork, title, transport
+ * controls — through a full recomposition on every tick during playback. Only the progress ring
+ * reads the lambdas, and it does so in its draw phase, so the tick now costs one redraw of the ring.
+ */
 @Composable
 fun MiniPlayer(
-    position: Long,
-    duration: Long,
+    positionProvider: () -> Long,
+    durationProvider: () -> Long,
     modifier: Modifier = Modifier,
     pureBlack: Boolean,
     isPairedWithNavigation: Boolean = false,
 ) {
     NewMiniPlayer(
-        position = position,
-        duration = duration,
+        positionProvider = positionProvider,
+        durationProvider = durationProvider,
         modifier = modifier,
         pureBlack = pureBlack,
         isPairedWithNavigation = isPairedWithNavigation,
@@ -74,8 +80,8 @@ fun MiniPlayer(
 
 @Composable
 private fun NewMiniPlayer(
-    position: Long,
-    duration: Long,
+    positionProvider: () -> Long,
+    durationProvider: () -> Long,
     modifier: Modifier = Modifier,
     pureBlack: Boolean,
     isPairedWithNavigation: Boolean,
@@ -217,8 +223,8 @@ private fun NewMiniPlayer(
                 modifier = Modifier.fillMaxSize(),
             )
             NewMiniPlayerContent(
-                position = position,
-                duration = duration,
+                positionProvider = positionProvider,
+                durationProvider = durationProvider,
                 playerConnection = playerConnection,
                 colors = contentColors,
             )
