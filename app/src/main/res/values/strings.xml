@@ -840,6 +840,8 @@
     <string name="presence_manager_running">Presence manager: running</string>
     <string name="presence_manager_stopped">Presence manager: stopped</string>
     <string name="experimental_features">Experimental Features</string>
+    <string name="experimental_ui">Experimental UI</string>
+    <string name="experimental_ui_desc">Try new interface experiments while keeping the stable UI available.</string>
     <string name="no_logs">No Logs</string>
     <string name="show_nerd_stats">Show nerd stats</string>
     <string name="description_show_nerd_stats">Display real-time playback statistics (codec, bitrate, buffer)</string>
