@@ -71,6 +71,7 @@ import dev.citali.lunartune.LocalPlayerAwareWindowInsets
 import dev.citali.lunartune.LocalPlayerConnection
 import dev.citali.lunartune.R
 import dev.citali.lunartune.constants.DisableBlurKey
+import dev.citali.lunartune.constants.ExperimentalUiKey
 import dev.citali.lunartune.extensions.togglePlayPause
 import moe.rukamori.archivetune.innertube.models.AlbumItem
 import moe.rukamori.archivetune.innertube.models.ArtistItem
@@ -79,6 +80,7 @@ import moe.rukamori.archivetune.innertube.models.WatchEndpoint
 import dev.citali.lunartune.models.toMediaMetadata
 import dev.citali.lunartune.playback.queues.YouTubeQueue
 import dev.citali.lunartune.search.SearchDiscoveryUiModel
+import dev.citali.lunartune.ui.component.ExperimentalThemeBackdrop
 import dev.citali.lunartune.ui.component.LocalMenuState
 import dev.citali.lunartune.ui.component.NavigationTitle
 import dev.citali.lunartune.ui.component.YouTubeGridItem
@@ -106,6 +108,7 @@ fun SearchScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
     val (disableBlur) = rememberPreference(DisableBlurKey, false)
+    val (experimentalUi) = rememberPreference(ExperimentalUiKey, false)
     val tonalStart = MaterialTheme.colorScheme.primaryContainer
     val tonalMiddle = MaterialTheme.colorScheme.secondaryContainer
     val lazyListState = rememberLazyListState()
@@ -137,7 +140,9 @@ fun SearchScreen(
                     },
                 ),
     ) {
-        if (!disableBlur) {
+        if (experimentalUi) {
+            ExperimentalThemeBackdrop(Modifier.fillMaxSize())
+        } else if (!disableBlur) {
             Box(
                 modifier =
                     Modifier
