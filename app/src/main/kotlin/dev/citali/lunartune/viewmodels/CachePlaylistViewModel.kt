@@ -25,6 +25,7 @@ import dev.citali.lunartune.di.DownloadCache
 import dev.citali.lunartune.di.PlayerCache
 import dev.citali.lunartune.extensions.filterExplicit
 import dev.citali.lunartune.extensions.filterVideo
+import dev.citali.lunartune.playback.CachedSongExporter
 import dev.citali.lunartune.utils.dataStore
 import dev.citali.lunartune.utils.get
 import java.time.LocalDateTime
@@ -89,4 +90,7 @@ class CachePlaylistViewModel
         fun removeSongFromCache(songId: String) {
             playerCache.removeResource(songId)
         }
+
+        suspend fun exportSong(song: Song): String =
+            CachedSongExporter(context, playerCache, downloadCache).export(song)
     }
