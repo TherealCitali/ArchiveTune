@@ -1582,8 +1582,9 @@ fun ExperimentalQuickPicksSection(
                 .background(
                     Brush.radialGradient(
                         0f to Color.Transparent,
-                        0.58f to MaterialTheme.colorScheme.surface.copy(alpha = 0.08f),
-                        1f to MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                        0.52f to Color.Transparent,
+                        0.78f to MaterialTheme.colorScheme.background.copy(alpha = 0.84f),
+                        1f to MaterialTheme.colorScheme.background,
                     ),
                 ),
         )
@@ -1679,8 +1680,9 @@ fun ExperimentalRemoteQuickPicksSection(
                 .background(
                     Brush.radialGradient(
                         0f to Color.Transparent,
-                        0.58f to MaterialTheme.colorScheme.surface.copy(alpha = 0.08f),
-                        1f to MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                        0.52f to Color.Transparent,
+                        0.78f to MaterialTheme.colorScheme.background.copy(alpha = 0.84f),
+                        1f to MaterialTheme.colorScheme.background,
                     ),
                 ),
         )
