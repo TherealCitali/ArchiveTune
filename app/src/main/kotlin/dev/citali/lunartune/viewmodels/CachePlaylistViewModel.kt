@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import dev.citali.lunartune.constants.HideExplicitKey
 import dev.citali.lunartune.constants.HideVideoKey
 import dev.citali.lunartune.db.MusicDatabase
@@ -92,5 +93,7 @@ class CachePlaylistViewModel
         }
 
         suspend fun exportSong(song: Song): String =
-            CachedSongExporter(context, playerCache, downloadCache).export(song)
+            withContext(Dispatchers.IO) {
+                CachedSongExporter(context, playerCache, downloadCache).export(song)
+            }
     }
