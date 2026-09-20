@@ -147,12 +147,13 @@ class LyricsPreloadManager
             }
 
             try {
-                val lyrics = lyricsHelper.getLyrics(song)
-                if (lyrics == LyricsEntity.LYRICS_NOT_FOUND) return
+                val fetchedLyrics = lyricsHelper.getLyricsWithSource(song)
+                if (fetchedLyrics.lyrics == LyricsEntity.LYRICS_NOT_FOUND) return
 
                 database.replaceLyricsIfAbsentOrNotFound(
                     id = song.id,
-                    lyrics = lyrics,
+                    lyrics = fetchedLyrics.lyrics,
+                    source = fetchedLyrics.providerName,
                 )
                 Log.d(TAG, "Pre-loaded lyrics for: ${song.title}")
             } catch (e: CancellationException) {

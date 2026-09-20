@@ -452,16 +452,16 @@ class DownloadUtil
         }
 
         companion object {
-            private const val MAX_PARALLEL_DOWNLOADS = 6
-            private const val MAX_IDLE_DOWNLOAD_CONNECTIONS = 12
-            private const val MAX_DOWNLOAD_HTTP_REQUESTS = 8
-            private const val MAX_DOWNLOAD_HTTP_REQUESTS_PER_HOST = 6
+            private const val MAX_PARALLEL_DOWNLOADS = 8
+            private const val MAX_IDLE_DOWNLOAD_CONNECTIONS = 16
+            private const val MAX_DOWNLOAD_HTTP_REQUESTS = 12
+            private const val MAX_DOWNLOAD_HTTP_REQUESTS_PER_HOST = 8
             private const val MAX_AUTO_RETRY_ATTEMPTS = 3
             private const val AUTO_RETRY_COOLDOWN_MS = 3_000L
             private const val DOWNLOAD_READ_TIMEOUT_SECONDS = 90L
             private const val DOWNLOAD_PROGRESS_REFRESH_INTERVAL_MS = 1_000L
             private const val DOWNLOAD_CONNECTION_KEEP_ALIVE_MINUTES = 5L
-            private const val DOWNLOAD_WRITE_BUFFER_SIZE = 256 * 1024
+            private const val DOWNLOAD_WRITE_BUFFER_SIZE = 512 * 1024
             private val STREAM_REFRESH_RESPONSE_CODES = setOf(403, 404, 410, 416)
         }
     }
