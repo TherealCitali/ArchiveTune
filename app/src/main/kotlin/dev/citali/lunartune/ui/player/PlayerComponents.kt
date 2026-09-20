@@ -67,13 +67,13 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.citali.lunartune.ui.component.LocalMenuState
 import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
@@ -271,7 +271,7 @@ fun PlayerTopActions(
     currentSongLiked: Boolean,
 ) {
     val haptic = LocalHapticFeedback.current
-    val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsStateWithLifecycle()
+    val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsState()
 
     when (playerDesignStyle) {
         PlayerDesignStyle.V2 -> {
@@ -979,7 +979,7 @@ fun PlayerPlaybackControls(
     currentSongLiked: Boolean,
 ) {
     val haptic = LocalHapticFeedback.current
-    val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsStateWithLifecycle()
+    val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsState()
     val view = LocalView.current
     val (enableHapticFeedback) = rememberPreference(EnableHapticFeedbackKey, true)
 
@@ -1963,7 +1963,7 @@ fun PlayerControlsContent(
     onSliderValueChangeFinished: () -> Unit,
     currentFormat: FormatEntity? = null,
 ) {
-    val currentSongLiked by playerConnection.currentSongLiked.collectAsStateWithLifecycle()
+    val currentSongLiked by playerConnection.currentSongLiked.collectAsState()
 
     val playPauseRoundness by animateDpAsState(
         targetValue = if (isPlaying) 24.dp else 36.dp,
@@ -3226,9 +3226,9 @@ fun V9PlayerContent(
         }
     }
 
-    val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsStateWithLifecycle()
-    val repeatMode by playerConnection.repeatMode.collectAsStateWithLifecycle()
-    val liked by playerConnection.currentSongLiked.collectAsStateWithLifecycle()
+    val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsState()
+    val repeatMode by playerConnection.repeatMode.collectAsState()
+    val liked by playerConnection.currentSongLiked.collectAsState()
     val onToggleLike = playerConnection::toggleLike
     val menuState = LocalMenuState.current
 
@@ -4369,22 +4369,71 @@ fun PlayerBackground(
                     if (colors.isNotEmpty()) {
                         val infiniteTransition = rememberInfiniteTransition(label = "GlowAnimation")
 
-                        // Kept as a State and read only inside onDrawBehind: reading it here (via
-                        // `by`) recomposed this whole branch — and re-ran the colour/position maths
-                        // — on every ~60fps animation frame for as long as the style was on screen,
-                        // competing with the lyrics and controls for frame budget. Now only the draw
-                        // phase ticks; the composable itself no longer recomposes on animation frames.
-                        val progressState =
-                            infiniteTransition.animateFloat(
-                                initialValue = 0f,
-                                targetValue = 1f,
-                                animationSpec =
-                                    infiniteRepeatable(
-                                        animation = tween(20000, easing = LinearEasing),
-                                        repeatMode = RepeatMode.Restart,
-                                    ),
-                                label = "glowProgress",
+                        val progress by infiniteTransition.animateFloat(
+                            initialValue = 0f,
+                            targetValue = 1f,
+                            animationSpec =
+                                infiniteRepeatable(
+                                    animation = tween(20000, easing = LinearEasing),
+                                    repeatMode = RepeatMode.Restart,
+                                ),
+                            label = "glowProgress",
+                        )
+
+                        fun rotatedColorAt(index: Int): Color {
+                            val size = colors.size
+                            val idx = index.toFloat() + progress * size
+                            val a = kotlin.math.floor(idx).toInt() % size
+                            val b = (a + 1) % size
+                            val frac = idx - kotlin.math.floor(idx)
+                            return androidx.compose.ui.graphics.lerp(
+                                colors.getOrElse(a) { Color.DarkGray },
+                                colors.getOrElse(b) { Color.DarkGray },
+                                frac,
                             )
+                        }
+
+                        fun oscillate(
+                            min: Float,
+                            max: Float,
+                            phase: Float,
+                            speed: Float = 1f,
+                        ): Float {
+                            // speed MUST be an integer to ensure seamless looping when progress wraps from 1f to 0f.
+                            val v = kotlin.math.sin(2f * kotlin.math.PI.toFloat() * (progress * speed + phase)).toFloat()
+                            return min + (max - min) * ((v + 1f) * 0.5f)
+                        }
+
+                        val color1 = rotatedColorAt(0)
+                        val color2 = rotatedColorAt(1)
+                        val color3 = rotatedColorAt(2)
+                        val color4 = rotatedColorAt(3)
+                        val color5 = rotatedColorAt(4)
+                        val color6 = rotatedColorAt(5)
+
+                        val o1x = oscillate(0.0f, 1.0f, 0.00f, 1.0f)
+                        val o1y = oscillate(0.0f, 0.5f, 0.07f, 1.0f)
+                        val r1 = oscillate(0.8f, 1.6f, 0.12f, 1.0f)
+
+                        val o2x = oscillate(1.0f, 0.0f, 0.2f, 1.0f)
+                        val o2y = oscillate(0.5f, 1.0f, 0.25f, 1.0f)
+                        val r2 = oscillate(0.7f, 1.5f, 0.18f, 1.0f)
+
+                        val o3x = oscillate(0.2f, 0.8f, 0.33f, 1.0f)
+                        val o3y = oscillate(0.8f, 0.2f, 0.36f, 1.0f)
+                        val r3 = oscillate(0.6f, 1.4f, 0.29f, 1.0f)
+
+                        val o4x = oscillate(0.3f, 0.7f, 0.44f, 1.0f)
+                        val o4y = oscillate(0.2f, 0.8f, 0.41f, 1.0f)
+                        val r4 = oscillate(0.9f, 1.7f, 0.47f, 1.0f)
+
+                        val o5x = oscillate(0.4f, 0.6f, 0.55f, 1.0f)
+                        val o5y = oscillate(0.0f, 1.0f, 0.51f, 1.0f)
+                        val r5 = oscillate(0.7f, 1.5f, 0.58f, 1.0f)
+
+                        val o6x = oscillate(0.0f, 1.0f, 0.66f, 1.0f)
+                        val o6y = oscillate(0.5f, 0.7f, 0.62f, 1.0f)
+                        val r6 = oscillate(0.8f, 1.8f, 0.69f, 1.0f)
 
                         Box(
                             modifier =
@@ -4395,105 +4444,44 @@ fun PlayerBackground(
                                         val height = size.height
                                         val baseColor = Color(0xFF050505)
 
-                                        fun rotatedColorAt(
-                                            index: Int,
-                                            progress: Float,
-                                        ): Color {
-                                            val size = colors.size
-                                            val idx = index.toFloat() + progress * size
-                                            val a = kotlin.math.floor(idx).toInt() % size
-                                            val b = (a + 1) % size
-                                            val frac = idx - kotlin.math.floor(idx)
-                                            return androidx.compose.ui.graphics.lerp(
-                                                colors.getOrElse(a) { Color.DarkGray },
-                                                colors.getOrElse(b) { Color.DarkGray },
-                                                frac,
+                                        val brush1 =
+                                            Brush.radialGradient(
+                                                colors = listOf(color1.copy(alpha = 0.85f), color1.copy(alpha = 0.5f), Color.Transparent),
+                                                center = Offset(width * o1x, height * o1y),
+                                                radius = width * r1,
                                             )
-                                        }
-
-                                        fun oscillate(
-                                            min: Float,
-                                            max: Float,
-                                            phase: Float,
-                                            progress: Float,
-                                            speed: Float = 1f,
-                                        ): Float {
-                                            // speed MUST be an integer to ensure seamless looping when progress wraps from 1f to 0f.
-                                            val v = kotlin.math.sin(2f * kotlin.math.PI.toFloat() * (progress * speed + phase)).toFloat()
-                                            return min + (max - min) * ((v + 1f) * 0.5f)
-                                        }
+                                        val brush2 =
+                                            Brush.radialGradient(
+                                                colors = listOf(color2.copy(alpha = 0.8f), color2.copy(alpha = 0.45f), Color.Transparent),
+                                                center = Offset(width * o2x, height * o2y),
+                                                radius = width * r2,
+                                            )
+                                        val brush3 =
+                                            Brush.radialGradient(
+                                                colors = listOf(color3.copy(alpha = 0.75f), color3.copy(alpha = 0.4f), Color.Transparent),
+                                                center = Offset(width * o3x, height * o3y),
+                                                radius = width * r3,
+                                            )
+                                        val brush4 =
+                                            Brush.radialGradient(
+                                                colors = listOf(color4.copy(alpha = 0.7f), color4.copy(alpha = 0.35f), Color.Transparent),
+                                                center = Offset(width * o4x, height * o4y),
+                                                radius = width * r4,
+                                            )
+                                        val brush5 =
+                                            Brush.radialGradient(
+                                                colors = listOf(color5.copy(alpha = 0.65f), color5.copy(alpha = 0.3f), Color.Transparent),
+                                                center = Offset(width * o5x, height * o5y),
+                                                radius = width * r5,
+                                            )
+                                        val brush6 =
+                                            Brush.radialGradient(
+                                                colors = listOf(color6.copy(alpha = 0.6f), color6.copy(alpha = 0.25f), Color.Transparent),
+                                                center = Offset(width * o6x, height * o6y),
+                                                radius = width * r6,
+                                            )
 
                                         onDrawBehind {
-                                            val progress = progressState.value
-
-                                            val color1 = rotatedColorAt(0, progress)
-                                            val color2 = rotatedColorAt(1, progress)
-                                            val color3 = rotatedColorAt(2, progress)
-                                            val color4 = rotatedColorAt(3, progress)
-                                            val color5 = rotatedColorAt(4, progress)
-                                            val color6 = rotatedColorAt(5, progress)
-
-                                            val o1x = oscillate(0.0f, 1.0f, 0.00f, progress, 1.0f)
-                                            val o1y = oscillate(0.0f, 0.5f, 0.07f, progress, 1.0f)
-                                            val r1 = oscillate(0.8f, 1.6f, 0.12f, progress, 1.0f)
-
-                                            val o2x = oscillate(1.0f, 0.0f, 0.2f, progress, 1.0f)
-                                            val o2y = oscillate(0.5f, 1.0f, 0.25f, progress, 1.0f)
-                                            val r2 = oscillate(0.7f, 1.5f, 0.18f, progress, 1.0f)
-
-                                            val o3x = oscillate(0.2f, 0.8f, 0.33f, progress, 1.0f)
-                                            val o3y = oscillate(0.8f, 0.2f, 0.36f, progress, 1.0f)
-                                            val r3 = oscillate(0.6f, 1.4f, 0.29f, progress, 1.0f)
-
-                                            val o4x = oscillate(0.3f, 0.7f, 0.44f, progress, 1.0f)
-                                            val o4y = oscillate(0.2f, 0.8f, 0.41f, progress, 1.0f)
-                                            val r4 = oscillate(0.9f, 1.7f, 0.47f, progress, 1.0f)
-
-                                            val o5x = oscillate(0.4f, 0.6f, 0.55f, progress, 1.0f)
-                                            val o5y = oscillate(0.0f, 1.0f, 0.51f, progress, 1.0f)
-                                            val r5 = oscillate(0.7f, 1.5f, 0.58f, progress, 1.0f)
-
-                                            val o6x = oscillate(0.0f, 1.0f, 0.66f, progress, 1.0f)
-                                            val o6y = oscillate(0.5f, 0.7f, 0.62f, progress, 1.0f)
-                                            val r6 = oscillate(0.8f, 1.8f, 0.69f, progress, 1.0f)
-
-                                            val brush1 =
-                                                Brush.radialGradient(
-                                                    colors = listOf(color1.copy(alpha = 0.85f), color1.copy(alpha = 0.5f), Color.Transparent),
-                                                    center = Offset(width * o1x, height * o1y),
-                                                    radius = width * r1,
-                                                )
-                                            val brush2 =
-                                                Brush.radialGradient(
-                                                    colors = listOf(color2.copy(alpha = 0.8f), color2.copy(alpha = 0.45f), Color.Transparent),
-                                                    center = Offset(width * o2x, height * o2y),
-                                                    radius = width * r2,
-                                                )
-                                            val brush3 =
-                                                Brush.radialGradient(
-                                                    colors = listOf(color3.copy(alpha = 0.75f), color3.copy(alpha = 0.4f), Color.Transparent),
-                                                    center = Offset(width * o3x, height * o3y),
-                                                    radius = width * r3,
-                                                )
-                                            val brush4 =
-                                                Brush.radialGradient(
-                                                    colors = listOf(color4.copy(alpha = 0.7f), color4.copy(alpha = 0.35f), Color.Transparent),
-                                                    center = Offset(width * o4x, height * o4y),
-                                                    radius = width * r4,
-                                                )
-                                            val brush5 =
-                                                Brush.radialGradient(
-                                                    colors = listOf(color5.copy(alpha = 0.65f), color5.copy(alpha = 0.3f), Color.Transparent),
-                                                    center = Offset(width * o5x, height * o5y),
-                                                    radius = width * r5,
-                                                )
-                                            val brush6 =
-                                                Brush.radialGradient(
-                                                    colors = listOf(color6.copy(alpha = 0.6f), color6.copy(alpha = 0.25f), Color.Transparent),
-                                                    center = Offset(width * o6x, height * o6y),
-                                                    radius = width * r6,
-                                                )
-
                                             drawRect(color = baseColor)
                                             drawRect(brush = brush1)
                                             drawRect(brush = brush2)

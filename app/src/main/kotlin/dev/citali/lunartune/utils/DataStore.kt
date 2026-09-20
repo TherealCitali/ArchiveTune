@@ -11,6 +11,7 @@ import android.content.Context
 import android.os.Looper
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.datastore.core.DataMigration
@@ -19,7 +20,6 @@ import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -180,7 +180,7 @@ fun <T> rememberPreference(
             context.dataStore.data
                 .map { it[key] ?: defaultValue }
                 .distinctUntilChanged()
-        }.collectAsStateWithLifecycle(initialValue)
+        }.collectAsState(initialValue)
 
     return remember {
         object : MutableState<T> {
@@ -211,7 +211,7 @@ inline fun <reified T : Enum<T>> rememberEnumPreference(
             context.dataStore.data
                 .map { it[key].toEnum(defaultValue = defaultValue) }
                 .distinctUntilChanged()
-        }.collectAsStateWithLifecycle(defaultValue)
+        }.collectAsState(defaultValue)
 
     return remember {
         object : MutableState<T> {

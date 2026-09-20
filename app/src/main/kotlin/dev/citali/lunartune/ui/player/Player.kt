@@ -72,13 +72,11 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -225,9 +223,6 @@ import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 private const val SeekbarSettleToleranceMs = 1_500L
-private const val ExpandedPositionTickMs = 100L
-private const val CollapsedPositionTickMs = 500L
-private const val SheetInFlightTickMs = 50L
 private const val V7LegacyBlurHeightFraction = 0.54f
 private const val V7BackdropMinArtworkSizePx = 1_024
 private const val V7BackdropMaxArtworkSizePx = 2_048
@@ -334,7 +329,7 @@ fun BottomSheetPlayer(
     val bottomSheetPageState = LocalBottomSheetPageState.current
 
     val playerConnection = LocalPlayerConnection.current ?: return
-    val rawMediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
+    val rawMediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val (albumArtOverrides) = rememberPreference(PerSongAlbumArtOverridesKey, "")
     val mediaMetadata =
         remember(rawMediaMetadata, albumArtOverrides) {
@@ -419,7 +414,7 @@ fun BottomSheetPlayer(
     val (backdropBlurAmount) = rememberPreference(BackdropBlurAmountKey, defaultValue = 60)
     val (showCodecOnPlayer) = rememberPreference(booleanPreferencesKey("show_codec_on_player"), false)
     val (incrementalSeekSkipEnabled) = rememberPreference(dev.citali.lunartune.constants.SeekExtraSeconds, defaultValue = false)
-    var keyboardSkipMultiplier by remember { mutableIntStateOf(1) }
+    var keyboardSkipMultiplier by remember { mutableStateOf(1) }
     var lastKeyboardTapTime by remember { mutableLongStateOf(0L) }
 
     val playerButtonsStyle by rememberEnumPreference(
@@ -466,14 +461,14 @@ fun BottomSheetPlayer(
             MaterialTheme.colorScheme.surfaceContainer.copy(alpha = progress)
         }
 
-    val playbackState by playerConnection.playbackState.collectAsStateWithLifecycle()
-    val isPlaying by playerConnection.isPlaying.collectAsStateWithLifecycle()
+    val playbackState by playerConnection.playbackState.collectAsState()
+    val isPlaying by playerConnection.isPlaying.collectAsState()
     val currentSong by playerConnection.currentSong.collectAsState(initial = null)
-    val currentSongLiked by playerConnection.currentSongLiked.collectAsStateWithLifecycle()
-    val queueTitle by playerConnection.queueTitle.collectAsStateWithLifecycle()
+    val currentSongLiked by playerConnection.currentSongLiked.collectAsState()
+    val queueTitle by playerConnection.queueTitle.collectAsState()
     val currentFormat by playerConnection.currentFormat.collectAsState(initial = null)
-    val queueWindows by playerConnection.queueWindows.collectAsStateWithLifecycle()
-    val currentWindowIndex by playerConnection.currentWindowIndex.collectAsStateWithLifecycle()
+    val queueWindows by playerConnection.queueWindows.collectAsState()
+    val currentWindowIndex by playerConnection.currentWindowIndex.collectAsState()
     val deviceMusicVolumeController = rememberDeviceMusicVolumeController()
     val onPlayerVolumeChange =
         remember(deviceMusicVolumeController) {
@@ -482,10 +477,10 @@ fun BottomSheetPlayer(
             }
         }
 
-    val repeatMode by playerConnection.repeatMode.collectAsStateWithLifecycle()
+    val repeatMode by playerConnection.repeatMode.collectAsState()
 
-    val canSkipPrevious by playerConnection.canSkipPrevious.collectAsStateWithLifecycle()
-    val canSkipNext by playerConnection.canSkipNext.collectAsStateWithLifecycle()
+    val canSkipPrevious by playerConnection.canSkipPrevious.collectAsState()
+    val canSkipNext by playerConnection.canSkipNext.collectAsState()
 
     val aodModeEnabled by playerConnection.aodModeEnabled.collectAsStateWithLifecycle()
     val currentLyricsEntity by playerConnection.currentLyrics.collectAsStateWithLifecycle(initialValue = null)
@@ -510,13 +505,6 @@ fun BottomSheetPlayer(
     var duration by rememberSaveable(mediaMetadata?.id) {
         mutableLongStateOf(playerConnection.player.duration)
     }
-    // Stable lambdas for the mini player: it reads the position through these in its draw
-    // phase instead of taking the values as parameters, so the position tick no longer
-    // recomposes the whole collapsed row (see MiniPlayer).
-    val positionUpdatedState = rememberUpdatedState(position)
-    val durationUpdatedState = rememberUpdatedState(duration)
-    val miniPlayerPositionProvider = remember { { positionUpdatedState.value } }
-    val miniPlayerDurationProvider = remember { { durationUpdatedState.value } }
     var lyricsSyncOffset by rememberSaveable(mediaMetadata?.id) {
         mutableIntStateOf(0)
     }
@@ -852,20 +840,7 @@ fun BottomSheetPlayer(
         val startTime = SystemClock.elapsedRealtime()
         if (playbackState == STATE_READY) {
             while (isActive) {
-                // Cadence by surface. The expanded player (sliders, lyrics) needs the 100ms
-                // tick; the collapsed mini player only draws a thin progress bar, so a coarse
-                // 500ms tick carries it while cutting this whole subtree's recomposition rate
-                // by 5x — it stays composed behind the mini player, and its 10Hz ticks were the
-                // dominant cost of returning to the app and of the mini player's idle drain.
-                // While the sheet is mid-flight between the two, ticks pause entirely so the
-                // open/close animation frames never compete with a full-player recomposition.
-                val settledCollapsed = state.isCollapsed || state.isDismissed
-                val settledExpanded = state.isExpanded
-                if (!settledCollapsed && !settledExpanded) {
-                    delay(SheetInFlightTickMs)
-                    continue
-                }
-                delay(if (aodModeEnabled || settledCollapsed) CollapsedPositionTickMs else ExpandedPositionTickMs)
+                delay(if (aodModeEnabled) 500L else 100L)
                 val isTransitioning = playerConnection.player.currentMediaItem?.mediaId != mediaMetadata?.id
                 val currentPlayerPosition = playerConnection.player.currentPosition
                 val currentPlayerDuration = playerConnection.player.duration
@@ -980,15 +955,6 @@ fun BottomSheetPlayer(
         }
     }
 
-    // Early canvas gate: the sheet's expanded content starts fading at progress 0.5 and is fully
-    // gone by 0.25, so pausing the (muted, purely visual) canvas video at the TOP of the fade
-    // removes the decode + surface compositing cost from the entire second half of the
-    // collapse/expand animation — the biggest contributor to "minimising the player janks while a
-    // canvas plays".
-    val playerSheetCanvasVisible by remember(state) {
-        derivedStateOf { state.progress > 0.5f }
-    }
-    CompositionLocalProvider(LocalPlayerSheetVisible provides playerSheetCanvasVisible) {
     BottomSheet(
         state = state,
         modifier =
@@ -1147,8 +1113,8 @@ fun BottomSheetPlayer(
         backHandlerEnabled = !aodModeEnabled,
         collapsedContent = {
             MiniPlayer(
-                positionProvider = miniPlayerPositionProvider,
-                durationProvider = miniPlayerDurationProvider,
+                position = position,
+                duration = duration,
                 pureBlack = pureBlack,
                 isPairedWithNavigation = isMiniPlayerPairedWithNavigation,
             )
@@ -2070,7 +2036,6 @@ fun BottomSheetPlayer(
                 lyricsText = currentLyricsEntity?.lyrics,
             )
         }
-    }
     }
 
     val activePlaybackError = playbackError

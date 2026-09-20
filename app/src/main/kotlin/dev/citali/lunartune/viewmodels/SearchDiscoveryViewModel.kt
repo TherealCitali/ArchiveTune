@@ -75,7 +75,7 @@ class SearchDiscoveryViewModel
                 viewModelScope.launch {
                     _state.value =
                         try {
-                            loadSearchDiscovery(forceRefresh = force)
+                            loadSearchDiscovery()
                                 .fold(
                                     onSuccess = { data ->
                                         if (data.isEmpty) {

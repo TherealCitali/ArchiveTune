@@ -13,6 +13,7 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.snap
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.DraggableState
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -36,7 +37,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -47,6 +47,7 @@ import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
@@ -74,31 +75,23 @@ fun BottomSheet(
         modifier =
             modifier
                 .fillMaxSize()
-                // `Modifier.offset { }` runs in the LAYOUT phase, so every drag/animation frame
-                // of the player sheet re-measured its content (the expanded player, lyrics, queue).
-                // Folding the translation into graphicsLayer moves it to the DRAW phase; the layout
-                // stays cached while the sheet moves. No visual change.
-                .graphicsLayer {
-                    translationY =
+                .offset {
+                    val y =
                         (state.expandedBound - state.value)
                             .roundToPx()
                             .coerceAtLeast(0)
-                            .toFloat()
+                    IntOffset(x = 0, y = y)
                 }.bottomSheetDraggable(state, onDismiss)
                 .clip(
                     RoundedCornerShape(
                         topStart = if (!state.isExpanded) 16.dp else 0.dp,
                         topEnd = if (!state.isExpanded) 16.dp else 0.dp,
                     ),
-                ).drawBehind {
-                    // drawRect's primitive alpha instead of Modifier.background(color.copy(alpha)):
-                    // the latter allocated a new Color and a new background element on every
-                    // drag/animation frame of the sheet; this one only re-runs the draw lambda.
-                    drawRect(
-                        color = backgroundColor,
+                ).background(
+                    backgroundColor.copy(
                         alpha = backgroundColor.alpha * state.progress.coerceIn(0f, 1f),
-                    )
-                },
+                    ),
+                ),
     ) {
         if (state.isExpandedOrExpanding && backHandlerEnabled) {
             BackHandler(onBack = state::collapseSoft)

@@ -1432,31 +1432,6 @@ fun AccountPlaylistsTitle(
 /**
  * Similar recommendations navigation title
  */
-/**
- * Sized request for a [ListThumbnailSize] header avatar. Without an explicit size Coil fetches
- * and decodes the original artwork (YouTube serves 1280×720+ for a bare thumbnail URL) only to
- * draw it at 56 dp; sizing the request lets the CDN return a small bucket and keeps the decode
- * proportional to what is drawn — the same treatment [AccountPlaylistsTitle] already gives its avatar.
- */
-@Composable
-private fun rememberListThumbnailRequest(url: String): ImageRequest {
-    val context = LocalContext.current
-    val sizePx =
-        with(LocalDensity.current) {
-            ListThumbnailSize.roundToPx().coerceAtLeast(1)
-        }
-    return remember(url, sizePx) {
-        ImageRequest
-            .Builder(context)
-            .data(url)
-            .size(Size(sizePx, sizePx))
-            .diskCachePolicy(CachePolicy.ENABLED)
-            .memoryCachePolicy(CachePolicy.ENABLED)
-            .crossfade(true)
-            .build()
-    }
-}
-
 @Composable
 fun SimilarRecommendationsTitle(
     recommendation: SimilarRecommendation,
@@ -1476,7 +1451,7 @@ fun SimilarRecommendationsTitle(
                             RoundedCornerShape(ThumbnailCornerRadius)
                         }
                     AsyncImage(
-                        model = rememberListThumbnailRequest(thumbnailUrl),
+                        model = thumbnailUrl,
                         contentDescription = null,
                         modifier =
                             Modifier
@@ -1528,7 +1503,7 @@ fun HomePageSectionTitle(
                             RoundedCornerShape(ThumbnailCornerRadius)
                         }
                     AsyncImage(
-                        model = rememberListThumbnailRequest(thumbnailUrl),
+                        model = thumbnailUrl,
                         contentDescription = null,
                         modifier =
                             Modifier

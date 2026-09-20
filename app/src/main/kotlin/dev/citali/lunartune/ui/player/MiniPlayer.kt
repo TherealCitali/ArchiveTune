@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -28,10 +29,10 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.palette.graphics.Palette
@@ -50,26 +51,21 @@ import dev.citali.lunartune.constants.SwipeSensitivityKey
 import dev.citali.lunartune.ui.theme.PlayerColorExtractor
 import dev.citali.lunartune.utils.rememberEnumPreference
 import dev.citali.lunartune.utils.rememberPreference
+import kotlin.math.roundToInt
 
 private const val MiniPlayerPaletteCacheSize = 24
 
-/**
- * [positionProvider] / [durationProvider] instead of plain Long parameters: the player's position
- * poll (see BottomSheetPlayer) would otherwise drive this whole row — artwork, title, transport
- * controls — through a full recomposition on every tick during playback. Only the progress ring
- * reads the lambdas, and it does so in its draw phase, so the tick now costs one redraw of the ring.
- */
 @Composable
 fun MiniPlayer(
-    positionProvider: () -> Long,
-    durationProvider: () -> Long,
+    position: Long,
+    duration: Long,
     modifier: Modifier = Modifier,
     pureBlack: Boolean,
     isPairedWithNavigation: Boolean = false,
 ) {
     NewMiniPlayer(
-        positionProvider = positionProvider,
-        durationProvider = durationProvider,
+        position = position,
+        duration = duration,
         modifier = modifier,
         pureBlack = pureBlack,
         isPairedWithNavigation = isPairedWithNavigation,
@@ -78,8 +74,8 @@ fun MiniPlayer(
 
 @Composable
 private fun NewMiniPlayer(
-    positionProvider: () -> Long,
-    durationProvider: () -> Long,
+    position: Long,
+    duration: Long,
     modifier: Modifier = Modifier,
     pureBlack: Boolean,
     isPairedWithNavigation: Boolean,
@@ -212,9 +208,7 @@ private fun NewMiniPlayer(
                 Modifier
                     .fillMaxWidth()
                     .height(MiniPlayerHeight)
-                    // Draw-phase translation for the swipe-to-skip gesture: the mini player's
-                    // layout stays cached while it slides instead of re-measuring every frame.
-                    .graphicsLayer { translationX = offsetX }
+                    .offset { IntOffset(offsetX.roundToInt(), 0) }
                     .clip(miniPlayerShape),
         ) {
             MiniPlayerBackground(
@@ -223,8 +217,8 @@ private fun NewMiniPlayer(
                 modifier = Modifier.fillMaxSize(),
             )
             NewMiniPlayerContent(
-                positionProvider = positionProvider,
-                durationProvider = durationProvider,
+                position = position,
+                duration = duration,
                 playerConnection = playerConnection,
                 colors = contentColors,
             )
@@ -299,25 +293,21 @@ private fun MiniPlayerBackground(
 
         MiniPlayerBackgroundStyle.GRADIENT -> {
             val colors = requireNotNull(palette)
-            // The mini player recomposes on every position tick; keying the brush on the palette
-            // means it is built once per track instead of once per tick.
-            val gradient =
-                remember(colors) {
-                    Brush.verticalGradient(
-                        colorStops =
-                            arrayOf(
-                                0f to colors.first.copy(alpha = 0.95f),
-                                0.52f to colors.second.copy(alpha = 0.82f),
-                                1f to colors.third.copy(alpha = 0.72f),
-                            ),
-                    )
-                }
             Box(modifier = modifier) {
                 Box(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .background(gradient),
+                            .background(
+                                Brush.verticalGradient(
+                                    colorStops =
+                                        arrayOf(
+                                            0f to colors.first.copy(alpha = 0.95f),
+                                            0.52f to colors.second.copy(alpha = 0.82f),
+                                            1f to colors.third.copy(alpha = 0.72f),
+                                        ),
+                                ),
+                            ),
                 )
                 Box(
                     modifier =

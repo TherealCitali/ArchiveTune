@@ -261,12 +261,7 @@ abstract class InternalDatabase : RoomDatabase() {
 private class DatabaseCallback : RoomDatabase.Callback() {
     override fun onOpen(db: SupportSQLiteDatabase) {
         super.onOpen(db)
-        // shutdown() right after execute(): the executor still runs the queued task, but its
-        // worker thread exits when done instead of parking forever. Without it every
-        // onOpen (each Room connection open, plus every restore/import that reopens the DB)
-        // leaked one idle thread for the life of the process.
-        val executor = java.util.concurrent.Executors.newSingleThreadExecutor()
-        executor.execute {
+        java.util.concurrent.Executors.newSingleThreadExecutor().execute {
             try {
                 db.query("PRAGMA busy_timeout = 60000").close()
                 db.query("PRAGMA cache_size = -16000").close()
@@ -281,7 +276,6 @@ private class DatabaseCallback : RoomDatabase.Callback() {
                 Log.e(TAG, "Failed to set PRAGMA settings", e)
             }
         }
-        executor.shutdown()
     }
 
     private fun cleanupDuplicatePlaylistsOnOpen(db: SupportSQLiteDatabase) {

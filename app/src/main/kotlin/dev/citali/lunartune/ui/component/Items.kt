@@ -39,6 +39,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -72,7 +73,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -84,11 +84,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.zIndex
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.Download.STATE_COMPLETED
@@ -145,6 +145,7 @@ import dev.citali.lunartune.utils.parseSongTags
 import dev.citali.lunartune.utils.parseTabMap
 import dev.citali.lunartune.utils.rememberPreference
 import dev.citali.lunartune.utils.reportException
+import kotlin.math.roundToInt
 
 const val ActiveBoxAlpha = 0.6f
 
@@ -1389,7 +1390,7 @@ fun YouTubeListItem(
             Icon.Library()
         }
         if (item is SongItem) {
-            val downloads by LocalDownloadUtil.current.downloads.collectAsStateWithLifecycle()
+            val downloads by LocalDownloadUtil.current.downloads.collectAsState()
             val download = downloads[item.id]
             Icon.Download(download?.state, percent = download?.percentDownloaded ?: -1f)
         }
@@ -1483,7 +1484,7 @@ fun YouTubeGridItem(
         if (item.explicit) Icon.Explicit()
         if (item is SongItem && song?.song?.inLibrary != null) Icon.Library()
         if (item is SongItem) {
-            val downloads by LocalDownloadUtil.current.downloads.collectAsStateWithLifecycle()
+            val downloads by LocalDownloadUtil.current.downloads.collectAsState()
             val download = downloads[item.id]
             Icon.Download(download?.state, percent = download?.percentDownloaded ?: -1f)
         }
@@ -2208,9 +2209,7 @@ fun SwipeToSongBox(
         Box(
             modifier =
                 Modifier
-                    // Draw-phase translation: the layout of the row stays cached while it is
-                    // swiped instead of re-measuring on every drag frame.
-                    .graphicsLayer { translationX = offset.value }
+                    .offset { IntOffset(offset.value.roundToInt(), 0) }
                     .fillMaxWidth()
                     .background(resolvedContentBackgroundColor),
             content = content,

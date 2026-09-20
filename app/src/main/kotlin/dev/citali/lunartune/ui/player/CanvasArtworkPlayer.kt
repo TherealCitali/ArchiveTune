@@ -19,7 +19,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
@@ -50,13 +49,6 @@ import java.util.Locale
 private const val CanvasPlaybackStallCheckIntervalMs = 1_000L
 private const val CanvasPlaybackStallTimeoutMs = 5_000L
 
-/**
- * Whether the player sheet is far enough open for its canvas artwork to be worth rendering.
- * Provided by BottomSheetPlayer; defaults to true so canvases outside the sheet (album pages,
- * AOD) keep playing.
- */
-val LocalPlayerSheetVisible = staticCompositionLocalOf { true }
-
 @Composable
 internal fun CanvasArtworkPlayer(
     primaryUrl: String?,
@@ -65,12 +57,6 @@ internal fun CanvasArtworkPlayer(
     modifier: Modifier = Modifier,
     resizeMode: Int = AspectRatioFrameLayout.RESIZE_MODE_FIT,
 ) {
-    // The muted canvas loop is purely visual, so it only needs to run while the player sheet is
-    // actually showing it. The sheet flips this local off at the top of its collapse fade, which
-    // takes the video decode out of the second half of the minimise animation and stops it
-    // running behind the mini player altogether.
-    val sheetVisible = LocalPlayerSheetVisible.current
-    val playbackActive = isPlaying && sheetVisible
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val primary = primaryUrl?.trim()?.takeIf { it.isNotBlank() }
@@ -83,7 +69,7 @@ internal fun CanvasArtworkPlayer(
     var currentUrl by remember(initial) { mutableStateOf(initial) }
     var isVideoReady by remember(initial) { mutableStateOf(false) }
     var hasPlaybackFailed by remember(initial) { mutableStateOf(false) }
-    val shouldPlay by rememberUpdatedState(playbackActive)
+    val shouldPlay by rememberUpdatedState(isPlaying)
 
     val okHttpClient =
         remember {
@@ -147,25 +133,25 @@ internal fun CanvasArtworkPlayer(
                             .build()
                     volume = 0f
                     repeatMode = Player.REPEAT_MODE_ONE
-                    playWhenReady = playbackActive
+                    playWhenReady = isPlaying
                 }
         }
 
-    LaunchedEffect(playbackActive) {
+    LaunchedEffect(isPlaying) {
         if (hasPlaybackFailed) {
             exoPlayer.pause()
         } else {
-            exoPlayer.setCanvasPlayback(playbackActive)
+            exoPlayer.setCanvasPlayback(isPlaying)
         }
     }
 
-    LaunchedEffect(currentUrl, playbackActive, primary, fallback, exoPlayer) {
-        if (!playbackActive || fallback.isNullOrBlank() || currentUrl != primary) return@LaunchedEffect
+    LaunchedEffect(currentUrl, isPlaying, primary, fallback, exoPlayer) {
+        if (!isPlaying || fallback.isNullOrBlank() || currentUrl != primary) return@LaunchedEffect
 
         var lastPosition = exoPlayer.currentPosition
         var stalledForMs = 0L
 
-        while (isActive && playbackActive && currentUrl == primary) {
+        while (isActive && isPlaying && currentUrl == primary) {
             delay(CanvasPlaybackStallCheckIntervalMs)
 
             val currentPosition = exoPlayer.currentPosition
@@ -284,7 +270,7 @@ internal fun CanvasArtworkPlayer(
         exoPlayer.stop()
         exoPlayer.setMediaItem(mediaItem)
         exoPlayer.prepare()
-        exoPlayer.setCanvasPlayback(playbackActive)
+        exoPlayer.setCanvasPlayback(isPlaying)
     }
 
     DisposableEffect(exoPlayer) {

@@ -24,6 +24,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -36,7 +37,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import dev.citali.lunartune.LocalPlayerAwareWindowInsets
@@ -70,12 +70,12 @@ fun ExploreScreen(
     val menuState = LocalMenuState.current
     val haptic = LocalHapticFeedback.current
     val playerConnection = LocalPlayerConnection.current ?: return
-    val isPlaying by playerConnection.isPlaying.collectAsStateWithLifecycle()
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
+    val isPlaying by playerConnection.isPlaying.collectAsState()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
 
-    val explorePage by exploreViewModel.explorePage.collectAsStateWithLifecycle()
-    val chartsPage by chartsViewModel.chartsPage.collectAsStateWithLifecycle()
-    val isChartsLoading by chartsViewModel.isLoading.collectAsStateWithLifecycle()
+    val explorePage by exploreViewModel.explorePage.collectAsState()
+    val chartsPage by chartsViewModel.chartsPage.collectAsState()
+    val isChartsLoading by chartsViewModel.isLoading.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
@@ -84,7 +84,7 @@ fun ExploreScreen(
     val scrollToTop by backStackEntry
         ?.savedStateHandle
         ?.getStateFlow("scrollToTop", false)
-        ?.collectAsStateWithLifecycle() ?: return
+        ?.collectAsState() ?: return
 
     LaunchedEffect(Unit) {
         if (chartsPage == null) {
