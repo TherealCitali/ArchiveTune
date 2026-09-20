@@ -1564,7 +1564,7 @@ fun ExperimentalQuickPicksSection(
             label = "quick picks backdrop",
             modifier = Modifier
                 .fillMaxSize()
-                .graphicsLayer { scaleX = 1.18f; scaleY = 1.18f; alpha = 0.86f },
+                .graphicsLayer { scaleX = 1.28f; scaleY = 1.28f; alpha = 0.82f },
         ) { artwork ->
             if (artwork != null) {
                 BlurredArtwork(
@@ -1579,25 +1579,27 @@ fun ExperimentalQuickPicksSection(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.62f))
                 .background(
                     Brush.radialGradient(
-                        colors = listOf(Color.White.copy(alpha = 0.10f), Color.Transparent),
+                        0f to Color.Transparent,
+                        0.58f to MaterialTheme.colorScheme.surface.copy(alpha = 0.08f),
+                        1f to MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
                     ),
                 ),
         )
         HorizontalPager(
             state = pagerState,
-            pageSize = PageSize.Fixed(250.dp),
-            pageSpacing = (-48).dp,
-            contentPadding = PaddingValues(horizontal = 36.dp),
-            modifier = Modifier.fillMaxWidth().height(336.dp),
+            pageSize = PageSize.Fixed(300.dp),
+            pageSpacing = (-42).dp,
+            contentPadding = PaddingValues(horizontal = 24.dp),
+            modifier = Modifier.fillMaxWidth().height(320.dp),
         ) { page ->
             val pick = items[page]
             val distance = (pagerState.currentPage - page + pagerState.currentPageOffsetFraction).absoluteValue.coerceIn(0f, 1f)
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
+                    .aspectRatio(1f)
                     .graphicsLayer {
                         val scale = 1f - distance * 0.10f
                         scaleX = scale
@@ -1617,7 +1619,7 @@ fun ExperimentalQuickPicksSection(
                     ),
             ) {
                 AsyncImage(model = pick.song.thumbnailUrl, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-                Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color.Transparent, 0.52f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.88f))))
+                Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color.Transparent, 0.52f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.64f))))
                 Column(modifier = Modifier.align(Alignment.BottomStart).padding(18.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                     Text(pick.song.title, color = Color.White, style = MaterialTheme.typography.titleLargeEmphasized, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     Text(pick.artists.joinToString { it.name }, color = Color.White.copy(alpha = 0.76f), style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -1659,7 +1661,7 @@ fun ExperimentalRemoteQuickPicksSection(
             label = "remote quick picks backdrop",
             modifier = Modifier
                 .fillMaxSize()
-                .graphicsLayer { scaleX = 1.18f; scaleY = 1.18f; alpha = 0.86f },
+                .graphicsLayer { scaleX = 1.28f; scaleY = 1.28f; alpha = 0.82f },
         ) { artwork ->
             if (artwork != null) {
                 BlurredArtwork(
@@ -1674,10 +1676,11 @@ fun ExperimentalRemoteQuickPicksSection(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.62f))
                 .background(
                     Brush.radialGradient(
-                        colors = listOf(Color.White.copy(alpha = 0.10f), Color.Transparent),
+                        0f to Color.Transparent,
+                        0.58f to MaterialTheme.colorScheme.surface.copy(alpha = 0.08f),
+                        1f to MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
                     ),
                 ),
         )
@@ -1697,7 +1700,7 @@ fun ExperimentalRemoteQuickPicksSection(
                 ),
             ) {
                 AsyncImage(model = song.thumbnail, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-                Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color.Transparent, 0.52f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.88f))))
+                Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color.Transparent, 0.52f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.64f))))
                 Column(modifier = Modifier.align(Alignment.BottomStart).padding(18.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                     Text(song.title, color = Color.White, style = MaterialTheme.typography.titleLargeEmphasized, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     Text(song.artists.joinToString { it.name }, color = Color.White.copy(alpha = 0.76f), style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
