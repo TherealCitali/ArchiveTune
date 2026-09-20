@@ -7,6 +7,7 @@
 
 package dev.citali.lunartune.ui.screens
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
@@ -70,7 +71,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -118,6 +118,7 @@ import dev.citali.lunartune.models.MediaMetadata
 import dev.citali.lunartune.models.SimilarRecommendation
 import dev.citali.lunartune.models.toMediaMetadata
 import dev.citali.lunartune.playback.PlayerConnection
+import dev.citali.lunartune.ui.player.BlurredArtwork
 import dev.citali.lunartune.playback.queues.ListQueue
 import dev.citali.lunartune.playback.queues.YouTubeQueue
 import dev.citali.lunartune.ui.component.AlbumGridItem
@@ -1552,22 +1553,45 @@ fun ExperimentalQuickPicksSection(
     if (items.isEmpty()) return
     val pagerState = rememberPagerState { items.size }
     val frontArtwork = items.getOrNull(pagerState.currentPage)?.song?.thumbnailUrl
-    Box(modifier = modifier.fillMaxWidth().height(276.dp)) {
-        frontArtwork?.let { artwork ->
-            AsyncImage(
-                model = artwork,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize().blur(64.dp),
-            )
-            Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface.copy(alpha = 0.70f)))
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(336.dp)
+            .graphicsLayer { clip = false },
+    ) {
+        Crossfade(
+            targetState = frontArtwork,
+            label = "quick picks backdrop",
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer { scaleX = 1.18f; scaleY = 1.18f; alpha = 0.86f },
+        ) { artwork ->
+            if (artwork != null) {
+                BlurredArtwork(
+                    model = artwork,
+                    radius = 64.dp,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
         }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.62f))
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(Color.White.copy(alpha = 0.10f), Color.Transparent),
+                    ),
+                ),
+        )
         HorizontalPager(
             state = pagerState,
-            pageSize = PageSize.Fixed(220.dp),
-            pageSpacing = (-34).dp,
-            contentPadding = PaddingValues(horizontal = 54.dp),
-            modifier = Modifier.fillMaxWidth().height(276.dp),
+            pageSize = PageSize.Fixed(250.dp),
+            pageSpacing = (-48).dp,
+            contentPadding = PaddingValues(horizontal = 36.dp),
+            modifier = Modifier.fillMaxWidth().height(336.dp),
         ) { page ->
             val pick = items[page]
             val distance = (pagerState.currentPage - page + pagerState.currentPageOffsetFraction).absoluteValue.coerceIn(0f, 1f)
@@ -1575,7 +1599,7 @@ fun ExperimentalQuickPicksSection(
                 modifier = Modifier
                     .fillMaxHeight()
                     .graphicsLayer {
-                        val scale = 1f - distance * 0.12f
+                        val scale = 1f - distance * 0.10f
                         scaleX = scale
                         scaleY = scale
                         alpha = 1f - distance * 0.18f
@@ -1624,16 +1648,44 @@ fun ExperimentalRemoteQuickPicksSection(
     if (songs.isEmpty()) return
     val pagerState = rememberPagerState { songs.size }
     val frontArtwork = songs.getOrNull(pagerState.currentPage)?.thumbnail
-    Box(modifier = modifier.fillMaxWidth().height(276.dp)) {
-        frontArtwork?.let { artwork ->
-            AsyncImage(model = artwork, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize().blur(64.dp))
-            Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface.copy(alpha = 0.70f)))
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(336.dp)
+            .graphicsLayer { clip = false },
+    ) {
+        Crossfade(
+            targetState = frontArtwork,
+            label = "remote quick picks backdrop",
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer { scaleX = 1.18f; scaleY = 1.18f; alpha = 0.86f },
+        ) { artwork ->
+            if (artwork != null) {
+                BlurredArtwork(
+                    model = artwork,
+                    radius = 64.dp,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
         }
-        HorizontalPager(state = pagerState, pageSize = PageSize.Fixed(220.dp), pageSpacing = (-34).dp, contentPadding = PaddingValues(horizontal = 54.dp), modifier = Modifier.fillMaxWidth().height(276.dp)) { page ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.62f))
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(Color.White.copy(alpha = 0.10f), Color.Transparent),
+                    ),
+                ),
+        )
+        HorizontalPager(state = pagerState, pageSize = PageSize.Fixed(250.dp), pageSpacing = (-48).dp, contentPadding = PaddingValues(horizontal = 36.dp), modifier = Modifier.fillMaxWidth().height(336.dp)) { page ->
             val song = songs[page]
             val distance = (pagerState.currentPage - page + pagerState.currentPageOffsetFraction).absoluteValue.coerceIn(0f, 1f)
             Box(
-                modifier = Modifier.fillMaxHeight().graphicsLayer { val scale = 1f - distance * 0.12f; scaleX = scale; scaleY = scale; alpha = 1f - distance * 0.18f }.clip(RoundedCornerShape(30.dp)).combinedClickable(
+                modifier = Modifier.fillMaxHeight().graphicsLayer { val scale = 1f - distance * 0.10f; scaleX = scale; scaleY = scale; alpha = 1f - distance * 0.18f }.clip(RoundedCornerShape(30.dp)).combinedClickable(
                     onClick = {
                         if (song.id == mediaMetadata?.id) playerConnection.player.togglePlayPause()
                         else playerConnection.playQueue(YouTubeQueue(endpoint = song.endpoint ?: WatchEndpoint(videoId = song.id), preloadItem = song.toMediaMetadata()))
