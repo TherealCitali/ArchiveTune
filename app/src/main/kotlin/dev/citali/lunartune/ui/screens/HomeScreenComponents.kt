@@ -1565,7 +1565,8 @@ fun ExperimentalQuickPicksSection(
             label = "quick picks backdrop",
             modifier = Modifier
                 .fillMaxSize()
-                .graphicsLayer { scaleX = 1.28f; scaleY = 1.28f; alpha = 0.82f },
+                .graphicsLayer { scaleX = 1.16f; scaleY = 1.16f; alpha = 0.82f }
+                .clip(CircleShape),
         ) { artwork ->
             if (artwork != null) {
                 BlurredArtwork(
@@ -1668,7 +1669,8 @@ fun ExperimentalRemoteQuickPicksSection(
             label = "remote quick picks backdrop",
             modifier = Modifier
                 .fillMaxSize()
-                .graphicsLayer { scaleX = 1.28f; scaleY = 1.28f; alpha = 0.82f },
+                .graphicsLayer { scaleX = 1.16f; scaleY = 1.16f; alpha = 0.82f }
+                .clip(CircleShape),
         ) { artwork ->
             if (artwork != null) {
                 BlurredArtwork(
