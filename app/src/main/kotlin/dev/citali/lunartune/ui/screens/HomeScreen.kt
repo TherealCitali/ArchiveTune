@@ -70,6 +70,7 @@ import dev.citali.lunartune.home.HomeUiState
 import dev.citali.lunartune.models.MediaMetadata
 import dev.citali.lunartune.playback.PlayerConnection
 import dev.citali.lunartune.ui.component.ExpressivePullToRefreshBox
+import dev.citali.lunartune.ui.component.ExperimentalThemeBackdrop
 import dev.citali.lunartune.ui.component.LocalMenuState
 import dev.citali.lunartune.ui.component.MenuState
 import dev.citali.lunartune.ui.utils.SnapLayoutInfoProvider
@@ -297,7 +298,9 @@ private fun HomeContent(
             .takeIf { it.quickPicksMode == QuickPicks.QUICK_PICKS }
             ?.remoteQuickPicks
     Box(modifier = modifier.fillMaxSize()) {
-        if (uiState.showTonalBackdrop) {
+        if (experimentalUi) {
+            ExperimentalThemeBackdrop(Modifier.fillMaxSize())
+        } else if (uiState.showTonalBackdrop) {
             Box(
                 modifier =
                     Modifier
