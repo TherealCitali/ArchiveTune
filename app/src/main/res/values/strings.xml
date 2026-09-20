@@ -348,6 +348,8 @@
     <string name="app_icon_change_failed">Couldn\'t change the app icon</string>
     <string name="theme">Theme</string>
     <string name="enable_dynamic_theme">Enable dynamic theme</string>
+    <string name="experimental_ui">Use experimental UI</string>
+    <string name="experimental_ui_desc">Try the new Lunar Aurora Home and Quick picks design.</string>
     <string name="random_theme_on_startup">Random theme on startup</string>
     <string name="random_theme_on_startup_desc">Apply a random color palette every time the app starts</string>
     <string name="font_preference">Font</string>
