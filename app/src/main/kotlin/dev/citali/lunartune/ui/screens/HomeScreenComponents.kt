@@ -1557,6 +1557,7 @@ fun ExperimentalQuickPicksSection(
         modifier = modifier
             .fillMaxWidth()
             .height(336.dp)
+            .background(Color.Black)
             .graphicsLayer { clip = false },
     ) {
         Crossfade(
@@ -1581,9 +1582,14 @@ fun ExperimentalQuickPicksSection(
                 .fillMaxSize()
                 .background(
                     Brush.radialGradient(
-                        0f to Color.Transparent,
-                        0.58f to MaterialTheme.colorScheme.surface.copy(alpha = 0.08f),
-                        1f to MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                        colorStops = arrayOf(
+                            0.0f to Color.Transparent,
+                            0.28f to Color.Black.copy(alpha = 0.05f),
+                            0.48f to Color.Black.copy(alpha = 0.20f),
+                            0.66f to Color.Black.copy(alpha = 0.45f),
+                            0.82f to Color.Black.copy(alpha = 0.74f),
+                            1.0f to Color.Black,
+                        ),
                     ),
                 ),
         )
@@ -1654,6 +1660,7 @@ fun ExperimentalRemoteQuickPicksSection(
         modifier = modifier
             .fillMaxWidth()
             .height(336.dp)
+            .background(Color.Black)
             .graphicsLayer { clip = false },
     ) {
         Crossfade(
@@ -1678,9 +1685,14 @@ fun ExperimentalRemoteQuickPicksSection(
                 .fillMaxSize()
                 .background(
                     Brush.radialGradient(
-                        0f to Color.Transparent,
-                        0.58f to MaterialTheme.colorScheme.surface.copy(alpha = 0.08f),
-                        1f to MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                        colorStops = arrayOf(
+                            0.0f to Color.Transparent,
+                            0.28f to Color.Black.copy(alpha = 0.05f),
+                            0.48f to Color.Black.copy(alpha = 0.20f),
+                            0.66f to Color.Black.copy(alpha = 0.45f),
+                            0.82f to Color.Black.copy(alpha = 0.74f),
+                            1.0f to Color.Black,
+                        ),
                     ),
                 ),
         )
