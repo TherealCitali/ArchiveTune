@@ -42,10 +42,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -299,26 +297,6 @@ private fun HomeContent(
             .takeIf { it.quickPicksMode == QuickPicks.QUICK_PICKS }
             ?.remoteQuickPicks
     Box(modifier = modifier.fillMaxSize()) {
-        if (experimentalUi) {
-            val primary = MaterialTheme.colorScheme.primary
-            val secondary = MaterialTheme.colorScheme.secondary
-            val tertiary = MaterialTheme.colorScheme.tertiary
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(460.dp)
-                        .then(if (disableBlur) Modifier else Modifier.blur(72.dp))
-                        .drawWithCache {
-                            val radius = size.minDimension * 0.52f
-                            onDrawBehind {
-                                drawCircle(primary.copy(alpha = 0.36f), radius, Offset(size.width * 0.16f, size.height * 0.16f))
-                                drawCircle(secondary.copy(alpha = 0.30f), radius, Offset(size.width * 0.82f, size.height * 0.24f))
-                                drawCircle(tertiary.copy(alpha = 0.24f), radius, Offset(size.width * 0.52f, size.height * 0.82f))
-                            }
-                        },
-            )
-        }
         if (uiState.showTonalBackdrop) {
             Box(
                 modifier =

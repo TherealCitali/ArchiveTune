@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -69,6 +70,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -133,6 +136,7 @@ import dev.citali.lunartune.ui.menu.YouTubeAlbumMenu
 import dev.citali.lunartune.ui.menu.YouTubeArtistMenu
 import dev.citali.lunartune.ui.menu.YouTubePlaylistMenu
 import dev.citali.lunartune.ui.menu.YouTubeSongMenu
+import kotlin.math.absoluteValue
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.random.Random
@@ -1545,73 +1549,58 @@ fun ExperimentalQuickPicksSection(
     modifier: Modifier = Modifier,
 ) {
     val items = remember(quickPicks) { quickPicks.distinctBy { it.id }.take(12) }
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        items(items = items, key = { it.id }, contentType = { "experimental_quick_pick" }) { pick ->
-            val artwork = remember(pick.song.thumbnailUrl) {
-                pick.song.thumbnailUrl?.displayArtworkUrl(width = 420, height = 520)
-            }
+    if (items.isEmpty()) return
+    val pagerState = rememberPagerState { items.size }
+    val frontArtwork = items.getOrNull(pagerState.currentPage)?.song?.thumbnailUrl
+    Box(modifier = modifier.fillMaxWidth().height(276.dp)) {
+        frontArtwork?.let { artwork ->
+            AsyncImage(
+                model = artwork,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize().blur(64.dp),
+            )
+            Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface.copy(alpha = 0.70f)))
+        }
+        HorizontalPager(
+            state = pagerState,
+            pageSize = PageSize.Fixed(220.dp),
+            pageSpacing = (-34).dp,
+            contentPadding = PaddingValues(horizontal = 54.dp),
+            modifier = Modifier.fillMaxWidth().height(276.dp),
+        ) { page ->
+            val pick = items[page]
+            val distance = (pagerState.currentPage - page + pagerState.currentPageOffsetFraction).absoluteValue.coerceIn(0f, 1f)
             Box(
                 modifier = Modifier
-                    .width(184.dp)
-                    .height(244.dp)
-                    .clip(RoundedCornerShape(28.dp))
+                    .fillMaxHeight()
+                    .graphicsLayer {
+                        val scale = 1f - distance * 0.12f
+                        scaleX = scale
+                        scaleY = scale
+                        alpha = 1f - distance * 0.18f
+                    }
+                    .clip(RoundedCornerShape(30.dp))
                     .combinedClickable(
                         onClick = {
-                            if (pick.id == mediaMetadata?.id) {
-                                playerConnection.player.togglePlayPause()
-                            } else {
-                                playerConnection.playQueue(
-                                    if (pick.song.isLocal) ListQueue(items = listOf(pick.toMediaItem()))
-                                    else YouTubeQueue.radio(pick.toMediaMetadata()),
-                                )
-                            }
+                            if (pick.id == mediaMetadata?.id) playerConnection.player.togglePlayPause()
+                            else playerConnection.playQueue(if (pick.song.isLocal) ListQueue(items = listOf(pick.toMediaItem())) else YouTubeQueue.radio(pick.toMediaMetadata()))
                         },
                         onLongClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            menuState.show {
-                                SongMenu(originalSong = pick, navController = navController, onDismiss = menuState::dismiss)
-                            }
+                            menuState.show { SongMenu(originalSong = pick, navController = navController, onDismiss = menuState::dismiss) }
                         },
                     ),
             ) {
-                AsyncImage(
-                    model = artwork,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                )
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                0f to Color.Transparent,
-                                0.48f to Color.Transparent,
-                                1f to Color.Black.copy(alpha = 0.88f),
-                            ),
-                        ),
-                )
-                Column(
-                    modifier = Modifier.align(Alignment.BottomStart).padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(3.dp),
-                ) {
-                    Text(pick.song.title, color = Color.White, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    Text(pick.artists.joinToString { it.name }, color = Color.White.copy(alpha = 0.72f), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                AsyncImage(model = pick.song.thumbnailUrl, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color.Transparent, 0.52f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.88f))))
+                Column(modifier = Modifier.align(Alignment.BottomStart).padding(18.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(pick.song.title, color = Color.White, style = MaterialTheme.typography.titleLargeEmphasized, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Text(pick.artists.joinToString { it.name }, color = Color.White.copy(alpha = 0.76f), style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 if (pick.id == mediaMetadata?.id && isPlaying) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        shape = CircleShape,
-                        modifier = Modifier.align(Alignment.TopEnd).padding(12.dp).size(34.dp),
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(painterResource(R.drawable.volume_up), contentDescription = null, modifier = Modifier.size(18.dp))
-                        }
+                    Surface(color = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary, shape = CircleShape, modifier = Modifier.align(Alignment.TopEnd).padding(12.dp).size(36.dp)) {
+                        Box(contentAlignment = Alignment.Center) { Icon(painterResource(R.drawable.volume_up), contentDescription = null, modifier = Modifier.size(19.dp)) }
                     }
                 }
             }
@@ -1619,6 +1608,7 @@ fun ExperimentalQuickPicksSection(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ExperimentalRemoteQuickPicksSection(
     section: HomePage.Section,
@@ -1631,51 +1621,38 @@ fun ExperimentalRemoteQuickPicksSection(
     modifier: Modifier = Modifier,
 ) {
     val songs = remember(section.items) { section.items.filterIsInstance<SongItem>().distinctBy(SongItem::id).take(12) }
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        items(items = songs, key = { it.id }, contentType = { "experimental_remote_quick_pick" }) { song ->
-            val isActive = song.id == mediaMetadata?.id
+    if (songs.isEmpty()) return
+    val pagerState = rememberPagerState { songs.size }
+    val frontArtwork = songs.getOrNull(pagerState.currentPage)?.thumbnail
+    Box(modifier = modifier.fillMaxWidth().height(276.dp)) {
+        frontArtwork?.let { artwork ->
+            AsyncImage(model = artwork, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize().blur(64.dp))
+            Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface.copy(alpha = 0.70f)))
+        }
+        HorizontalPager(state = pagerState, pageSize = PageSize.Fixed(220.dp), pageSpacing = (-34).dp, contentPadding = PaddingValues(horizontal = 54.dp), modifier = Modifier.fillMaxWidth().height(276.dp)) { page ->
+            val song = songs[page]
+            val distance = (pagerState.currentPage - page + pagerState.currentPageOffsetFraction).absoluteValue.coerceIn(0f, 1f)
             Box(
-                modifier = Modifier
-                    .width(184.dp)
-                    .height(244.dp)
-                    .clip(RoundedCornerShape(28.dp))
-                    .combinedClickable(
-                        onClick = {
-                            if (isActive) playerConnection.player.togglePlayPause()
-                            else playerConnection.playQueue(YouTubeQueue(endpoint = song.endpoint ?: WatchEndpoint(videoId = song.id), preloadItem = song.toMediaMetadata()))
-                        },
-                        onLongClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            menuState.show {
-                                YouTubeSongMenu(song = song, navController = navController, onDismiss = menuState::dismiss)
-                            }
-                        },
-                    ),
+                modifier = Modifier.fillMaxHeight().graphicsLayer { val scale = 1f - distance * 0.12f; scaleX = scale; scaleY = scale; alpha = 1f - distance * 0.18f }.clip(RoundedCornerShape(30.dp)).combinedClickable(
+                    onClick = {
+                        if (song.id == mediaMetadata?.id) playerConnection.player.togglePlayPause()
+                        else playerConnection.playQueue(YouTubeQueue(endpoint = song.endpoint ?: WatchEndpoint(videoId = song.id), preloadItem = song.toMediaMetadata()))
+                    },
+                    onLongClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        menuState.show { YouTubeSongMenu(song = song, navController = navController, onDismiss = menuState::dismiss) }
+                    },
+                ),
             ) {
-                AsyncImage(
-                    model = song.thumbnail,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                )
-                Box(
-                    modifier = Modifier.fillMaxSize().background(
-                        Brush.verticalGradient(0f to Color.Transparent, 0.48f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.88f)),
-                    ),
-                )
-                Column(modifier = Modifier.align(Alignment.BottomStart).padding(16.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                    Text(song.title, color = Color.White, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    Text(song.artists.joinToString { it.name }, color = Color.White.copy(alpha = 0.72f), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                AsyncImage(model = song.thumbnail, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color.Transparent, 0.52f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.88f))))
+                Column(modifier = Modifier.align(Alignment.BottomStart).padding(18.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(song.title, color = Color.White, style = MaterialTheme.typography.titleLargeEmphasized, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Text(song.artists.joinToString { it.name }, color = Color.White.copy(alpha = 0.76f), style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
-                if (isActive && isPlaying) {
-                    Surface(color = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary, shape = CircleShape, modifier = Modifier.align(Alignment.TopEnd).padding(12.dp).size(34.dp)) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(painterResource(R.drawable.volume_up), contentDescription = null, modifier = Modifier.size(18.dp))
-                        }
+                if (song.id == mediaMetadata?.id && isPlaying) {
+                    Surface(color = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary, shape = CircleShape, modifier = Modifier.align(Alignment.TopEnd).padding(12.dp).size(36.dp)) {
+                        Box(contentAlignment = Alignment.Center) { Icon(painterResource(R.drawable.volume_up), contentDescription = null, modifier = Modifier.size(19.dp)) }
                     }
                 }
             }
