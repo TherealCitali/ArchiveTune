@@ -1532,6 +1532,157 @@ fun HomePageSectionTitle(
  * Uses the same card/list layouts as the local quick picks so the "Quick picks display
  * mode" preference applies to online picks too.
  */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun ExperimentalQuickPicksSection(
+    quickPicks: List<Song>,
+    mediaMetadata: MediaMetadata?,
+    isPlaying: Boolean,
+    navController: NavController,
+    playerConnection: PlayerConnection,
+    menuState: MenuState,
+    haptic: HapticFeedback,
+    modifier: Modifier = Modifier,
+) {
+    val items = remember(quickPicks) { quickPicks.distinctBy { it.id }.take(12) }
+    LazyRow(
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        items(items = items, key = { it.id }, contentType = { "experimental_quick_pick" }) { pick ->
+            val artwork = remember(pick.song.thumbnailUrl) {
+                pick.song.thumbnailUrl?.displayArtworkUrl(width = 420, height = 520)
+            }
+            Box(
+                modifier = Modifier
+                    .width(184.dp)
+                    .height(244.dp)
+                    .clip(RoundedCornerShape(28.dp))
+                    .combinedClickable(
+                        onClick = {
+                            if (pick.id == mediaMetadata?.id) {
+                                playerConnection.player.togglePlayPause()
+                            } else {
+                                playerConnection.playQueue(
+                                    if (pick.song.isLocal) ListQueue(items = listOf(pick.toMediaItem()))
+                                    else YouTubeQueue.radio(pick.toMediaMetadata()),
+                                )
+                            }
+                        },
+                        onLongClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            menuState.show {
+                                SongMenu(originalSong = pick, navController = navController, onDismiss = menuState::dismiss)
+                            }
+                        },
+                    ),
+            ) {
+                AsyncImage(
+                    model = artwork,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                0f to Color.Transparent,
+                                0.48f to Color.Transparent,
+                                1f to Color.Black.copy(alpha = 0.88f),
+                            ),
+                        ),
+                )
+                Column(
+                    modifier = Modifier.align(Alignment.BottomStart).padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(3.dp),
+                ) {
+                    Text(pick.song.title, color = Color.White, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Text(pick.artists.joinToString { it.name }, color = Color.White.copy(alpha = 0.72f), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                if (pick.id == mediaMetadata?.id && isPlaying) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        shape = CircleShape,
+                        modifier = Modifier.align(Alignment.TopEnd).padding(12.dp).size(34.dp),
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(painterResource(R.drawable.volume_up), contentDescription = null, modifier = Modifier.size(18.dp))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ExperimentalRemoteQuickPicksSection(
+    section: HomePage.Section,
+    mediaMetadata: MediaMetadata?,
+    isPlaying: Boolean,
+    navController: NavController,
+    playerConnection: PlayerConnection,
+    menuState: MenuState,
+    haptic: HapticFeedback,
+    modifier: Modifier = Modifier,
+) {
+    val songs = remember(section.items) { section.items.filterIsInstance<SongItem>().distinctBy(SongItem::id).take(12) }
+    LazyRow(
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        items(items = songs, key = { it.id }, contentType = { "experimental_remote_quick_pick" }) { song ->
+            val isActive = song.id == mediaMetadata?.id
+            Box(
+                modifier = Modifier
+                    .width(184.dp)
+                    .height(244.dp)
+                    .clip(RoundedCornerShape(28.dp))
+                    .combinedClickable(
+                        onClick = {
+                            if (isActive) playerConnection.player.togglePlayPause()
+                            else playerConnection.playQueue(YouTubeQueue(endpoint = song.endpoint ?: WatchEndpoint(videoId = song.id), preloadItem = song.toMediaMetadata()))
+                        },
+                        onLongClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            menuState.show {
+                                YouTubeSongMenu(song = song, navController = navController, onDismiss = menuState::dismiss)
+                            }
+                        },
+                    ),
+            ) {
+                AsyncImage(
+                    model = song.thumbnail,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+                Box(
+                    modifier = Modifier.fillMaxSize().background(
+                        Brush.verticalGradient(0f to Color.Transparent, 0.48f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.88f)),
+                    ),
+                )
+                Column(modifier = Modifier.align(Alignment.BottomStart).padding(16.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(song.title, color = Color.White, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Text(song.artists.joinToString { it.name }, color = Color.White.copy(alpha = 0.72f), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                if (isActive && isPlaying) {
+                    Surface(color = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary, shape = CircleShape, modifier = Modifier.align(Alignment.TopEnd).padding(12.dp).size(34.dp)) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(painterResource(R.drawable.volume_up), contentDescription = null, modifier = Modifier.size(18.dp))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 @OptIn(
     ExperimentalFoundationApi::class,
     ExperimentalMaterial3Api::class,
