@@ -12,14 +12,14 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import androidx.media3.C
+import androidx.media3.common.C
 import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.TransferListener
 import androidx.media3.datasource.cache.Cache
 import androidx.media3.datasource.cache.CacheDataSource
 import dev.citali.lunartune.db.entities.Song
 import timber.log.Timber
-import java.io.IOException
 
 /**
  * Copies a complete Media3 cache resource into the user's music collection via MediaStore.
@@ -170,5 +170,6 @@ class CachedSongExporter(
         ): Int = C.RESULT_END_OF_INPUT
         override fun getUri(): Uri? = null
         override fun close() = Unit
+        override fun addTransferListener(transferListener: TransferListener) = Unit
     }
 }
