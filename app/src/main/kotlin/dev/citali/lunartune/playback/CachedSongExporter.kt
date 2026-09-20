@@ -162,7 +162,7 @@ class CachedSongExporter(
      * cache gaps no longer throw — they just produce a truncated export instead of a failure.
      */
     private object NoopDataSource : DataSource {
-        override fun open(dataSpec: DataSpec): Long = C.LENGTH_UNSET
+        override fun open(dataSpec: DataSpec): Long = C.LENGTH_UNSET.toLong()
         override fun read(
             buffer: ByteArray,
             offset: Int,
