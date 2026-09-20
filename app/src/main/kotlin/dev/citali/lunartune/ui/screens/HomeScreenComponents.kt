@@ -1532,11 +1532,6 @@ fun HomePageSectionTitle(
  * Uses the same card/list layouts as the local quick picks so the "Quick picks display
  * mode" preference applies to online picks too.
  */
-@OptIn(
-    ExperimentalFoundationApi::class,
-    ExperimentalMaterial3Api::class,
-    ExperimentalMaterial3ExpressiveApi::class,
-)
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ExperimentalQuickPicksSection(
@@ -1688,6 +1683,11 @@ fun ExperimentalRemoteQuickPicksSection(
     }
 }
 
+@OptIn(
+    ExperimentalFoundationApi::class,
+    ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3ExpressiveApi::class,
+)
 @Composable
 fun RemoteQuickPicksSection(
     section: HomePage.Section,
