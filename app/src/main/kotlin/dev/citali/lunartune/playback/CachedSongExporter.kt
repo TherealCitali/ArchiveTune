@@ -13,7 +13,7 @@ import android.provider.MediaStore
 import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.cache.Cache
 import androidx.media3.datasource.cache.CacheDataSource
-import androidx.media3.datasource.upstream.DataSource
+import androidx.media3.datasource.DataSource
 import dev.citali.lunartune.db.entities.Song
 import java.io.IOException
 

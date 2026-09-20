@@ -413,6 +413,7 @@ fun SongMenu(
     val addToQueueText = stringResource(R.string.add_to_queue)
     val addToPlaylistText = stringResource(R.string.add_to_playlist)
     val shareText = stringResource(R.string.share)
+    val exportAudioText = stringResource(R.string.export_audio)
     val editText = stringResource(R.string.edit)
 
     val primaryActions =
@@ -423,6 +424,7 @@ fun SongMenu(
             addToQueueText,
             addToPlaylistText,
             shareText,
+            exportAudioText,
             editText,
             isLocalSong,
             onDismiss,
@@ -507,7 +509,7 @@ fun SongMenu(
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             },
-                            text = stringResource(R.string.export_audio),
+                            text = exportAudioText,
                             onClick = {
                                 onDismiss()
                                 coroutineScope.launch {
