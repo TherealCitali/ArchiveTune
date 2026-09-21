@@ -414,8 +414,9 @@ fun LyricsV2(
         }
     }
 
-    // Auto-scroll to active line
-    LaunchedEffect(currentLineIndex, isManualScrolling, lyricsScroll) {
+    // Auto-scroll to active line. Also re-runs when the focus anchor changes (the player
+    // controls hide or return) so the line glides into the space they give up or take back.
+    LaunchedEffect(currentLineIndex, isManualScrolling, lyricsScroll, focusAnchorHeightPx) {
         if (!lyricsScroll || isManualScrolling || !isSynced) return@LaunchedEffect
         if (currentLineIndex < 0 || currentLineIndex >= entriesWithWords.size) return@LaunchedEffect
 
