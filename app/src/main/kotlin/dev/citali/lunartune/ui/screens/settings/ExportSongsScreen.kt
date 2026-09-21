@@ -88,7 +88,6 @@ import dev.citali.lunartune.db.MusicDatabase
 import dev.citali.lunartune.db.entities.detectAudioExtensionFromSpans
 import dev.citali.lunartune.db.entities.extensionToMimeType
 import dev.citali.lunartune.playback.AudioTagger
-import dev.citali.lunartune.playback.MonochromeStreamResolver
 import dev.citali.lunartune.ui.component.IconButton
 import dev.citali.lunartune.ui.utils.backToMain
 
@@ -152,7 +151,9 @@ fun ExportSongsScreen(navController: NavController) {
                     val cache: Cache = if (isDownloaded) downloadCache else playerCache
                     val spans = runCatching { cache.getCachedSpans(key) }.getOrNull().orEmpty()
                     if (spans.isEmpty()) return@mapNotNull null
-                    val songId = MonochromeStreamResolver.songIdFromCacheKey(key)
+                    // Lossless streams cache under a mono: key prefix; strip it
+                    // so the song lookup finds the real entry.
+                    val songId = key.removePrefix("mono:")
                     val songEntity = database.getSongByIdBlocking(songId)
                     val title = songEntity?.song?.title?.takeIf { it.isNotBlank() }
                         ?: "Unknown song ($key)"
