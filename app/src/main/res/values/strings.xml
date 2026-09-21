@@ -185,6 +185,13 @@
     <string name="export_audio_success">Audio exported to Music/LunarTune</string>
     <string name="export_audio_failed">Could not export this cached audio</string>
     <string name="delete">Delete</string>
+    <string name="lossless_source">Lossless source</string>
+    <string name="monochrome_lossless">Monochrome lossless (FLAC)</string>
+    <string name="monochrome_lossless_description">Stream matched songs as lossless FLAC from the Monochrome catalogue before falling back to YouTube Music. Downloads and fully cached songs are unaffected.</string>
+    <string name="monochrome_instance">API instance</string>
+    <string name="monochrome_instance_dialog_title">Monochrome API instance</string>
+    <string name="monochrome_instance_dialog_hint">https://api.monochrome.tf</string>
+    <string name="monochrome_instance_save">Save</string>
     <string name="hide_playlist">Hide playlist</string>
     <string name="unhide_playlist">Unhide playlist</string>
     <string name="show_hidden_playlists">Show hidden</string>

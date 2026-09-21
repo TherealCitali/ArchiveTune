@@ -120,6 +120,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import dev.citali.lunartune.MainActivity
 import dev.citali.lunartune.R
 import dev.citali.lunartune.aod.ACTION_AOD_MODE
@@ -244,6 +245,7 @@ import dev.citali.lunartune.utils.StreamClientUtils
 import dev.citali.lunartune.utils.SyncUtils
 import dev.citali.lunartune.utils.YTPlayerUtils
 import dev.citali.lunartune.utils.dataStore
+import dev.citali.lunartune.utils.preference
 import dev.citali.lunartune.utils.enumPreference
 import dev.citali.lunartune.utils.get
 import dev.citali.lunartune.utils.getAsync
@@ -358,6 +360,16 @@ class MusicService :
         this,
         PlayerStreamClientKey,
         PlayerStreamClient.WEB_REMIX,
+    )
+    private val monochromeEnabled by preference(
+        this,
+        dev.citali.lunartune.constants.MonochromeEnabledKey,
+        false,
+    )
+    private val monochromeInstance by preference(
+        this,
+        dev.citali.lunartune.constants.MonochromeInstanceKey,
+        dev.citali.lunartune.monochrome.MonochromeAudioProvider.DEFAULT_INSTANCE,
     )
     private val playbackUrlCache = ConcurrentHashMap<String, AuthScopedCacheValue>()
     private var nextMediaItemPrefetchJob: Job? = null
@@ -7547,6 +7559,12 @@ class MusicService :
                 } ?: resolvedDataSpec
             }
 
+        if (!lowDataModeActive && monochromeEnabled) {
+            resolveLosslessDataSpec(dataSpec = dataSpec, mediaId = mediaId)?.let { losslessDataSpec ->
+                return losslessDataSpec
+            }
+        }
+
         val playbackData =
             runBlocking(Dispatchers.IO) {
                 retryWithoutPlaybackLoginContext {
@@ -7669,6 +7687,49 @@ class MusicService :
         } ?: resolvedDataSpec
     }
 
+
+    /**
+     * Attempts to resolve a lossless FLAC stream via the Monochrome source
+     * for the given song. Returns null when the source is unavailable for
+     * this item so regular YouTube Music resolution can proceed.
+     *
+     * The returned DataSpec uses the [MonochromeStreamResolver.CACHE_KEY_PREFIX]
+     * cache key so lossless bytes never mix with YouTube Music spans in the
+     * Media3 caches.
+     */
+    private fun resolveLosslessDataSpec(
+        dataSpec: DataSpec,
+        mediaId: String,
+    ): DataSpec? {
+        if (mediaId.startsWith(MonochromeStreamResolver.CACHE_KEY_PREFIX)) return dataSpec
+        if (dataSpec.uri.shouldBypassYouTubeResolver()) return null
+        val song =
+            runBlocking(Dispatchers.IO) {
+                database.getSongByIdBlocking(mediaId)
+            } ?: return null
+        if (song.song.isLocal || song.song.isMusicVideo) return null
+        val instanceUrl =
+            monochromeInstance.ifBlank {
+                dev.citali.lunartune.monochrome.MonochromeAudioProvider.DEFAULT_INSTANCE
+            }
+        val resolved =
+            runBlocking(Dispatchers.IO) {
+                withTimeoutOrNull(3_000L) {
+                    MonochromeStreamResolver.resolve(
+                        songId = mediaId,
+                        title = song.song.title,
+                        artists = song.artists.map { it.name },
+                        durationSec = song.song.duration.takeIf { it > 0 },
+                        instanceUrl = instanceUrl,
+                    )
+                }
+            } ?: return null
+        return dataSpec
+            .buildUpon()
+            .setUri(resolved.url.toUri())
+            .setKey(MonochromeStreamResolver.cacheKeyFor(mediaId))
+            .build()
+    }
 
     private fun FormatEntity?.hasDisplayablePlaybackDetails(): Boolean {
         val format = this ?: return false
