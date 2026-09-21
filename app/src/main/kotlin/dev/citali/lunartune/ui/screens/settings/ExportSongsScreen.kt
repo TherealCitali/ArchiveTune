@@ -74,6 +74,8 @@ import androidx.media3.datasource.cache.Cache
 import androidx.media3.datasource.cache.CacheSpan
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import com.arthenica.ffmpegkit.FFmpegKit
+import com.arthenica.ffmpegkit.ReturnCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -206,15 +208,16 @@ fun ExportSongsScreen(navController: NavController) {
                             if (spans.isNullOrEmpty()) { failed++; continue@loop }
                             val totalSpanBytes = spans.sumOf { it.length }
                             if (totalSpanBytes <= 0L) { failed++; continue@loop }
-                            val exportExt = detectAudioExtensionFromSpans(spans)
-                            val mime = extensionToMimeType(exportExt)
+                            val sourceExt = detectAudioExtensionFromSpans(spans)
                             val safeTitle =
                                 row.title
                                     .replace(Regex("[\\\\/:*?\"<>|]"), "_")
                                     .ifBlank { "audio_${row.songId}" }
 
                             val tempFile =
-                                java.io.File(tempDir, "${row.songId}_${row.cacheKey.hashCode()}.$exportExt")
+                                java.io.File(tempDir, "${row.songId}_${row.cacheKey.hashCode()}.$sourceExt")
+                            val mp3File =
+                                java.io.File(tempDir, "${row.songId}_${row.cacheKey.hashCode()}.mp3")
                             try {
                                 runCatching {
                                     java.io.FileOutputStream(tempFile).use { output ->
@@ -236,8 +239,38 @@ fun ExportSongsScreen(navController: NavController) {
                                     continue@loop
                                 }
 
+                                // WebM/Opus streams cannot carry tags in their source
+                                // container, so convert them to MP3 — the most widely
+                                // supported tagged format — before export.
+                                var exportFile = tempFile
+                                var exportExt = sourceExt
+                                if (sourceExt == "webm" || sourceExt == "opus") {
+                                    val session = runCatching {
+                                        FFmpegKit.executeWithArguments(
+                                            arrayOf(
+                                                "-y", "-hide_banner", "-loglevel", "error",
+                                                "-i", tempFile.absolutePath,
+                                                "-vn",
+                                                "-c:a", "libmp3lame",
+                                                "-b:a", "320k",
+                                                mp3File.absolutePath,
+                                            ),
+                                        )
+                                    }.getOrNull()
+                                    if (session != null &&
+                                        ReturnCode.isSuccess(session.returnCode) &&
+                                        mp3File.exists() && mp3File.length() > 0L
+                                    ) {
+                                        exportFile = mp3File
+                                        exportExt = "mp3"
+                                    }
+                                    // On failure fall back to the raw WebM/Opus copy so
+                                    // the song is still exported (without embedded tags).
+                                }
+
+                                val mime = extensionToMimeType(exportExt)
                                 val resolvedMetadata = resolveExportMetadata(database, row)
-                                AudioTagger.tag(tempFile, resolvedMetadata)
+                                AudioTagger.tag(exportFile, resolvedMetadata)
 
                                 val destUri =
                                     android.provider.DocumentsContract.createDocument(
@@ -250,7 +283,7 @@ fun ExportSongsScreen(navController: NavController) {
                                     context.contentResolver.openOutputStream(destUri, "w")?.use { output ->
                                         java.io.BufferedOutputStream(output, EXPORT_COPY_BUFFER_BYTES)
                                             .use { bufOut ->
-                                                java.io.FileInputStream(tempFile).use { input ->
+                                                java.io.FileInputStream(exportFile).use { input ->
                                                     java.io
                                                         .BufferedInputStream(input, EXPORT_COPY_BUFFER_BYTES)
                                                         .use { bufIn -> bufIn.copyTo(bufOut) }
@@ -263,6 +296,7 @@ fun ExportSongsScreen(navController: NavController) {
                                 }.onFailure { failed++ }
                             } finally {
                                 tempFile.delete()
+                                mp3File.delete()
                             }
                         }
 

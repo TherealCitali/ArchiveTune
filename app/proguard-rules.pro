@@ -138,6 +138,10 @@
 -dontwarn javax.swing.**
 -keep class org.jaudiotagger.** { *; }
 
+## FFmpegKit (song export transcoding)
+-keep class com.arthenica.ffmpegkit.** { *; }
+-dontwarn com.arthenica.ffmpegkit.**
+
 ## Jetpack Glance
 # Keep ActionCallback implementations and their no-arg constructors
 -keep class * implements androidx.glance.appwidget.action.ActionCallback {

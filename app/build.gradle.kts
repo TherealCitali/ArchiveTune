@@ -367,6 +367,9 @@ dependencies {
 
     // Song export metadata tagging (ported AudioTagger)
     implementation("com.github.RouHim:jaudiotagger:1.4.31")
+
+    // WebM/Opus → MP3 transcoding for the song export
+    implementation("com.arthenica:ffmpeg-kit-audio:6.0-2")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {

@@ -182,7 +182,7 @@
     <string name="canvas_refetch_failed">Couldn\'t refresh animated canvas</string>
     <string name="share">Share</string>
     <string name="export_songs">Export songs</string>
-    <string name="export_songs_description">Save a copy of your cached and downloaded songs to a chosen folder in their original audio format</string>
+    <string name="export_songs_description">Save a copy of your cached and downloaded songs to a chosen folder. Songs keep their audio format; WebM/Opus streams are converted to MP3 so metadata can be embedded</string>
     <string name="export_songs_pick_folder">Pick export folder</string>
     <string name="export_songs_selected_count">%1$d of %2$d selected</string>
     <string name="export_songs_empty">No cached or downloaded songs to export</string>
