@@ -295,6 +295,9 @@ val PlayerStreamClientKey = stringPreferencesKey("playerStreamClient")
 val StreamSourcesOrderKey = stringPreferencesKey("streamSourcesOrder")
 val StreamSourcesEnabledKey = stringSetPreferencesKey("streamSourcesEnabled")
 
+val MonochromeEnabledKey = booleanPreferencesKey("monochromeEnabled")
+val MonochromeInstanceKey = stringPreferencesKey("monochromeInstance")
+
 enum class PlayerStreamClient {
     VISION_OS,
     ANDROID_VR,
