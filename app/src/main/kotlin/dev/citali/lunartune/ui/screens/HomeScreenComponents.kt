@@ -71,11 +71,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedback
@@ -1568,24 +1565,8 @@ fun ExperimentalQuickPicksSection(
             label = "quick picks backdrop",
             modifier = Modifier
                 .fillMaxSize()
-                .graphicsLayer {
-                    scaleX = 1.06f
-                    scaleY = 1.06f
-                    alpha = 0.58f
-                    compositingStrategy = CompositingStrategy.Offscreen
-                }
-                .drawWithCache {
-                    val radialMask =
-                        Brush.radialGradient(
-                            0f to Color.White,
-                            0.52f to Color.White,
-                            1f to Color.Transparent,
-                        )
-                    onDrawWithContent {
-                        drawContent()
-                        drawRect(radialMask, blendMode = BlendMode.DstIn)
-                    }
-                },
+                .graphicsLayer { scaleX = 1.16f; scaleY = 1.16f; alpha = 0.82f }
+                .clip(CircleShape),
         ) { artwork ->
             if (artwork != null) {
                 BlurredArtwork(
@@ -1600,7 +1581,18 @@ fun ExperimentalQuickPicksSection(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-
+                .background(
+                    Brush.radialGradient(
+                        colorStops = arrayOf(
+                            0.0f to Color.Transparent,
+                            0.28f to Color.Black.copy(alpha = 0.05f),
+                            0.48f to Color.Black.copy(alpha = 0.20f),
+                            0.66f to Color.Black.copy(alpha = 0.45f),
+                            0.82f to Color.Black.copy(alpha = 0.74f),
+                            1.0f to Color.Black,
+                        ),
+                    ),
+                ),
         )
         HorizontalPager(
             state = pagerState,
@@ -1677,24 +1669,8 @@ fun ExperimentalRemoteQuickPicksSection(
             label = "remote quick picks backdrop",
             modifier = Modifier
                 .fillMaxSize()
-                .graphicsLayer {
-                    scaleX = 1.06f
-                    scaleY = 1.06f
-                    alpha = 0.58f
-                    compositingStrategy = CompositingStrategy.Offscreen
-                }
-                .drawWithCache {
-                    val radialMask =
-                        Brush.radialGradient(
-                            0f to Color.White,
-                            0.52f to Color.White,
-                            1f to Color.Transparent,
-                        )
-                    onDrawWithContent {
-                        drawContent()
-                        drawRect(radialMask, blendMode = BlendMode.DstIn)
-                    }
-                },
+                .graphicsLayer { scaleX = 1.16f; scaleY = 1.16f; alpha = 0.82f }
+                .clip(CircleShape),
         ) { artwork ->
             if (artwork != null) {
                 BlurredArtwork(
@@ -1709,7 +1685,18 @@ fun ExperimentalRemoteQuickPicksSection(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-
+                .background(
+                    Brush.radialGradient(
+                        colorStops = arrayOf(
+                            0.0f to Color.Transparent,
+                            0.28f to Color.Black.copy(alpha = 0.05f),
+                            0.48f to Color.Black.copy(alpha = 0.20f),
+                            0.66f to Color.Black.copy(alpha = 0.45f),
+                            0.82f to Color.Black.copy(alpha = 0.74f),
+                            1.0f to Color.Black,
+                        ),
+                    ),
+                ),
         )
         HorizontalPager(state = pagerState, pageSize = PageSize.Fixed(250.dp), pageSpacing = (-48).dp, contentPadding = PaddingValues(horizontal = 36.dp), modifier = Modifier.fillMaxWidth().height(336.dp)) { page ->
             val song = songs[page]
