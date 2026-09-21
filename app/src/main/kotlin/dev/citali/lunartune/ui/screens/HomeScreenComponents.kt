@@ -7,7 +7,6 @@
 
 package dev.citali.lunartune.ui.screens
 
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
@@ -32,7 +31,6 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -71,11 +69,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedback
@@ -121,7 +115,6 @@ import dev.citali.lunartune.models.MediaMetadata
 import dev.citali.lunartune.models.SimilarRecommendation
 import dev.citali.lunartune.models.toMediaMetadata
 import dev.citali.lunartune.playback.PlayerConnection
-import dev.citali.lunartune.ui.player.BlurredArtwork
 import dev.citali.lunartune.playback.queues.ListQueue
 import dev.citali.lunartune.playback.queues.YouTubeQueue
 import dev.citali.lunartune.ui.component.AlbumGridItem
@@ -140,7 +133,6 @@ import dev.citali.lunartune.ui.menu.YouTubeAlbumMenu
 import dev.citali.lunartune.ui.menu.YouTubeArtistMenu
 import dev.citali.lunartune.ui.menu.YouTubePlaylistMenu
 import dev.citali.lunartune.ui.menu.YouTubeSongMenu
-import kotlin.math.absoluteValue
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.random.Random
@@ -1540,208 +1532,6 @@ fun HomePageSectionTitle(
  * Uses the same card/list layouts as the local quick picks so the "Quick picks display
  * mode" preference applies to online picks too.
  */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun ExperimentalQuickPicksSection(
-    quickPicks: List<Song>,
-    mediaMetadata: MediaMetadata?,
-    isPlaying: Boolean,
-    navController: NavController,
-    playerConnection: PlayerConnection,
-    menuState: MenuState,
-    haptic: HapticFeedback,
-    modifier: Modifier = Modifier,
-) {
-    val items = remember(quickPicks) { quickPicks.distinctBy { it.id }.take(12) }
-    if (items.isEmpty()) return
-    val pagerState = rememberPagerState { items.size }
-    val frontArtwork = items.getOrNull(pagerState.currentPage)?.song?.thumbnailUrl
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(336.dp)
-            .background(Color.Black)
-            .graphicsLayer { clip = false },
-    ) {
-        Crossfade(
-            targetState = frontArtwork,
-            label = "quick picks backdrop",
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    scaleX = 1.06f
-                    scaleY = 1.06f
-                    alpha = 0.58f
-                    compositingStrategy = CompositingStrategy.Offscreen
-                }
-                .drawWithCache {
-                    val radialMask =
-                        Brush.radialGradient(
-                            0f to Color.White,
-                            0.52f to Color.White,
-                            1f to Color.Transparent,
-                        )
-                    onDrawWithContent {
-                        drawContent()
-                        drawRect(radialMask, blendMode = BlendMode.DstIn)
-                    }
-                },
-        ) { artwork ->
-            if (artwork != null) {
-                BlurredArtwork(
-                    model = artwork,
-                    radius = 64.dp,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-
-        )
-        HorizontalPager(
-            state = pagerState,
-            pageSize = PageSize.Fixed(300.dp),
-            pageSpacing = (-42).dp,
-            contentPadding = PaddingValues(horizontal = 24.dp),
-            modifier = Modifier.fillMaxWidth().height(320.dp),
-        ) { page ->
-            val pick = items[page]
-            val distance = (pagerState.currentPage - page + pagerState.currentPageOffsetFraction).absoluteValue.coerceIn(0f, 1f)
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .aspectRatio(1f)
-                    .graphicsLayer {
-                        val scale = 1f - distance * 0.10f
-                        scaleX = scale
-                        scaleY = scale
-                        alpha = 1f - distance * 0.18f
-                    }
-                    .clip(RoundedCornerShape(30.dp))
-                    .combinedClickable(
-                        onClick = {
-                            if (pick.id == mediaMetadata?.id) playerConnection.player.togglePlayPause()
-                            else playerConnection.playQueue(if (pick.song.isLocal) ListQueue(items = listOf(pick.toMediaItem())) else YouTubeQueue.radio(pick.toMediaMetadata()))
-                        },
-                        onLongClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            menuState.show { SongMenu(originalSong = pick, navController = navController, onDismiss = menuState::dismiss) }
-                        },
-                    ),
-            ) {
-                AsyncImage(model = pick.song.thumbnailUrl, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-                Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color.Transparent, 0.52f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.64f))))
-                Column(modifier = Modifier.align(Alignment.BottomStart).padding(18.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                    Text(pick.song.title, color = Color.White, style = MaterialTheme.typography.titleLargeEmphasized, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    Text(pick.artists.joinToString { it.name }, color = Color.White.copy(alpha = 0.76f), style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-                if (pick.id == mediaMetadata?.id && isPlaying) {
-                    Surface(color = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary, shape = CircleShape, modifier = Modifier.align(Alignment.TopEnd).padding(12.dp).size(36.dp)) {
-                        Box(contentAlignment = Alignment.Center) { Icon(painterResource(R.drawable.volume_up), contentDescription = null, modifier = Modifier.size(19.dp)) }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun ExperimentalRemoteQuickPicksSection(
-    section: HomePage.Section,
-    mediaMetadata: MediaMetadata?,
-    isPlaying: Boolean,
-    navController: NavController,
-    playerConnection: PlayerConnection,
-    menuState: MenuState,
-    haptic: HapticFeedback,
-    modifier: Modifier = Modifier,
-) {
-    val songs = remember(section.items) { section.items.filterIsInstance<SongItem>().distinctBy(SongItem::id).take(12) }
-    if (songs.isEmpty()) return
-    val pagerState = rememberPagerState { songs.size }
-    val frontArtwork = songs.getOrNull(pagerState.currentPage)?.thumbnail
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(336.dp)
-            .background(Color.Black)
-            .graphicsLayer { clip = false },
-    ) {
-        Crossfade(
-            targetState = frontArtwork,
-            label = "remote quick picks backdrop",
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    scaleX = 1.06f
-                    scaleY = 1.06f
-                    alpha = 0.58f
-                    compositingStrategy = CompositingStrategy.Offscreen
-                }
-                .drawWithCache {
-                    val radialMask =
-                        Brush.radialGradient(
-                            0f to Color.White,
-                            0.52f to Color.White,
-                            1f to Color.Transparent,
-                        )
-                    onDrawWithContent {
-                        drawContent()
-                        drawRect(radialMask, blendMode = BlendMode.DstIn)
-                    }
-                },
-        ) { artwork ->
-            if (artwork != null) {
-                BlurredArtwork(
-                    model = artwork,
-                    radius = 64.dp,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-
-        )
-        HorizontalPager(state = pagerState, pageSize = PageSize.Fixed(250.dp), pageSpacing = (-48).dp, contentPadding = PaddingValues(horizontal = 36.dp), modifier = Modifier.fillMaxWidth().height(336.dp)) { page ->
-            val song = songs[page]
-            val distance = (pagerState.currentPage - page + pagerState.currentPageOffsetFraction).absoluteValue.coerceIn(0f, 1f)
-            Box(
-                modifier = Modifier.fillMaxHeight().graphicsLayer { val scale = 1f - distance * 0.10f; scaleX = scale; scaleY = scale; alpha = 1f - distance * 0.18f }.clip(RoundedCornerShape(30.dp)).combinedClickable(
-                    onClick = {
-                        if (song.id == mediaMetadata?.id) playerConnection.player.togglePlayPause()
-                        else playerConnection.playQueue(YouTubeQueue(endpoint = song.endpoint ?: WatchEndpoint(videoId = song.id), preloadItem = song.toMediaMetadata()))
-                    },
-                    onLongClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        menuState.show { YouTubeSongMenu(song = song, navController = navController, onDismiss = menuState::dismiss) }
-                    },
-                ),
-            ) {
-                AsyncImage(model = song.thumbnail, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-                Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color.Transparent, 0.52f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.64f))))
-                Column(modifier = Modifier.align(Alignment.BottomStart).padding(18.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                    Text(song.title, color = Color.White, style = MaterialTheme.typography.titleLargeEmphasized, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    Text(song.artists.joinToString { it.name }, color = Color.White.copy(alpha = 0.76f), style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-                if (song.id == mediaMetadata?.id && isPlaying) {
-                    Surface(color = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary, shape = CircleShape, modifier = Modifier.align(Alignment.TopEnd).padding(12.dp).size(36.dp)) {
-                        Box(contentAlignment = Alignment.Center) { Icon(painterResource(R.drawable.volume_up), contentDescription = null, modifier = Modifier.size(19.dp)) }
-                    }
-                }
-            }
-        }
-    }
-}
-
 @OptIn(
     ExperimentalFoundationApi::class,
     ExperimentalMaterial3Api::class,

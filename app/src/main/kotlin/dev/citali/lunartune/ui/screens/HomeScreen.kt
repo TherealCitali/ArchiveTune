@@ -60,8 +60,6 @@ import kotlinx.coroutines.CoroutineScope
 import dev.citali.lunartune.LocalPlayerAwareWindowInsets
 import dev.citali.lunartune.LocalPlayerConnection
 import dev.citali.lunartune.R
-import dev.citali.lunartune.constants.DisableBlurKey
-import dev.citali.lunartune.constants.ExperimentalUiKey
 import dev.citali.lunartune.constants.QuickPicks
 
 import dev.citali.lunartune.home.HomeAction
@@ -70,12 +68,10 @@ import dev.citali.lunartune.home.HomeUiState
 import dev.citali.lunartune.models.MediaMetadata
 import dev.citali.lunartune.playback.PlayerConnection
 import dev.citali.lunartune.ui.component.ExpressivePullToRefreshBox
-import dev.citali.lunartune.ui.component.ExperimentalThemeBackdrop
 import dev.citali.lunartune.ui.component.LocalMenuState
 import dev.citali.lunartune.ui.component.MenuState
 import dev.citali.lunartune.ui.utils.SnapLayoutInfoProvider
 import dev.citali.lunartune.viewmodels.HomeViewModel
-import dev.citali.lunartune.utils.rememberPreference
 import moe.rukamori.archivetune.innertube.pages.HomePage
 
 private val HomeFeedMaxWidth = 1_200.dp
@@ -95,7 +91,6 @@ fun HomeScreen(
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
     val isPlaying by playerConnection.isPlaying.collectAsStateWithLifecycle()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
-    val experimentalUi by rememberPreference(ExperimentalUiKey, defaultValue = false)
 
     val lazyListState = rememberLazyListState()
     val forgottenFavoritesGridState = rememberLazyGridState()
@@ -212,7 +207,6 @@ fun HomeScreen(
                     lazyListState = lazyListState,
                     forgottenFavoritesGridState = forgottenFavoritesGridState,
                     onAction = viewModel::onAction,
-                    experimentalUi = experimentalUi,
                 )
             }
         }
@@ -287,10 +281,8 @@ private fun HomeContent(
     lazyListState: androidx.compose.foundation.lazy.LazyListState,
     forgottenFavoritesGridState: LazyGridState,
     onAction: (HomeAction) -> Unit,
-    experimentalUi: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val disableBlur by rememberPreference(DisableBlurKey, defaultValue = false)
     val tonalStart = MaterialTheme.colorScheme.primaryContainer
     val tonalMiddle = MaterialTheme.colorScheme.secondaryContainer
     val remoteQuickPicks =
@@ -298,9 +290,7 @@ private fun HomeContent(
             .takeIf { it.quickPicksMode == QuickPicks.QUICK_PICKS }
             ?.remoteQuickPicks
     Box(modifier = modifier.fillMaxSize()) {
-        if (experimentalUi) {
-            ExperimentalThemeBackdrop(Modifier.fillMaxSize())
-        } else if (uiState.showTonalBackdrop) {
+        if (uiState.showTonalBackdrop) {
             Box(
                 modifier =
                     Modifier
@@ -416,28 +406,16 @@ private fun HomeContent(
                                 key = "home_remote_quick_picks",
                                 contentType = "quick_picks",
                             ) {
-                                if (experimentalUi) {
-                                    ExperimentalRemoteQuickPicksSection(
-                                        section = remoteQuickPicks,
-                                        mediaMetadata = mediaMetadata,
-                                        isPlaying = isPlaying,
-                                        navController = navController,
-                                        playerConnection = playerConnection,
-                                        menuState = menuState,
-                                        haptic = haptic,
-                                    )
-                                } else {
-                                    RemoteQuickPicksSection(
-                                        section = remoteQuickPicks,
-                                        mediaMetadata = mediaMetadata,
-                                        isPlaying = isPlaying,
-                                        displayMode = uiState.quickPicksDisplayMode,
-                                        navController = navController,
-                                        playerConnection = playerConnection,
-                                        menuState = menuState,
-                                        haptic = haptic,
-                                    )
-                                }
+                                RemoteQuickPicksSection(
+                                    section = remoteQuickPicks,
+                                    mediaMetadata = mediaMetadata,
+                                    isPlaying = isPlaying,
+                                    displayMode = uiState.quickPicksDisplayMode,
+                                    navController = navController,
+                                    playerConnection = playerConnection,
+                                    menuState = menuState,
+                                    haptic = haptic,
+                                )
                             }
                         } else if (
                             uiState.quickPicksMode != QuickPicks.DONT_SHOW &&
@@ -455,28 +433,16 @@ private fun HomeContent(
                                 key = "home_quick_picks",
                                 contentType = "quick_picks",
                             ) {
-                                if (experimentalUi) {
-                                    ExperimentalQuickPicksSection(
-                                        quickPicks = uiState.quickPicks,
-                                        mediaMetadata = mediaMetadata,
-                                        isPlaying = isPlaying,
-                                        navController = navController,
-                                        playerConnection = playerConnection,
-                                        menuState = menuState,
-                                        haptic = haptic,
-                                    )
-                                } else {
-                                    QuickPicksSection(
-                                        quickPicks = uiState.quickPicks,
-                                        mediaMetadata = mediaMetadata,
-                                        isPlaying = isPlaying,
-                                        displayMode = uiState.quickPicksDisplayMode,
-                                        navController = navController,
-                                        playerConnection = playerConnection,
-                                        menuState = menuState,
-                                        haptic = haptic,
-                                    )
-                                }
+                                QuickPicksSection(
+                                    quickPicks = uiState.quickPicks,
+                                    mediaMetadata = mediaMetadata,
+                                    isPlaying = isPlaying,
+                                    displayMode = uiState.quickPicksDisplayMode,
+                                    navController = navController,
+                                    playerConnection = playerConnection,
+                                    menuState = menuState,
+                                    haptic = haptic,
+                                )
                             }
                         }
 
