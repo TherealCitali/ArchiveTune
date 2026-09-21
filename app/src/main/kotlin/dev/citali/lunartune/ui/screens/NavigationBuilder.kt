@@ -62,6 +62,7 @@ import dev.citali.lunartune.ui.screens.settings.ContentSettings
 import dev.citali.lunartune.ui.screens.settings.CustomizeBackground
 import dev.citali.lunartune.ui.screens.settings.DebugSettings
 import dev.citali.lunartune.ui.screens.settings.DiscordSettings
+import dev.citali.lunartune.ui.screens.settings.ExportSongsScreen
 import dev.citali.lunartune.ui.screens.settings.HiddenPlaylistsScreen
 import dev.citali.lunartune.ui.screens.settings.IntegrationScreen
 import dev.citali.lunartune.ui.screens.settings.InternetSettings
@@ -424,6 +425,9 @@ fun NavGraphBuilder.navigationBuilder(
     }
     composable("settings/storage") {
         StorageSettings(navController)
+    }
+    composable("settings/storage/export_songs") {
+        ExportSongsScreen(navController)
     }
     composable("settings/privacy") {
         PrivacySettings(navController)

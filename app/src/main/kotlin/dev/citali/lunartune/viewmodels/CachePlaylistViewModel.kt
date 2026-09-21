@@ -17,7 +17,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import dev.citali.lunartune.constants.HideExplicitKey
 import dev.citali.lunartune.constants.HideVideoKey
 import dev.citali.lunartune.db.MusicDatabase
@@ -26,7 +25,6 @@ import dev.citali.lunartune.di.DownloadCache
 import dev.citali.lunartune.di.PlayerCache
 import dev.citali.lunartune.extensions.filterExplicit
 import dev.citali.lunartune.extensions.filterVideo
-import dev.citali.lunartune.playback.CachedSongExporter
 import dev.citali.lunartune.utils.dataStore
 import dev.citali.lunartune.utils.get
 import java.time.LocalDateTime
@@ -91,9 +89,4 @@ class CachePlaylistViewModel
         fun removeSongFromCache(songId: String) {
             playerCache.removeResource(songId)
         }
-
-        suspend fun exportSong(song: Song): String =
-            withContext(Dispatchers.IO) {
-                CachedSongExporter(context, playerCache, downloadCache).export(song)
-            }
     }

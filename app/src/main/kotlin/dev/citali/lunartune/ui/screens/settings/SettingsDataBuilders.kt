@@ -412,6 +412,7 @@ fun buildSettingsGroups(
             onClick = { navController.navigate("settings/storage") },
             children = listOf(
                 SettingsChild("Downloaded songs", "downloaded_songs", listOf("downloaded", "offline songs", "saved songs")),
+                SettingsChild("Export songs", "export_songs", listOf("export", "export songs", "save songs", "copy songs", "local storage", "file")),
                 SettingsChild("Song cache size", "song_cache_size", listOf("cache size", "song cache", "memory", "download cache")),
                 SettingsChild("Clear song cache", "clear_song_cache", listOf("clear song cache", "delete song cache", "wipe song cache")),
                 SettingsChild("Image cache size", "image_cache_size", listOf("image cache", "thumbnail cache", "artwork cache")),

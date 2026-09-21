@@ -364,6 +364,9 @@ dependencies {
     implementation(libs.accompanist.lyrics.core)
 
     implementation("org.json:json:20240303")
+
+    // Song export metadata tagging (ported AudioTagger)
+    implementation("com.github.RouHim:jaudiotagger:1.4.31")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
