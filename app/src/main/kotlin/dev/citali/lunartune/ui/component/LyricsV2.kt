@@ -519,12 +519,6 @@ fun LyricsV2(
                     .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen },
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item(key = "lyrics_source", contentType = "lyrics_source") {
-                LyricsSourceLabel(
-                    source = currentLyrics?.source,
-                    color = textColor,
-                )
-            }
             itemsIndexed(
                 items = entriesWithWords,
                 key = { index, entry -> "${index}_${entry.time}" },
