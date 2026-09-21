@@ -90,7 +90,6 @@ import dev.citali.lunartune.constants.DefaultOpenTabKey
 import dev.citali.lunartune.constants.DisableAnimationsKey
 import dev.citali.lunartune.constants.DisableBlurKey
 import dev.citali.lunartune.constants.DynamicThemeKey
-import dev.citali.lunartune.constants.ExperimentalUiKey
 import dev.citali.lunartune.constants.FontPreferenceKey
 import dev.citali.lunartune.constants.ForceHighRefreshRateKey
 import dev.citali.lunartune.constants.GridItemSize
@@ -165,11 +164,6 @@ fun AppearanceSettings(navController: NavController) {
         rememberPreference(
             DynamicThemeKey,
             defaultValue = true,
-        )
-    val (experimentalUi, onExperimentalUiChange) =
-        rememberPreference(
-            ExperimentalUiKey,
-            defaultValue = false,
         )
     val (randomThemeOnStartup, onRandomThemeOnStartupChange) =
         rememberPreference(
@@ -564,15 +558,6 @@ fun AppearanceSettings(navController: NavController) {
                         icon = { Icon(painterResource(R.drawable.palette), null) },
                         checked = dynamicTheme,
                         onCheckedChange = onDynamicThemeChange,
-                    )
-                }
-                item {
-                    SwitchPreference(
-                        title = { Text(stringResource(R.string.experimental_ui)) },
-                        description = stringResource(R.string.experimental_ui_desc),
-                        icon = { Icon(painterResource(R.drawable.auto_awesome), null) },
-                        checked = experimentalUi,
-                        onCheckedChange = onExperimentalUiChange,
                     )
                 }
 
