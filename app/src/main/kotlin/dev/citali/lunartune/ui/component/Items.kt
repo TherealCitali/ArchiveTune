@@ -134,9 +134,6 @@ import dev.citali.lunartune.models.MediaMetadata
 import dev.citali.lunartune.playback.queues.LocalAlbumRadio
 import dev.citali.lunartune.ui.theme.PlayerColorExtractor
 import dev.citali.lunartune.ui.theme.extractThemeColor
-import dev.citali.lunartune.ui.transition.albumArtworkKey
-import dev.citali.lunartune.ui.transition.playlistArtworkKey
-import dev.citali.lunartune.ui.transition.sharedArtwork
 import dev.citali.lunartune.ui.utils.YtimgResizePolicy
 import dev.citali.lunartune.ui.utils.getNextFallbackUrl
 import dev.citali.lunartune.ui.utils.preferredThumbnailRatio
@@ -659,7 +656,6 @@ fun AlbumListItem(
     thumbnailContent = {
         ItemThumbnail(
             thumbnailUrl = album.album.thumbnailUrl,
-            sharedKey = albumArtworkKey(album.id),
             isActive = isActive,
             isPlaying = isPlaying,
             shape = RoundedCornerShape(ThumbnailCornerRadius),
@@ -746,7 +742,6 @@ fun AlbumGridItem(
 
         ItemThumbnail(
             thumbnailUrl = album.album.thumbnailUrl,
-            sharedKey = albumArtworkKey(album.id),
             isActive = isActive,
             isPlaying = isPlaying,
             shape = RoundedCornerShape(GridThumbnailCornerRadius),
@@ -1433,7 +1428,6 @@ fun YouTubeListItem(
             thumbnailContent = {
                 ItemThumbnail(
                     thumbnailUrl = item.thumbnail,
-                    sharedKey = item.sharedArtworkKey(),
                     albumIndex = albumIndex,
                     isSelected = isSelected,
                     isActive = isActive,
@@ -1542,7 +1536,6 @@ fun YouTubeGridItem(
 
             ItemThumbnail(
                 thumbnailUrl = item.thumbnail,
-                sharedKey = item.sharedArtworkKey(),
                 isActive = isActive,
                 isPlaying = isPlaying,
                 shape = shape,
@@ -1671,13 +1664,6 @@ fun LocalAlbumsGrid(
     modifier = modifier,
 )
 
-private fun YTItem.sharedArtworkKey(): String? =
-    when (this) {
-        is AlbumItem -> albumArtworkKey(id)
-        is PlaylistItem -> playlistArtworkKey(id)
-        else -> null
-    }
-
 @Composable
 fun ItemThumbnail(
     thumbnailUrl: String?,
@@ -1695,7 +1681,6 @@ fun ItemThumbnail(
     maxSizePx: Int? = null,
     sizeBuckets: List<Int>? = null,
     sourceAspectRatio: Float? = null,
-    sharedKey: String? = null,
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -1704,7 +1689,6 @@ fun ItemThumbnail(
         contentAlignment = Alignment.Center,
         modifier =
             modifier
-                .sharedArtwork(sharedKey)
                 .fillMaxSize()
                 .aspectRatio(thumbnailRatio)
                 .clip(shape)
