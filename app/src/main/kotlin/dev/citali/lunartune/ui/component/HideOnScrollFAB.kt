@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import dev.citali.lunartune.LocalAnimationsDisabled
 import dev.citali.lunartune.LocalPlayerAwareWindowInsets
 import dev.citali.lunartune.constants.EnableHapticFeedbackKey
+import dev.citali.lunartune.ui.theme.LunarMotion
 import dev.citali.lunartune.ui.utils.isScrollingUp
 import dev.citali.lunartune.utils.rememberPreference
 
@@ -50,8 +51,8 @@ fun HideOnScrollFAB(
     val animationsDisabled = LocalAnimationsDisabled.current
     AnimatedVisibility(
         visible = visible && lazyListState.isScrollingUp(),
-        enter = slideInVertically(animationSpec = tween(if (animationsDisabled) 0 else 220)) { it },
-        exit = slideOutVertically(animationSpec = tween(if (animationsDisabled) 0 else 220)) { it },
+        enter = slideInVertically(animationSpec = if (animationsDisabled) tween(0) else LunarMotion.bouncy()) { it },
+        exit = slideOutVertically(animationSpec = if (animationsDisabled) tween(0) else LunarMotion.snappy()) { it },
         modifier =
             modifier.windowInsetsPadding(
                 LocalPlayerAwareWindowInsets.current
@@ -97,8 +98,8 @@ fun BoxScope.HideOnScrollFAB(
     val animationsDisabled = LocalAnimationsDisabled.current
     AnimatedVisibility(
         visible = visible && lazyListState.isScrollingUp(),
-        enter = slideInVertically(animationSpec = tween(if (animationsDisabled) 0 else 220)) { it },
-        exit = slideOutVertically(animationSpec = tween(if (animationsDisabled) 0 else 220)) { it },
+        enter = slideInVertically(animationSpec = if (animationsDisabled) tween(0) else LunarMotion.bouncy()) { it },
+        exit = slideOutVertically(animationSpec = if (animationsDisabled) tween(0) else LunarMotion.snappy()) { it },
         modifier =
             Modifier
                 .align(Alignment.BottomEnd)
@@ -127,8 +128,8 @@ fun BoxScope.HideOnScrollFAB(
     val animationsDisabled = LocalAnimationsDisabled.current
     AnimatedVisibility(
         visible = visible && scrollState.isScrollingUp(),
-        enter = slideInVertically(animationSpec = tween(if (animationsDisabled) 0 else 220)) { it },
-        exit = slideOutVertically(animationSpec = tween(if (animationsDisabled) 0 else 220)) { it },
+        enter = slideInVertically(animationSpec = if (animationsDisabled) tween(0) else LunarMotion.bouncy()) { it },
+        exit = slideOutVertically(animationSpec = if (animationsDisabled) tween(0) else LunarMotion.snappy()) { it },
         modifier =
             Modifier
                 .align(Alignment.BottomEnd)
