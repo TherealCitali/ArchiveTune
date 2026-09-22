@@ -732,6 +732,12 @@ private fun AboutSuccessContent(
                 )
             }
         }
+
+        item(key = "legal_notice", contentType = "about_legal_notice") {
+            AboutContentContainer {
+                LegalNoticeCard(modifier = Modifier.fillMaxWidth())
+            }
+        }
     }
 }
 
@@ -1017,6 +1023,48 @@ private fun TeamMemberSection(
                     minHeight = if (prominentFirstItem && index == 0) 96.dp else 80.dp,
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun LegalNoticeCard(modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.extraLarge,
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(AboutSpacing.md),
+            verticalArrangement = Arrangement.spacedBy(AboutSpacing.xs),
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(AboutSpacing.xs),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.info),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = stringResource(R.string.about_legal_notice),
+                    style = MaterialTheme.typography.titleLargeEmphasized,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+            Text(
+                text = stringResource(R.string.about_legal_notice_body),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
