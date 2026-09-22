@@ -380,6 +380,14 @@ fun LyricsScreen(
     }
     val controlsVisible = controlsEnabled && controlsRevealed
 
+    // Apple Music style: the whole on-screen chrome (top bar and player controls)
+    // fades together when the screen goes idle.
+    val chromeAlpha by animateFloatAsState(
+        targetValue = if (controlsVisible) 1f else 0f,
+        animationSpec = if (controlsVisible) controlsFadeInSpec() else controlsFadeOutSpec(),
+        label = "lyricsChromeAlpha",
+    )
+
     val gradientColorsCache =
         remember {
             object : LinkedHashMap<String, List<Color>>(20, 0.75f, true) {
@@ -509,17 +517,24 @@ fun LyricsScreen(
                     .fillMaxSize()
                     .windowInsetsPadding(WindowInsets.systemBars),
         ) {
-            AppleMusicGrabber(onClick = onBackClick)
-            AppleMusicTrackHeader(
-                mediaMetadata = mediaMetadata,
-                foregroundColor = foregroundColor,
-                onMoreClick = showLyricsMenu,
-                onDismissClick = onBackClick,
+            Column(
                 modifier =
                     Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
-            )
+                        .graphicsLayer { alpha = chromeAlpha }
+                        .blockPointerInput(enabled = !controlsVisible),
+            ) {
+                AppleMusicGrabber(onClick = onBackClick)
+                AppleMusicTrackHeader(
+                    mediaMetadata = mediaMetadata,
+                    foregroundColor = foregroundColor,
+                    onMoreClick = showLyricsMenu,
+                    onDismissClick = onBackClick,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp),
+                )
+            }
 
             if (orientation == Configuration.ORIENTATION_LANDSCAPE && controlsEnabled) {
                 Row(
@@ -1356,9 +1371,11 @@ private class LyricsWithControlsGeometry {
  * frame, which is what let the breathing dots of an instrumental section turn the old
  * shrink-and-fade into a stutter and an instant cut on slower phones.
  *
- * The pane keeps positioning its current line against the height it has while the controls are
- * shown (the `focusAnchorHeight` handed to [lyrics]), so the line stays exactly where it is in both
- * directions and the extra room only ever shows more of the upcoming lines.
+ * While the controls are up, the pane positions its current line against the height it has then
+ * (the `focusAnchorHeight` handed to [lyrics]). Once they leave, the line re-anchors against the
+ * full height and glides down into the space the controls gave up — the way the original
+ * ArchiveTune player hands the freed space to the line in focus — and glides back when they
+ * return.
  *
  * Controls on their way out stop taking touches and leave the composition once faded, so the lines
  * that now occupy their space can be scrolled and tapped like any others.
@@ -1420,7 +1437,14 @@ private fun LyricsWithControls(
         if (constraints.hasBoundedHeight) {
             val lyricsHeight = (constraints.maxHeight - reservedHeight).coerceAtLeast(0)
             lyricsConstraints = constraints.copy(minHeight = lyricsHeight, maxHeight = lyricsHeight)
-            focusAnchorHeight = (constraints.maxHeight - controlsHeightPx).coerceAtLeast(0).toDp()
+            // Controls up: anchor against the shortened pane. Controls gone: no override, so
+            // the focused line anchors against the full pane and takes over the freed space.
+            focusAnchorHeight =
+                if (controlsVisible) {
+                    (constraints.maxHeight - controlsHeightPx).coerceAtLeast(0).toDp()
+                } else {
+                    null
+                }
         } else {
             lyricsConstraints = constraints.copy(minHeight = 0)
             focusAnchorHeight = null

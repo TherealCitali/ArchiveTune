@@ -18,6 +18,7 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -718,11 +719,18 @@ fun LyricsEnhanced(
                             .fillMaxSize()
                             .nestedScroll(nestedScrollConnection),
                 ) {
-                    val lyricsViewportOffset =
+                    val focusAnchorOffset =
                         remember(maxHeight, focusAnchorHeight) {
                             val focusHeight = focusAnchorHeight?.let { it - LyricsPaneBottomPadding } ?: maxHeight
                             focusHeight.coerceAtLeast(0.dp) * LYRICS_FOCUS_HEIGHT_RATIO
                         }
+                    // Glide the focused line to its new anchor when the player controls hide
+                    // or return instead of jumping it into or out of the freed space.
+                    val lyricsViewportOffset by animateDpAsState(
+                        targetValue = focusAnchorOffset,
+                        animationSpec = tween(520),
+                        label = "lyricsViewportOffset",
+                    )
 
                     key(lyricsSessionKey, syncedLyricsRenderVersion) {
                         KaraokeLyricsView(
