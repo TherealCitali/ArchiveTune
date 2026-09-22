@@ -1208,7 +1208,7 @@ fun AppearanceSettings(navController: NavController) {
                 item {
                     SwitchPreference(
                         title = { Text(stringResource(R.string.experimental_ui)) },
-                        description = stringResource(R.string.experimental_ui_description),
+                        description = stringResource(R.string.experimental_ui_desc),
                         icon = { Icon(painterResource(R.drawable.experiment), null) },
                         checked = experimentalUi,
                         onCheckedChange = onExperimentalUiChange,

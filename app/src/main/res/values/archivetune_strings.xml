@@ -775,6 +775,4 @@
     <string name="aod_mode_exit">Exit AOD</string>
     <string name="playlist_source_local">Local</string>
     <string name="playlist_source_online">Online</string>
-    <string name="experimental_ui">Experimental UI</string>
-    <string name="experimental_ui_description">Try the experimental home redesign: charts deck, cover flow and orbit dock. May change or break anytime.</string>
 </resources>
