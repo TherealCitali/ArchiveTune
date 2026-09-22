@@ -119,7 +119,6 @@ import dev.citali.lunartune.ui.component.shimmer.TextPlaceholder
 import dev.citali.lunartune.ui.menu.SelectionMediaMetadataMenu
 import dev.citali.lunartune.ui.menu.YouTubePlaylistMenu
 import dev.citali.lunartune.ui.menu.YouTubeSongMenu
-import dev.citali.lunartune.ui.transition.playlistArtworkKey
 import dev.citali.lunartune.ui.utils.HeaderDownloadItem
 import dev.citali.lunartune.ui.utils.HeaderDownloadProgressIndicator
 import dev.citali.lunartune.ui.utils.HeaderDownloadState
@@ -403,7 +402,6 @@ fun OnlinePlaylistScreen(
                             MediaDetailHero(
                                 title = playlist.title,
                                 thumbnailUrl = playlist.thumbnail,
-                                sharedKey = playlistArtworkKey(playlist.id),
                                 fallbackIcon = R.drawable.queue_music,
                                 systemBarsTopPadding = systemBarsTopPadding,
                                 subtitle = author,
