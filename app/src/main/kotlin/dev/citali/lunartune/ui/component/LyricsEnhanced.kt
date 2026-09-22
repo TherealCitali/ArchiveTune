@@ -772,13 +772,6 @@ fun LyricsEnhanced(
             }
         }
 
-        if (lyrics != null && lyrics != LYRICS_NOT_FOUND && lyricsEntries.isNotEmpty()) {
-            LyricsSourceLabel(
-                source = currentLyrics?.source,
-                color = textColor,
-                modifier = Modifier.align(Alignment.TopCenter),
-            )
-        }
     }
 
     if (isSelectionModeActive && selectionLines.isNotEmpty()) {
