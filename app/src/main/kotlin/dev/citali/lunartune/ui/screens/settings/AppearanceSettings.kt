@@ -127,7 +127,6 @@ import dev.citali.lunartune.constants.SwipeSensitivityKey
 import dev.citali.lunartune.constants.SwipeThumbnailKey
 import dev.citali.lunartune.constants.SwipeToSongKey
 import dev.citali.lunartune.constants.ThumbnailCornerRadiusKey
-import dev.citali.lunartune.constants.VisualizerEnabledKey
 import dev.citali.lunartune.constants.toLibraryFilterOrder
 import dev.citali.lunartune.constants.toLibraryFilterPreference
 import dev.citali.lunartune.constants.toPlaylistTagOrder
@@ -268,11 +267,6 @@ fun AppearanceSettings(navController: NavController) {
         rememberPreference(
             SwipeSensitivityKey,
             defaultValue = 0.73f,
-        )
-    val (visualizerEnabled, onVisualizerEnabledChange) =
-        rememberPreference(
-            VisualizerEnabledKey,
-            defaultValue = true,
         )
     val (gridItemSize, onGridItemSizeChange) =
         rememberEnumPreference(
@@ -941,16 +935,6 @@ fun AppearanceSettings(navController: NavController) {
                             showSliderOptionDialog = true
                         },
                         isEnabled = isPlayerControlsCustomizationEnabled,
-                    )
-                }
-
-                item {
-                    SwitchPreference(
-                        title = { Text(stringResource(R.string.player_visualizer)) },
-                        description = stringResource(R.string.player_visualizer_description),
-                        icon = { Icon(painterResource(R.drawable.graphic_eq), null) },
-                        checked = visualizerEnabled,
-                        onCheckedChange = onVisualizerEnabledChange,
                     )
                 }
 
