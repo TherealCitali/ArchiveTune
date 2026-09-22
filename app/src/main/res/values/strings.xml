@@ -192,6 +192,12 @@
     <string name="monochrome_instance_dialog_title">Monochrome API instance</string>
     <string name="monochrome_instance_dialog_hint">https://api.monochrome.tf</string>
     <string name="monochrome_instance_save">Save</string>
+    <string name="monochrome_status">Service status</string>
+    <string name="monochrome_status_checking">Checking service status…</string>
+    <string name="monochrome_status_active">Active</string>
+    <string name="monochrome_status_maintenance">Down (maintenance) — playback falls back to YouTube Music</string>
+    <string name="monochrome_status_down">Down (unreachable) — playback falls back to YouTube Music. Check monochrome.tf for notices</string>
+    <string name="monochrome_status_unknown">Unknown — tap to re-check</string>
     <string name="hide_playlist">Hide playlist</string>
     <string name="unhide_playlist">Unhide playlist</string>
     <string name="show_hidden_playlists">Show hidden</string>

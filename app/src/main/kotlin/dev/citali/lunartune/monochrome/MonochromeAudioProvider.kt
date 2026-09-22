@@ -38,6 +38,7 @@ object MonochromeAudioProvider {
     private const val COVER_BASE = "https://resources.tidal.com/images"
     private const val CONNECT_TIMEOUT_MS = 8_000
     private const val READ_TIMEOUT_MS = 8_000
+    private const val STATUS_TIMEOUT_MS = 5_000
 
     data class MonochromeTrack(
         val id: String,
@@ -132,6 +133,48 @@ object MonochromeAudioProvider {
                 Timber.tag("Monochrome").w(error, "Stream resolve failed for %s", trackId)
                 null
             }
+        }
+
+    /** Availability of a Monochrome instance, mirroring how the website surfaces playback status. */
+    enum class MonochromeStatus {
+        ACTIVE,
+        MAINTENANCE,
+        DOWN,
+        UNKNOWN,
+    }
+
+    /**
+     * Probes the instance's search endpoint and classifies availability:
+     * [MonochromeStatus.ACTIVE] when it answers with payload data,
+     * [MonochromeStatus.MAINTENANCE] when the server reports maintenance,
+     * [MonochromeStatus.DOWN] when it is unreachable, and [MonochromeStatus.UNKNOWN]
+     * for any other answer. Safe to call from the main thread's coroutine.
+     */
+    suspend fun checkStatus(instanceUrl: String): MonochromeStatus =
+        withContext(Dispatchers.IO) {
+            val probeUrl = "${instanceUrl.trimEnd('/')}/search/?s=probe"
+            runCatching {
+                val connection = URL(probeUrl).openConnection() as HttpURLConnection
+                connection.connectTimeout = STATUS_TIMEOUT_MS
+                connection.readTimeout = STATUS_TIMEOUT_MS
+                connection.requestMethod = "GET"
+                connection.setRequestProperty("Accept", "application/json")
+                connection.setRequestProperty("User-Agent", "LunarTune")
+                val code = connection.responseCode
+                val body =
+                    (if (code in 200..299) connection.inputStream else connection.errorStream)
+                        ?.bufferedReader()?.use { it.readText() }
+                        .orEmpty()
+                connection.disconnect()
+                val lowered = body.lowercase()
+                when {
+                    "maintenance" in lowered -> MonochromeStatus.MAINTENANCE
+                    code == 503 -> MonochromeStatus.MAINTENANCE
+                    code in 200..299 && "\"data\"" in body -> MonochromeStatus.ACTIVE
+                    code in 200..299 -> MonochromeStatus.UNKNOWN
+                    else -> MonochromeStatus.DOWN
+                }
+            }.getOrElse { MonochromeStatus.DOWN }
         }
 
     private fun getJson(url: String): JSONObject? {

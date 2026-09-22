@@ -83,6 +83,17 @@ fun StreamSourcesSettings(navController: NavController) {
         rememberPreference(MonochromeInstanceKey, defaultValue = MonochromeAudioProvider.DEFAULT_INSTANCE)
     var showInstanceDialog by remember { mutableStateOf(false) }
     var instanceDraft by remember { mutableStateOf(monochromeInstance) }
+    var monochromeStatus by remember {
+        mutableStateOf<MonochromeAudioProvider.MonochromeStatus?>(null)
+    }
+    var statusCheckTick by remember { mutableStateOf(0) }
+    LaunchedEffect(monochromeInstance, statusCheckTick) {
+        monochromeStatus = null
+        monochromeStatus =
+            MonochromeAudioProvider.checkStatus(
+                monochromeInstance.ifBlank { MonochromeAudioProvider.DEFAULT_INSTANCE },
+            )
+    }
 
     val order = deserializeStreamSourcesOrder(orderRaw)
     val enabled =
@@ -231,6 +242,25 @@ fun StreamSourcesSettings(navController: NavController) {
                         description = stringResource(R.string.monochrome_lossless_description),
                         checked = monochromeEnabled,
                         onCheckedChange = onMonochromeEnabledChange,
+                    )
+                }
+                item {
+                    val statusText =
+                        when (monochromeStatus) {
+                            null -> stringResource(R.string.monochrome_status_checking)
+                            MonochromeAudioProvider.MonochromeStatus.ACTIVE ->
+                                stringResource(R.string.monochrome_status_active)
+                            MonochromeAudioProvider.MonochromeStatus.MAINTENANCE ->
+                                stringResource(R.string.monochrome_status_maintenance)
+                            MonochromeAudioProvider.MonochromeStatus.DOWN ->
+                                stringResource(R.string.monochrome_status_down)
+                            MonochromeAudioProvider.MonochromeStatus.UNKNOWN ->
+                                stringResource(R.string.monochrome_status_unknown)
+                        }
+                    PreferenceEntry(
+                        title = { Text(stringResource(R.string.monochrome_status)) },
+                        description = statusText,
+                        onClick = { statusCheckTick++ },
                     )
                 }
                 item {
