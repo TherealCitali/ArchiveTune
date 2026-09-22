@@ -15,6 +15,8 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import dev.citali.lunartune.ui.experimental.ExperimentalNavigationDock
+import dev.citali.lunartune.ui.experimental.ExperimentalUiEnabledKey
 import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -111,6 +113,18 @@ fun FloatingNavigationToolbar(
     onItemLongClick: ((Screens) -> Unit)? = null,
     onSearchItemDoubleClick: (() -> Unit)? = null,
 ) {
+    val (experimentalUi) = rememberPreference(ExperimentalUiEnabledKey, defaultValue = false)
+    if (experimentalUi) {
+        ExperimentalNavigationDock(
+            items = items,
+            modifier = modifier,
+            isSelected = isSelected,
+            onItemClick = onItemClick,
+            onItemLongClick = onItemLongClick,
+            onSearchItemDoubleClick = onSearchItemDoubleClick,
+        )
+        return
+    }
     val isFloating = style == NavigationBarStyle.FLOATING
     val (navBarWidthFraction) =
         rememberPreference(NavigationBarWidthKey, defaultValue = NAVIGATION_BAR_WIDTH_DEFAULT)

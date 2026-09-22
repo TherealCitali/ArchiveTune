@@ -143,6 +143,7 @@ import dev.citali.lunartune.ui.component.PreferenceGroup
 import dev.citali.lunartune.ui.component.SwitchPreference
 import dev.citali.lunartune.ui.component.TagsManagementDialog
 import dev.citali.lunartune.ui.component.ThumbnailCornerRadiusSelectorButton
+import dev.citali.lunartune.ui.experimental.ExperimentalUiEnabledKey
 import dev.citali.lunartune.ui.player.StyledPlaybackSlider
 import dev.citali.lunartune.ui.theme.CustomFontLoader
 import dev.citali.lunartune.ui.utils.backToMain
@@ -419,6 +420,8 @@ fun AppearanceSettings(navController: NavController) {
             key = ChipSortTypeKey,
             defaultValue = LibraryFilter.LIBRARY,
         )
+    val (experimentalUi, onExperimentalUiChange) =
+        rememberPreference(ExperimentalUiEnabledKey, defaultValue = false)
     val supportedHighestFps = rememberSupportedHighestFps()
     val isHighRefreshRateSupported = supportedHighestFps > HIGH_REFRESH_RATE_THRESHOLD_FPS
 
@@ -1199,6 +1202,16 @@ fun AppearanceSettings(navController: NavController) {
                         icon = { Icon(painterResource(R.drawable.swipe), null) },
                         checked = swipeToSong,
                         onCheckedChange = onSwipeToSongChange,
+                    )
+                }
+
+                item {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.experimental_ui)) },
+                        description = stringResource(R.string.experimental_ui_description),
+                        icon = { Icon(painterResource(R.drawable.experiment), null) },
+                        checked = experimentalUi,
+                        onCheckedChange = onExperimentalUiChange,
                     )
                 }
             }
