@@ -350,19 +350,6 @@ fun StorageSettings(
                         onClick = { clearDownloads = true },
                     )
                 }
-                item {
-                    PreferenceEntry(
-                        title = { Text(stringResource(R.string.export_songs)) },
-                        description = stringResource(R.string.export_songs_description),
-                        icon = {
-                            Icon(
-                                painter = painterResource(R.drawable.send),
-                                contentDescription = null,
-                            )
-                        },
-                        onClick = { navController.navigate("settings/storage/export_songs") },
-                    )
-                }
             }
 
             if (clearDownloads) {

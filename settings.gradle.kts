@@ -24,13 +24,6 @@ dependencyResolutionManagement {
                 releasesOnly()
             }
         }
-        // Google's mirror of Maven Central. Some legacy Central artifacts
-        // (e.g. com.arthenica:ffmpeg-kit-*) intermittently 404 on repo1,
-        // so resolve through the mirror as a fallback.
-        maven {
-            name = "MavenCentralGoogleMirror"
-            setUrl("https://maven-central.storage-download.googleapis.com/maven2/")
-        }
         exclusiveContent {
             forRepository {
                 maven {
