@@ -55,6 +55,7 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 import dev.citali.lunartune.LocalAnimationsDisabled
 import dev.citali.lunartune.constants.BottomSheetAnimationSpec
+import dev.citali.lunartune.constants.BottomSheetCollapseAnimationSpec
 import dev.citali.lunartune.constants.BottomSheetSoftAnimationSpec
 
 /**
@@ -195,7 +196,7 @@ class BottomSheetState(
     }
 
     fun collapseSoft() {
-        collapse(if (animationsDisabled) snap() else BottomSheetSoftAnimationSpec)
+        collapse(if (animationsDisabled) snap() else BottomSheetCollapseAnimationSpec)
     }
 
     fun expandSoft() {
