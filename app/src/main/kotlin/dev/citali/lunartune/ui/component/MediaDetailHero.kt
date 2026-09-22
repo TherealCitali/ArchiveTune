@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import dev.citali.lunartune.R
 import dev.citali.lunartune.constants.AppBarHeight
+import dev.citali.lunartune.ui.transition.sharedArtwork
 import dev.citali.lunartune.ui.utils.YtimgResizePolicy
 import dev.citali.lunartune.ui.utils.fadingEdge
 import dev.citali.lunartune.ui.utils.resize
@@ -78,6 +79,7 @@ public fun MediaDetailHero(
     onPlay: (() -> Unit)?,
     onToggleAdd: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    sharedKey: String? = null,
     subtitle: AnnotatedString? = null,
     metadata: String? = null,
     description: String? = null,
@@ -100,18 +102,22 @@ public fun MediaDetailHero(
                 .background(surfaceColor),
     ) {
         if (thumbnailUrl != null) {
-            AsyncImage(
-                model =
-                    thumbnailUrl.resize(
-                        width = MediaDetailHeroArtworkSizePx,
-                        height = MediaDetailHeroArtworkSizePx,
-                        sizeBuckets = MediaDetailHeroArtworkSizeBuckets,
-                        ytimgResizePolicy = YtimgResizePolicy.PreserveOriginal,
-                    ),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.matchParentSize(),
-            )
+            Box(
+                modifier = Modifier.matchParentSize().sharedArtwork(sharedKey),
+            ) {
+                AsyncImage(
+                    model =
+                        thumbnailUrl.resize(
+                            width = MediaDetailHeroArtworkSizePx,
+                            height = MediaDetailHeroArtworkSizePx,
+                            sizeBuckets = MediaDetailHeroArtworkSizeBuckets,
+                            ytimgResizePolicy = YtimgResizePolicy.PreserveOriginal,
+                        ),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.matchParentSize(),
+                )
+            }
         } else {
             Box(
                 modifier =
