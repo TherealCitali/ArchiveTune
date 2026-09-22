@@ -11,10 +11,9 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.LocalSharedTransitionScope
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.rememberSharedContentState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -25,10 +24,16 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 
 /**
+ * Carries the [SharedTransitionScope] from the root [androidx.compose.animation.SharedTransitionLayout]
+ * down the tree. Provided in MainActivity; null outside the layout (dialogs, menus, player)
+ * where [Modifier.sharedArtwork] safely renders nothing special.
+ */
+val LocalLunarSharedTransitionScope = staticCompositionLocalOf<SharedTransitionScope?> { null }
+
+/**
  * Carries the current navigation destination's [AnimatedVisibilityScope] down the tree so
  * shared elements (artwork heroes) don't require threading scope parameters through every
- * screen. Provided per-destination by [sharedComposable]; null outside a destination
- * (dialogs, menus, player) where [Modifier.sharedArtwork] safely renders nothing special.
+ * screen. Provided per-destination by [sharedComposable].
  */
 val LocalNavAnimatedVisibilityScope = staticCompositionLocalOf<AnimatedVisibilityScope?> { null }
 
@@ -68,12 +73,12 @@ fun NavGraphBuilder.sharedComposable(
  */
 @Composable
 fun Modifier.sharedArtwork(key: String?): Modifier {
-    val transitionScope = LocalSharedTransitionScope.current
+    val transitionScope = LocalLunarSharedTransitionScope.current
     val visibilityScope = LocalNavAnimatedVisibilityScope.current
     if (key == null || transitionScope == null || visibilityScope == null) return this
     return with(transitionScope) {
         this@sharedArtwork.sharedElement(
-            state = rememberSharedContentState(key = key),
+            sharedContentState = rememberSharedContentState(key = key),
             animatedVisibilityScope = visibilityScope,
             boundsTransform = { _, _ ->
                 spring(stiffness = Spring.StiffnessMediumLow)
