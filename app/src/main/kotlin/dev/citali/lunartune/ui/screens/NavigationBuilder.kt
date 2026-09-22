@@ -21,7 +21,6 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
-import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import dev.citali.lunartune.BuildConfig
 import dev.citali.lunartune.constants.UpdateChannel
@@ -80,6 +79,7 @@ import dev.citali.lunartune.ui.screens.settings.StorageSettings
 import dev.citali.lunartune.ui.screens.settings.StreamSourcesSettings
 import dev.citali.lunartune.ui.screens.settings.ThemeCreatorScreen
 import dev.citali.lunartune.ui.screens.settings.UpdateScreen
+import dev.citali.lunartune.ui.transition.sharedComposable
 import dev.citali.lunartune.viewmodels.OnlineSearchSort
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,15 +93,15 @@ fun NavGraphBuilder.navigationBuilder(
     searchScrollConnection: NestedScrollConnection? = null,
     onlineSearchSort: OnlineSearchSort = OnlineSearchSort.DEFAULT,
 ) {
-    composable(Screens.Home.route) {
+    sharedComposable(Screens.Home.route) {
         HomeScreen(navController, headerScrollConnection = homeScrollConnection)
     }
-    composable(
+    sharedComposable(
         Screens.Library.route,
     ) {
         LibraryScreen(navController)
     }
-    composable(Screens.Search.route) {
+    sharedComposable(Screens.Search.route) {
         SearchScreen(
             navController = navController,
             onSearchClick = {
@@ -112,19 +112,19 @@ fun NavGraphBuilder.navigationBuilder(
             headerScrollConnection = searchScrollConnection,
         )
     }
-    composable("local_songs") {
+    sharedComposable("local_songs") {
         LocalSongScreen(navController)
     }
-    composable("history") {
+    sharedComposable("history") {
         HistoryScreen(navController)
     }
-    composable("stats") {
+    sharedComposable("stats") {
         StatsScreen(navController)
     }
-    composable("news") {
+    sharedComposable("news") {
         NewsScreen(navController)
     }
-    composable(
+    sharedComposable(
         route = "view_news/{newsId}",
         arguments =
             listOf(
@@ -133,7 +133,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         ViewNewsScreen(navController)
     }
-    composable(
+    sharedComposable(
         route = "year_in_music?year={year}",
         arguments =
             listOf(
@@ -149,26 +149,26 @@ fun NavGraphBuilder.navigationBuilder(
             initialYear = selectedYear,
         )
     }
-    composable(MusicRecognitionRoute) {
+    sharedComposable(MusicRecognitionRoute) {
         MusicRecognitionScreen(navController)
     }
-    composable(MusicRecognitionDetailsRoute) { backStackEntry ->
+    sharedComposable(MusicRecognitionDetailsRoute) { backStackEntry ->
         val encodedTrack = backStackEntry.arguments?.getString("encodedTrack").orEmpty()
         MusicRecognitionDetailsScreen(navController, encodedTrack)
     }
-    composable(Screens.MoodAndGenres.route) {
+    sharedComposable(Screens.MoodAndGenres.route) {
         MoodAndGenresScreen(navController)
     }
-    composable("account") {
+    sharedComposable("account") {
         AccountScreen(navController, scrollBehavior)
     }
-    composable("new_release") {
+    sharedComposable("new_release") {
         NewReleaseScreen(navController, scrollBehavior)
     }
-    composable("charts_screen") {
+    sharedComposable("charts_screen") {
         ChartsScreen(navController)
     }
-    composable(
+    sharedComposable(
         route = "browse/{browseId}",
         arguments =
             listOf(
@@ -183,7 +183,7 @@ fun NavGraphBuilder.navigationBuilder(
             it.arguments?.getString("browseId"),
         )
     }
-    composable(
+    sharedComposable(
         route = OnlineSearchResultRoute,
         arguments =
             listOf(
@@ -229,7 +229,7 @@ fun NavGraphBuilder.navigationBuilder(
             searchSort = onlineSearchSort,
         )
     }
-    composable(
+    sharedComposable(
         route = "album/{albumId}",
         arguments =
             listOf(
@@ -240,7 +240,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         AlbumScreen(navController, scrollBehavior)
     }
-    composable(
+    sharedComposable(
         route = "artist/{artistId}",
         arguments =
             listOf(
@@ -251,7 +251,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         ArtistScreen(navController, scrollBehavior)
     }
-    composable(
+    sharedComposable(
         route = "artist/{artistId}/songs",
         arguments =
             listOf(
@@ -262,7 +262,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         ArtistSongsScreen(navController, scrollBehavior)
     }
-    composable(
+    sharedComposable(
         route = "artist/{artistId}/albums",
         arguments =
             listOf(
@@ -273,7 +273,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         ArtistAlbumsScreen(navController, scrollBehavior)
     }
-    composable(
+    sharedComposable(
         route = "artist/{artistId}/items?browseId={browseId}&params={params}",
         arguments =
             listOf(
@@ -292,7 +292,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         ArtistItemsScreen(navController, scrollBehavior)
     }
-    composable(
+    sharedComposable(
         route = "online_playlist/{playlistId}",
         arguments =
             listOf(
@@ -303,7 +303,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         OnlinePlaylistScreen(navController, scrollBehavior)
     }
-    composable(
+    sharedComposable(
         route = "local_playlist/{playlistId}",
         arguments =
             listOf(
@@ -314,7 +314,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         LocalPlaylistScreen(navController, scrollBehavior)
     }
-    composable(
+    sharedComposable(
         route = "spotify_playlist/{playlistId}",
         arguments =
             listOf(
@@ -325,7 +325,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         SpotifyPlaylistScreen(navController, scrollBehavior)
     }
-    composable(
+    sharedComposable(
         route = "auto_playlist/{playlist}?tab={tab}",
         arguments =
             listOf(
@@ -340,7 +340,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         AutoPlaylistScreen(navController, scrollBehavior)
     }
-    composable(
+    sharedComposable(
         route = "cache_playlist/{playlist}",
         arguments =
             listOf(
@@ -351,7 +351,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         CachePlaylistScreen(navController, scrollBehavior)
     }
-    composable(
+    sharedComposable(
         route = "top_playlist/{top}",
         arguments =
             listOf(
@@ -362,7 +362,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         TopPlaylistScreen(navController, scrollBehavior)
     }
-    composable(
+    sharedComposable(
         route = "youtube_browse/{browseId}?params={params}",
         arguments =
             listOf(
@@ -378,100 +378,100 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         YouTubeBrowseScreen(navController)
     }
-    composable("settings") {
+    sharedComposable("settings") {
         SettingsScreen(navController, latestVersionName())
     }
-    composable("settings/account") {
+    sharedComposable("settings/account") {
         AccountSettings(navController, latestVersionName())
     }
-    composable("settings/hidden_playlists") {
+    sharedComposable("settings/hidden_playlists") {
         HiddenPlaylistsScreen(navController)
     }
-    composable("settings/appearance") {
+    sharedComposable("settings/appearance") {
         AppearanceSettings(navController)
     }
-    composable("settings/appearance/navigation_bar") {
+    sharedComposable("settings/appearance/navigation_bar") {
         NavigationBarSettings(navController)
     }
-    composable("settings/appearance/aod_customized") {
+    sharedComposable("settings/appearance/aod_customized") {
         AodCustomizedScreen(navController)
     }
-    composable("settings/appearance/palette_picker") {
+    sharedComposable("settings/appearance/palette_picker") {
         PalettePickerScreen(navController)
     }
-    composable("settings/appearance/lyrics_animations") {
+    sharedComposable("settings/appearance/lyrics_animations") {
         LyricsAnimationSettings(navController)
     }
-    composable("settings/appearance/theme_creator") {
+    sharedComposable("settings/appearance/theme_creator") {
         ThemeCreatorScreen(navController)
     }
-    composable("settings/content") {
+    sharedComposable("settings/content") {
         ContentSettings(navController)
     }
-    composable("settings/lyrics") {
+    sharedComposable("settings/lyrics") {
         LyricsSettings(navController)
     }
-    composable("settings/internet") {
+    sharedComposable("settings/internet") {
         InternetSettings(navController)
     }
-    composable("settings/player") {
+    sharedComposable("settings/player") {
         PlayerSettings(navController)
     }
-    composable("settings/player/stream_sources") {
+    sharedComposable("settings/player/stream_sources") {
         StreamSourcesSettings(navController)
     }
-    composable("settings/player/chiper") {
+    sharedComposable("settings/player/chiper") {
         ChiperSettings(navController)
     }
-    composable("settings/storage") {
+    sharedComposable("settings/storage") {
         StorageSettings(navController)
     }
-    composable("settings/storage/export_songs") {
+    sharedComposable("settings/storage/export_songs") {
         ExportSongsScreen(navController)
     }
-    composable("settings/privacy") {
+    sharedComposable("settings/privacy") {
         PrivacySettings(navController)
     }
-    composable("settings/app_lock") {
+    sharedComposable("settings/app_lock") {
         AppLockScreen(navController)
     }
-    composable("settings/pin_setup") {
+    sharedComposable("settings/pin_setup") {
         PinSetupScreen(navController)
     }
-    composable("settings/backup_restore") {
+    sharedComposable("settings/backup_restore") {
         BackupAndRestore(navController)
     }
-    composable("settings/discord") {
+    sharedComposable("settings/discord") {
         DiscordSettings(navController)
     }
-    composable("settings/integration") {
+    sharedComposable("settings/integration") {
         IntegrationScreen(navController)
     }
-    composable("settings/ai_integration") {
+    sharedComposable("settings/ai_integration") {
         AiIntegrationSettings(navController)
     }
-    composable("settings/music_together") {
+    sharedComposable("settings/music_together") {
         MusicTogetherScreen(navController)
     }
-    composable("settings/lastfm") {
+    sharedComposable("settings/lastfm") {
         LastFMSettings(navController)
     }
-    composable("settings/discord/experimental") {
+    sharedComposable("settings/discord/experimental") {
         dev.citali.lunartune.ui.screens.settings
             .DiscordExperimental(navController)
     }
-    composable("settings/misc") {
+    sharedComposable("settings/misc") {
         DebugSettings(navController)
     }
-    composable("settings/logcat") {
+    sharedComposable("settings/logcat") {
         LogcatScreen(navController)
     }
     if (BuildConfig.UPDATER_AVAILABLE) {
-        composable("settings/update") {
+        sharedComposable("settings/update") {
             UpdateScreen(navController, onUpToDate = onClearUpdateBadge)
         }
     }
-    composable(
+    sharedComposable(
         route = "settings/changelog?channel={channel}",
         arguments =
             listOf(
@@ -486,13 +486,13 @@ fun NavGraphBuilder.navigationBuilder(
         val channel = UpdateChannel.fromStoredName(channelName, defaultUpdateChannel)
         ChangelogScreen(navController, channel = channel)
     }
-    composable("settings/about") {
+    sharedComposable("settings/about") {
         AboutScreen(navController)
     }
-    composable("customize_background") {
+    sharedComposable("customize_background") {
         CustomizeBackground(navController)
     }
-    composable(
+    sharedComposable(
         route = "$LOGIN_ROUTE?$LOGIN_URL_ARGUMENT={$LOGIN_URL_ARGUMENT}",
         arguments =
             listOf(

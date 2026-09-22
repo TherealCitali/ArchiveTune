@@ -101,6 +101,7 @@ import dev.citali.lunartune.ui.menu.AlbumMenu
 import dev.citali.lunartune.ui.menu.SelectionSongMenu
 import dev.citali.lunartune.ui.menu.SongMenu
 import dev.citali.lunartune.ui.menu.YouTubeAlbumMenu
+import dev.citali.lunartune.ui.transition.albumArtworkKey
 import dev.citali.lunartune.ui.utils.HeaderDownloadItem
 import dev.citali.lunartune.ui.utils.HeaderDownloadProgressIndicator
 import dev.citali.lunartune.ui.utils.HeaderDownloadState
@@ -273,6 +274,7 @@ fun AlbumScreen(
                     MediaDetailHero(
                         title = albumWithSongs.album.title,
                         thumbnailUrl = albumWithSongs.album.thumbnailUrl,
+                        sharedKey = albumArtworkKey(albumWithSongs.album.id),
                         fallbackIcon = R.drawable.album,
                         systemBarsTopPadding = systemBarsTopPadding,
                         subtitle = artistNames,
