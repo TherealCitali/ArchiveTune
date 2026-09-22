@@ -187,10 +187,13 @@ LunarTune is made possible by the work of many open-source projects and communit
 
 ## ⚖️ Legal Disclaimer
 
-LunarTune is an independent third-party client.
+LunarTune is an independent third-party client. It does not host any content — all music content is provided by third-party sources through YouTube Music and the optional Monochrome lossless streaming source.
 - Not affiliated with Google LLC or YouTube.
 - Does not bypass YouTube's technical protections.
+- The optional Monochrome source connects to a user-configured third-party service at the user's own risk; LunarTune ships no content and is unaffiliated with it.
 - Users are encouraged to support artists by purchasing music via official channels.
+
+Please respect copyright laws and support official artists and distributors.
 
 ## ⚖️ License, Copyright, and Trademark Notice
 

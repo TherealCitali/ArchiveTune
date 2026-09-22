@@ -753,6 +753,8 @@
     <string name="about_contributor_translation">Contributor Translation</string>
     <string name="about_license">LICENSE</string>
     <string name="about_license_unknown">Unknown license</string>
+    <string name="about_legal_notice">Legal Notice</string>
+    <string name="about_legal_notice_body">LunarTune does not host any content. All music content is provided by third-party sources through YouTube Music and the optional Monochrome lossless source. Please respect copyright laws and support official artists and distributors.</string>
     <string name="about_position_lead_dev">Lead developer of LunarTune</string>
     <string name="about_position_original">Base framework</string>
     <string name="about_position_bot_contributor">Contributor</string>
