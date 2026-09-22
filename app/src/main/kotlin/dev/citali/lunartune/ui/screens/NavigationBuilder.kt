@@ -195,7 +195,7 @@ fun NavGraphBuilder.navigationBuilder(
             if (disableAnimations) {
                 fadeIn(tween(0))
             } else {
-                fadeIn(tween(250, easing = LunarMotion.EmphasizedDecelerate))
+                fadeIn(tween(300))
             }
         },
         exitTransition = {
@@ -211,9 +211,9 @@ fun NavGraphBuilder.navigationBuilder(
             if (disableAnimations) {
                 fadeIn(tween(0))
             } else if (initialState.destination.route?.startsWith(OnlineSearchResultRoutePrefix) == true) {
-                fadeIn(tween(250, easing = LunarMotion.EmphasizedDecelerate))
+                fadeIn(tween(300))
             } else {
-                fadeIn(tween(250, easing = LunarMotion.EmphasizedDecelerate)) + slideInHorizontally(animationSpec = tween(300, easing = LunarMotion.EmphasizedDecelerate)) { -it / 2 }
+                fadeIn(tween(300)) + slideInHorizontally(animationSpec = LunarMotion.glide()) { -it / 2 }
             }
         },
         popExitTransition = {

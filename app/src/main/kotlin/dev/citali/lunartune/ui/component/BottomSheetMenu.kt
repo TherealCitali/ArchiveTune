@@ -7,6 +7,9 @@
 
 package dev.citali.lunartune.ui.component
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import dev.citali.lunartune.ui.theme.LunarMotion
 
 val LocalMenuState = compositionLocalOf { MenuState() }
 
@@ -96,13 +100,22 @@ fun BottomSheetMenu(
             },
             modifier = modifier.fillMaxHeight(),
         ) {
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
+            AnimatedVisibility(
+                visible = true,
+                enter =
+                    scaleIn(
+                        initialScale = 0.97f,
+                        animationSpec = LunarMotion.bouncy(),
+                    ) + fadeIn(animationSpec = LunarMotion.smooth()),
             ) {
-                state.content(this)
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
+                ) {
+                    state.content(this)
+                }
             }
         }
     }
