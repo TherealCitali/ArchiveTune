@@ -413,7 +413,6 @@ fun SongMenu(
     val addToQueueText = stringResource(R.string.add_to_queue)
     val addToPlaylistText = stringResource(R.string.add_to_playlist)
     val shareText = stringResource(R.string.share)
-    val exportAudioText = stringResource(R.string.export_audio)
     val editText = stringResource(R.string.edit)
 
     val primaryActions =
@@ -424,7 +423,6 @@ fun SongMenu(
             addToQueueText,
             addToPlaylistText,
             shareText,
-            exportAudioText,
             editText,
             isLocalSong,
             onDismiss,
@@ -498,33 +496,6 @@ fun SongMenu(
                         onClick = { showChoosePlaylistDialog = true },
                     ),
                 )
-                if (isFromCache || download?.state == Download.STATE_COMPLETED) {
-                    add(
-                        NewAction(
-                            icon = {
-                                Icon(
-                                    painter = painterResource(R.drawable.download),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(28.dp),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            },
-                            text = exportAudioText,
-                            onClick = {
-                                onDismiss()
-                                coroutineScope.launch {
-                                    runCatching { cacheViewModel.exportSong(song) }
-                                        .onSuccess {
-                                            Toast.makeText(context, R.string.export_audio_success, Toast.LENGTH_SHORT).show()
-                                        }
-                                        .onFailure {
-                                            Toast.makeText(context, R.string.export_audio_failed, Toast.LENGTH_LONG).show()
-                                        }
-                                }
-                            },
-                        ),
-                    )
-                }
                 add(
                     NewAction(
                         icon = {
