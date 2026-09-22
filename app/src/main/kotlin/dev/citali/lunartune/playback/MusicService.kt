@@ -60,6 +60,7 @@ import androidx.media3.common.Player.REPEAT_MODE_OFF
 import androidx.media3.common.Player.REPEAT_MODE_ONE
 import androidx.media3.common.Player.STATE_IDLE
 import androidx.media3.common.Timeline
+import androidx.media3.common.audio.AudioProcessor
 import androidx.media3.common.audio.SonicAudioProcessor
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
@@ -124,6 +125,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import dev.citali.lunartune.MainActivity
 import dev.citali.lunartune.R
 import dev.citali.lunartune.aod.ACTION_AOD_MODE
+import dev.citali.lunartune.audio.PlayerVisualizer
 import dev.citali.lunartune.constants.AodAutoStartScreenOffKey
 import dev.citali.lunartune.constants.AodModeEnabledKey
 import dev.citali.lunartune.cast.CastMediaItemResolver
@@ -1065,7 +1067,7 @@ class MusicService :
             ExoPlayer
                 .Builder(this)
                 .setMediaSourceFactory(createMediaSourceFactory())
-                .setRenderersFactory(createRenderersFactory())
+                .setRenderersFactory(createRenderersFactory(withVisualizerTee = true))
                 .setLoadControl(createPrimaryLoadControl())
                 .setTrackSelector(DefaultTrackSelector(this, SafeTrackSelectionFactory()))
                 .setHandleAudioBecomingNoisy(true)
@@ -7990,7 +7992,30 @@ class MusicService :
             ).setPrioritizeTimeOverSizeThresholds(true)
             .build()
 
-    private fun createRenderersFactory() =
+    /**
+     * Audio processor chain for [createRenderersFactory]. The visualizer tap is only attached
+     * to the main player: the short-lived crossfade player would otherwise interleave foreign
+     * PCM into the spectrum.
+     */
+    private fun createAudioProcessorChain(withVisualizerTee: Boolean): DefaultAudioSink.DefaultAudioProcessorChain {
+        val processors =
+            mutableListOf<AudioProcessor>(
+                SilenceSkippingAudioProcessor(
+                    1_500_000L,
+                    0.35f,
+                    500_000L,
+                    10,
+                    150.toShort(),
+                ),
+                SonicAudioProcessor(),
+            )
+        if (withVisualizerTee) {
+            processors.add(PlayerVisualizer.teeProcessor)
+        }
+        return DefaultAudioSink.DefaultAudioProcessorChain(*processors.toTypedArray())
+    }
+
+    private fun createRenderersFactory(withVisualizerTee: Boolean = false) =
         object : DefaultRenderersFactory(this) {
             override fun buildAudioSink(
                 context: Context,
@@ -8000,18 +8025,8 @@ class MusicService :
                 .Builder(context)
                 .setEnableFloatOutput(false)
                 .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
-                .setAudioProcessorChain(
-                    DefaultAudioSink.DefaultAudioProcessorChain(
-                        SilenceSkippingAudioProcessor(
-                            1_500_000L,
-                            0.35f,
-                            500_000L,
-                            10,
-                            150.toShort(),
-                        ),
-                        SonicAudioProcessor(),
-                    ),
-                ).build()
+                .setAudioProcessorChain(createAudioProcessorChain(withVisualizerTee))
+                .build()
         }
 
     override fun onPlaybackStatsReady(

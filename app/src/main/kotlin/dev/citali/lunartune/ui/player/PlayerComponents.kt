@@ -2008,6 +2008,11 @@ fun PlayerControlsContent(
 
     Spacer(Modifier.height(12.dp))
 
+    PlayerVisualizerStrip(
+        isPlaying = isPlaying,
+        color = textBackgroundColor,
+    )
+
     PlayerSlider(
         sliderStyle = sliderStyle,
         sliderPosition = sliderPosition,
@@ -2213,6 +2218,11 @@ fun V8PlayerControlsContent(
             )
 
             Spacer(Modifier.height(contentGap))
+
+            PlayerVisualizerStrip(
+                isPlaying = isPlaying,
+                color = foreground,
+            )
 
             V8PlaybackProgress(
                 sliderPosition = sliderPosition,
