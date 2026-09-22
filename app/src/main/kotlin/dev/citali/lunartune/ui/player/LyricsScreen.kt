@@ -380,14 +380,6 @@ fun LyricsScreen(
     }
     val controlsVisible = controlsEnabled && controlsRevealed
 
-    // Apple Music style: the whole on-screen chrome (top bar and player controls)
-    // fades together when the screen goes idle.
-    val chromeAlpha by animateFloatAsState(
-        targetValue = if (controlsVisible) 1f else 0f,
-        animationSpec = if (controlsVisible) controlsFadeInSpec() else controlsFadeOutSpec(),
-        label = "lyricsChromeAlpha",
-    )
-
     val gradientColorsCache =
         remember {
             object : LinkedHashMap<String, List<Color>>(20, 0.75f, true) {
@@ -517,24 +509,17 @@ fun LyricsScreen(
                     .fillMaxSize()
                     .windowInsetsPadding(WindowInsets.systemBars),
         ) {
-            Column(
+            AppleMusicGrabber(onClick = onBackClick)
+            AppleMusicTrackHeader(
+                mediaMetadata = mediaMetadata,
+                foregroundColor = foregroundColor,
+                onMoreClick = showLyricsMenu,
+                onDismissClick = onBackClick,
                 modifier =
                     Modifier
-                        .graphicsLayer { alpha = chromeAlpha }
-                        .blockPointerInput(enabled = !controlsVisible),
-            ) {
-                AppleMusicGrabber(onClick = onBackClick)
-                AppleMusicTrackHeader(
-                    mediaMetadata = mediaMetadata,
-                    foregroundColor = foregroundColor,
-                    onMoreClick = showLyricsMenu,
-                    onDismissClick = onBackClick,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp),
-                )
-            }
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
+            )
 
             if (orientation == Configuration.ORIENTATION_LANDSCAPE && controlsEnabled) {
                 Row(
