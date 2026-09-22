@@ -17,10 +17,9 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import dev.citali.lunartune.ui.experimental.ExperimentalNavigationDock
 import dev.citali.lunartune.ui.experimental.ExperimentalUiEnabledKey
+import dev.citali.lunartune.ui.theme.LunarMotion
 import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -214,7 +213,7 @@ fun FloatingNavigationToolbar(
         } else {
             indicatorX.animateTo(
                 targetValue = targetX,
-                animationSpec = spring(dampingRatio = 0.72f, stiffness = Spring.StiffnessMediumLow),
+                animationSpec = LunarMotion.bouncy(),
             )
         }
     }
@@ -281,13 +280,10 @@ fun FloatingNavigationToolbar(
                             val iconScale = remember(screen) { Animatable(1f) }
                             LaunchedEffect(selected) {
                                 if (selected) {
-                                    iconScale.snapTo(0.85f)
+                                    iconScale.snapTo(0.8f)
                                     iconScale.animateTo(
                                         1f,
-                                        spring(
-                                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                                            stiffness = Spring.StiffnessMediumLow,
-                                        ),
+                                        LunarMotion.press(),
                                     )
                                 } else {
                                     iconScale.snapTo(1f)
