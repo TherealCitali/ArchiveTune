@@ -99,6 +99,7 @@ import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.toBitmap
+import dev.citali.lunartune.ui.theme.LunarMotion
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -2242,7 +2243,7 @@ private fun reset(
         animate(
             initialValue = offset.value,
             targetValue = 0f,
-            animationSpec = tween(durationMillis = 300),
+            animationSpec = LunarMotion.bouncy(),
         ) { value, _ -> offset.value = value }
     }
 }

@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.citali.lunartune.network.NetworkBannerUiState
+import dev.citali.lunartune.ui.theme.LunarMotion
 
 private data class NetworkBannerVisuals(
     val message: String,
@@ -85,10 +86,10 @@ fun NetworkStatusBanner(
         visible = state != NetworkBannerUiState.Hidden,
         modifier = modifier,
         enter =
-            slideInVertically(animationSpec = tween(durationMillis = 250)) { -it } +
+            slideInVertically(animationSpec = LunarMotion.bouncy()) { -it } +
                 fadeIn(animationSpec = tween(durationMillis = 180)),
         exit =
-            slideOutVertically(animationSpec = tween(durationMillis = 220)) { -it } +
+            slideOutVertically(animationSpec = LunarMotion.snappy()) { -it } +
                 fadeOut(animationSpec = tween(durationMillis = 180)),
         label = "networkStatusBanner",
     ) {

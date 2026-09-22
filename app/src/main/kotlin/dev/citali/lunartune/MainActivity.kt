@@ -183,6 +183,7 @@ import coil3.request.allowHardware
 import coil3.toBitmap
 import com.valentinilk.shimmer.LocalShimmerTheme
 import dagger.hilt.android.AndroidEntryPoint
+import dev.citali.lunartune.ui.theme.LunarMotion
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -2363,13 +2364,13 @@ class MainActivity : FragmentActivity() {
                                                 } else if (initialState.destination.route in topLevelScreens &&
                                                     targetState.destination.route in topLevelScreens
                                                 ) {
-                                                    fadeIn(tween(220, delayMillis = 90)) +
+                                                    fadeIn(tween(220, delayMillis = 90, easing = LunarMotion.EmphasizedDecelerate)) +
                                                         scaleIn(
-                                                            animationSpec = tween(220, delayMillis = 90),
+                                                            animationSpec = tween(220, delayMillis = 90, easing = LunarMotion.EmphasizedDecelerate),
                                                             initialScale = 0.92f,
                                                         )
                                                 } else {
-                                                    fadeIn(tween(250)) + slideInHorizontally { it / 2 }
+                                                    fadeIn(tween(250, easing = LunarMotion.EmphasizedDecelerate)) + slideInHorizontally(animationSpec = tween(300, easing = LunarMotion.EmphasizedDecelerate)) { it / 2 }
                                                 }
                                             },
                                             exitTransition = {
@@ -2378,9 +2379,9 @@ class MainActivity : FragmentActivity() {
                                                 } else if (initialState.destination.route in topLevelScreens &&
                                                     targetState.destination.route in topLevelScreens
                                                 ) {
-                                                    fadeOut(tween(90))
+                                                    fadeOut(tween(90, easing = LunarMotion.EmphasizedAccelerate))
                                                 } else {
-                                                    fadeOut(tween(200)) + slideOutHorizontally { -it / 2 }
+                                                    fadeOut(tween(200, easing = LunarMotion.EmphasizedAccelerate)) + slideOutHorizontally(animationSpec = tween(300, easing = LunarMotion.EmphasizedAccelerate)) { -it / 2 }
                                                 }
                                             },
                                             popEnterTransition = {
@@ -2392,13 +2393,13 @@ class MainActivity : FragmentActivity() {
                                                     ) &&
                                                     targetState.destination.route in topLevelScreens
                                                 ) {
-                                                    fadeIn(tween(220, delayMillis = 90)) +
+                                                    fadeIn(tween(220, delayMillis = 90, easing = LunarMotion.EmphasizedDecelerate)) +
                                                         scaleIn(
-                                                            animationSpec = tween(220, delayMillis = 90),
+                                                            animationSpec = tween(220, delayMillis = 90, easing = LunarMotion.EmphasizedDecelerate),
                                                             initialScale = 0.92f,
                                                         )
                                                 } else {
-                                                    fadeIn(tween(250)) + slideInHorizontally { -it / 2 }
+                                                    fadeIn(tween(250, easing = LunarMotion.EmphasizedDecelerate)) + slideInHorizontally(animationSpec = tween(300, easing = LunarMotion.EmphasizedDecelerate)) { -it / 2 }
                                                 }
                                             },
                                             popExitTransition = {
@@ -2410,9 +2411,9 @@ class MainActivity : FragmentActivity() {
                                                     ) &&
                                                     targetState.destination.route in topLevelScreens
                                                 ) {
-                                                    fadeOut(tween(90))
+                                                    fadeOut(tween(90, easing = LunarMotion.EmphasizedAccelerate))
                                                 } else {
-                                                    fadeOut(tween(200)) + slideOutHorizontally { it / 2 }
+                                                    fadeOut(tween(200, easing = LunarMotion.EmphasizedAccelerate)) + slideOutHorizontally(animationSpec = tween(300, easing = LunarMotion.EmphasizedAccelerate)) { it / 2 }
                                                 }
                                             },
                                             modifier =

@@ -78,6 +78,7 @@ import dev.citali.lunartune.ui.screens.settings.StorageSettings
 import dev.citali.lunartune.ui.screens.settings.StreamSourcesSettings
 import dev.citali.lunartune.ui.screens.settings.ThemeCreatorScreen
 import dev.citali.lunartune.ui.screens.settings.UpdateScreen
+import dev.citali.lunartune.ui.theme.LunarMotion
 import dev.citali.lunartune.ui.transition.sharedComposable
 import dev.citali.lunartune.viewmodels.OnlineSearchSort
 
@@ -194,32 +195,32 @@ fun NavGraphBuilder.navigationBuilder(
             if (disableAnimations) {
                 fadeIn(tween(0))
             } else {
-                fadeIn(tween(250))
+                fadeIn(tween(250, easing = LunarMotion.EmphasizedDecelerate))
             }
         },
         exitTransition = {
             if (disableAnimations) {
                 fadeOut(tween(0))
             } else if (targetState.destination.route?.startsWith(OnlineSearchResultRoutePrefix) == true) {
-                fadeOut(tween(200))
+                fadeOut(tween(200, easing = LunarMotion.EmphasizedAccelerate))
             } else {
-                fadeOut(tween(200)) + slideOutHorizontally { -it / 2 }
+                fadeOut(tween(200, easing = LunarMotion.EmphasizedAccelerate)) + slideOutHorizontally(animationSpec = tween(300, easing = LunarMotion.EmphasizedAccelerate)) { -it / 2 }
             }
         },
         popEnterTransition = {
             if (disableAnimations) {
                 fadeIn(tween(0))
             } else if (initialState.destination.route?.startsWith(OnlineSearchResultRoutePrefix) == true) {
-                fadeIn(tween(250))
+                fadeIn(tween(250, easing = LunarMotion.EmphasizedDecelerate))
             } else {
-                fadeIn(tween(250)) + slideInHorizontally { -it / 2 }
+                fadeIn(tween(250, easing = LunarMotion.EmphasizedDecelerate)) + slideInHorizontally(animationSpec = tween(300, easing = LunarMotion.EmphasizedDecelerate)) { -it / 2 }
             }
         },
         popExitTransition = {
             if (disableAnimations) {
                 fadeOut(tween(0))
             } else {
-                fadeOut(tween(200))
+                fadeOut(tween(200, easing = LunarMotion.EmphasizedAccelerate))
             }
         },
     ) {

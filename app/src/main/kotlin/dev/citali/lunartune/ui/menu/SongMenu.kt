@@ -12,7 +12,6 @@ package dev.citali.lunartune.ui.menu
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -71,6 +70,7 @@ import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import dev.citali.lunartune.ui.theme.LunarMotion
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -141,7 +141,7 @@ fun SongMenu(
 
     val rotationAnimation by animateFloatAsState(
         targetValue = refetchIconDegree,
-        animationSpec = tween(durationMillis = 800),
+        animationSpec = LunarMotion.bouncy(),
         label = "",
     )
 

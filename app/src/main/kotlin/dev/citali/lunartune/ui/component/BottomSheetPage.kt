@@ -54,6 +54,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import dev.citali.lunartune.ui.theme.LunarMotion
 import dev.citali.lunartune.ui.utils.top
 
 val LocalBottomSheetPageState = compositionLocalOf { BottomSheetPageState() }
@@ -113,12 +114,12 @@ fun BottomSheetPage(
         enter =
             slideInVertically(
                 initialOffsetY = { it },
-                animationSpec = tween(300),
+                animationSpec = LunarMotion.bouncy(),
             ),
         exit =
             slideOutVertically(
                 targetOffsetY = { it },
-                animationSpec = tween(300),
+                animationSpec = LunarMotion.snappy(),
             ),
         modifier = modifier,
     ) {
