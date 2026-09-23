@@ -17,6 +17,8 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import dev.citali.lunartune.ui.experimental.ExperimentalNavigationDock
 import dev.citali.lunartune.ui.experimental.ExperimentalUiEnabledKey
+import dev.citali.lunartune.ui.screens.settings.MotionBarKey
+import dev.citali.lunartune.ui.theme.LunarMotion
 import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -114,6 +116,7 @@ fun FloatingNavigationToolbar(
     onSearchItemDoubleClick: (() -> Unit)? = null,
 ) {
     val (experimentalUi) = rememberPreference(ExperimentalUiEnabledKey, defaultValue = false)
+    val (motionBar) = rememberPreference(MotionBarKey, defaultValue = true)
     if (experimentalUi) {
         ExperimentalNavigationDock(
             items = items,
@@ -214,7 +217,7 @@ fun FloatingNavigationToolbar(
         } else {
             indicatorX.animateTo(
                 targetValue = targetX,
-                animationSpec = spring(dampingRatio = 0.72f, stiffness = Spring.StiffnessMediumLow),
+                animationSpec = if (motionBar) LunarMotion.glide() else spring(dampingRatio = 0.72f, stiffness = Spring.StiffnessMediumLow),
             )
         }
     }
@@ -284,10 +287,14 @@ fun FloatingNavigationToolbar(
                                     iconScale.snapTo(0.85f)
                                     iconScale.animateTo(
                                         1f,
-                                        spring(
-                                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                                            stiffness = Spring.StiffnessMediumLow,
-                                        ),
+                                        if (motionBar) {
+                                            LunarMotion.bouncy()
+                                        } else {
+                                            spring(
+                                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                                stiffness = Spring.StiffnessMediumLow,
+                                            )
+                                        },
                                     )
                                 } else {
                                     iconScale.snapTo(1f)

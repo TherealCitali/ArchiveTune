@@ -39,7 +39,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.citali.lunartune.network.NetworkBannerUiState
+import dev.citali.lunartune.ui.screens.settings.MotionListsKey
 import dev.citali.lunartune.ui.theme.LunarMotion
+import dev.citali.lunartune.utils.rememberPreference
 
 private data class NetworkBannerVisuals(
     val message: String,
@@ -53,6 +55,7 @@ fun NetworkStatusBanner(
     state: NetworkBannerUiState,
     modifier: Modifier = Modifier,
 ) {
+    val (motionLists) = rememberPreference(MotionListsKey, defaultValue = true)
     var lastVisibleState by remember { mutableStateOf<NetworkBannerUiState>(NetworkBannerUiState.Offline) }
 
     if (state != NetworkBannerUiState.Hidden) {
@@ -86,10 +89,10 @@ fun NetworkStatusBanner(
         visible = state != NetworkBannerUiState.Hidden,
         modifier = modifier,
         enter =
-            slideInVertically(animationSpec = LunarMotion.bouncy()) { -it } +
+            slideInVertically(animationSpec = if (motionLists) LunarMotion.bouncy() else tween(durationMillis = 250)) { -it } +
                 fadeIn(animationSpec = tween(durationMillis = 180)),
         exit =
-            slideOutVertically(animationSpec = LunarMotion.snappy()) { -it } +
+            slideOutVertically(animationSpec = if (motionLists) LunarMotion.snappy() else tween(durationMillis = 220)) { -it } +
                 fadeOut(animationSpec = tween(durationMillis = 180)),
         label = "networkStatusBanner",
     ) {

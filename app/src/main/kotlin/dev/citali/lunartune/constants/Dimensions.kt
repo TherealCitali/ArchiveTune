@@ -50,7 +50,17 @@ val NavigationBarAnimationSpec =
         stiffness = Spring.StiffnessLow,
     )
 
+// Ported from 4nx3b/ArchiveTune: a bouncy main spec gives the mini player its
+// signature bounce on expand, fling-collapse and dismiss.
 val BottomSheetAnimationSpec =
+    spring<Dp>(
+        dampingRatio = 0.85f,
+        stiffness = 400f,
+    )
+
+// Calm fallback used when the "Mini player bounce" motion toggle is off:
+// the original no-bounce spec.
+val BottomSheetCalmAnimationSpec =
     spring<Dp>(
         dampingRatio = Spring.DampingRatioNoBouncy,
         stiffness = Spring.StiffnessMediumLow,

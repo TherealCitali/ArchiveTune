@@ -182,6 +182,7 @@ import coil3.request.allowHardware
 import coil3.toBitmap
 import com.valentinilk.shimmer.LocalShimmerTheme
 import dagger.hilt.android.AndroidEntryPoint
+import dev.citali.lunartune.ui.screens.settings.MotionNavKey
 import dev.citali.lunartune.ui.theme.LunarMotion
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -773,6 +774,7 @@ class MainActivity : FragmentActivity() {
                 DisableAnimationsKey,
                 defaultValue = defaultDisableAnimations,
             )
+            val motionNav by rememberPreference(MotionNavKey, defaultValue = true)
             val forceHighRefreshRate by rememberPreference(
                 ForceHighRefreshRateKey,
                 defaultValue = true,
@@ -2356,13 +2358,13 @@ class MainActivity : FragmentActivity() {
                                         } else if (initialState.destination.route in topLevelScreens &&
                                             targetState.destination.route in topLevelScreens
                                         ) {
-                                            fadeIn(tween(280)) +
+                                            fadeIn(if (motionNav) tween(280) else tween(220, delayMillis = 90)) +
                                                 scaleIn(
-                                                    animationSpec = LunarMotion.glide(),
+                                                    animationSpec = if (motionNav) LunarMotion.glide() else tween(220, delayMillis = 90),
                                                     initialScale = 0.92f,
                                                 )
                                         } else {
-                                            fadeIn(tween(300)) + slideInHorizontally(animationSpec = LunarMotion.glide()) { it / 2 }
+                                            fadeIn(if (motionNav) tween(300) else tween(250)) + slideInHorizontally(animationSpec = if (motionNav) LunarMotion.glide() else tween()) { it / 2 }
                                         }
                                     },
                                     exitTransition = {
@@ -2385,13 +2387,13 @@ class MainActivity : FragmentActivity() {
                                             ) &&
                                             targetState.destination.route in topLevelScreens
                                         ) {
-                                            fadeIn(tween(280)) +
+                                            fadeIn(if (motionNav) tween(280) else tween(220, delayMillis = 90)) +
                                                 scaleIn(
-                                                    animationSpec = LunarMotion.glide(),
+                                                    animationSpec = if (motionNav) LunarMotion.glide() else tween(220, delayMillis = 90),
                                                     initialScale = 0.92f,
                                                 )
                                         } else {
-                                            fadeIn(tween(300)) + slideInHorizontally(animationSpec = LunarMotion.glide()) { -it / 2 }
+                                            fadeIn(if (motionNav) tween(300) else tween(250)) + slideInHorizontally(animationSpec = if (motionNav) LunarMotion.glide() else tween()) { -it / 2 }
                                         }
                                     },
                                     popExitTransition = {
@@ -2437,6 +2439,7 @@ class MainActivity : FragmentActivity() {
                                         topAppBarScrollBehavior,
                                         { latestVersionName },
                                         disableAnimations,
+                                        motionNavAnimations = motionNav,
                                         onClearUpdateBadge = { latestVersionName = BuildConfig.VERSION_NAME },
                                         homeScrollConnection = homeScrollBehavior.nestedScrollConnection,
                                         searchScrollConnection = searchScrollBehavior.nestedScrollConnection,

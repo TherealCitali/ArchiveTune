@@ -11,6 +11,7 @@ import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -51,7 +52,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.citali.lunartune.R
 import dev.citali.lunartune.ui.screens.OptionStats
+import dev.citali.lunartune.ui.screens.settings.MotionMicroKey
 import dev.citali.lunartune.ui.theme.LunarMotion
+import dev.citali.lunartune.utils.rememberPreference
 
 @Composable
 fun <E> ChipsRow(
@@ -119,10 +122,11 @@ fun <Int> ChoiceChipsRow(
     modifier: Modifier = Modifier,
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
 ) {
+    val (motionMicro) = rememberPreference(MotionMicroKey, defaultValue = true)
     var expandIconDegree by remember { mutableFloatStateOf(0f) }
     val rotationAnimation by animateFloatAsState(
         targetValue = expandIconDegree,
-        animationSpec = LunarMotion.bouncy(),
+        animationSpec = if (motionMicro) LunarMotion.bouncy() else tween(durationMillis = 400),
         label = "",
     )
 

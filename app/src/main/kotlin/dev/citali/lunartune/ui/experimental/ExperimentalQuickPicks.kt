@@ -60,9 +60,13 @@ import dev.citali.lunartune.playback.queues.ListQueue
 import dev.citali.lunartune.playback.queues.YouTubeQueue
 import dev.citali.lunartune.ui.component.MenuState
 import dev.citali.lunartune.ui.menu.SongMenu
+import dev.citali.lunartune.ui.menu.YouTubeSongMenu
 import dev.citali.lunartune.ui.utils.displayArtworkUrl
 import kotlin.math.abs
 import kotlin.math.min
+import moe.rukamori.archivetune.innertube.models.SongItem
+import moe.rukamori.archivetune.innertube.models.WatchEndpoint
+import moe.rukamori.archivetune.innertube.pages.HomePage
 
 private const val ExperimentalChartSize = 10
 private const val ChartArtworkPx = 320
@@ -187,19 +191,42 @@ private fun ChartCard(
     onMenu: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val artworkUrl =
-        remember(song.song.thumbnailUrl) {
+    ChartCardCore(
+        title = song.title,
+        subtitle = song.artists.joinToString { it.name },
+        artworkData =
             song.song.thumbnailUrl?.displayArtworkUrl(
                 width = ChartArtworkPx,
                 height = ChartArtworkPx,
-            )
-        }
+            ),
+        rank = rank,
+        isActive = isActive,
+        isPlaying = isPlaying,
+        onPlay = onPlay,
+        onMenu = onMenu,
+        modifier = modifier,
+    )
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun ChartCardCore(
+    title: String,
+    subtitle: String,
+    artworkData: Any?,
+    rank: Int,
+    isActive: Boolean,
+    isPlaying: Boolean,
+    onPlay: () -> Unit,
+    onMenu: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
     val imageRequest =
-        remember(artworkUrl) {
+        remember(artworkData) {
             ImageRequest
                 .Builder(context)
-                .data(artworkUrl)
+                .data(artworkData)
                 .size(Size(ChartArtworkPx, ChartArtworkPx))
                 .crossfade(true)
                 .build()
@@ -256,7 +283,7 @@ private fun ChartCard(
                 )
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = song.title,
+                        text = title,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -264,7 +291,7 @@ private fun ChartCard(
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
-                        text = song.artists.joinToString { it.name },
+                        text = subtitle,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -313,4 +340,141 @@ private fun ChartCard(
             }
         }
     }
+}
+
+/**
+ * "Charts deck" for online quick picks: the same Top-10 chart pager as the
+ * offline deck, fed by YouTube Music shelf items. Playback and menu behaviour
+ * matches the classic remote cards exactly.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun ExperimentalRemoteChartsSection(
+    section: HomePage.Section,
+    mediaMetadata: MediaMetadata?,
+    isPlaying: Boolean,
+    navController: NavController,
+    playerConnection: PlayerConnection,
+    menuState: MenuState,
+    haptic: HapticFeedback,
+    modifier: Modifier = Modifier,
+) {
+    val songs =
+        remember(section.items) {
+            section.items.filterIsInstance<SongItem>().distinctBy { it.id }.take(ExperimentalChartSize)
+        }
+    if (songs.isEmpty()) return
+    val pagerState = rememberPagerState(pageCount = { songs.size })
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        HorizontalPager(
+            state = pagerState,
+            pageSpacing = 12.dp,
+            contentPadding = PaddingValues(horizontal = 20.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+        ) { page ->
+            val song = songs[page]
+            val pageOffset = (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
+            val damp = min(1f, abs(pageOffset))
+            val clamped = pageOffset.coerceIn(-1f, 1f)
+            RemoteChartCard(
+                song = song,
+                rank = page + 1,
+                isActive = song.id == mediaMetadata?.id,
+                isPlaying = isPlaying,
+                onPlay = {
+                    if (song.id == mediaMetadata?.id) {
+                        playerConnection.player.togglePlayPause()
+                    } else {
+                        playerConnection.playQueue(
+                            YouTubeQueue(
+                                endpoint = song.endpoint ?: WatchEndpoint(videoId = song.id),
+                                preloadItem = song.toMediaMetadata(),
+                            ),
+                        )
+                    }
+                },
+                onMenu = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    menuState.show {
+                        YouTubeSongMenu(
+                            song = song,
+                            navController = navController,
+                            onDismiss = menuState::dismiss,
+                        )
+                    }
+                },
+                modifier =
+                    Modifier.graphicsLayer {
+                        val scale = 1f - 0.08f * damp
+                        scaleX = scale
+                        scaleY = scale
+                        rotationY = -6f * clamped
+                        alpha = 1f - 0.35f * damp
+                    },
+            )
+        }
+
+        Spacer(Modifier.height(10.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+        ) {
+            Text(
+                text = "${pagerState.currentPage + 1} / ${songs.size}",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(Modifier.width(10.dp))
+            Box(
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .height(4.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+            ) {
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth((pagerState.currentPage + 1) / songs.size.toFloat())
+                            .height(4.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary),
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun RemoteChartCard(
+    song: SongItem,
+    rank: Int,
+    isActive: Boolean,
+    isPlaying: Boolean,
+    onPlay: () -> Unit,
+    onMenu: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    ChartCardCore(
+        title = song.title,
+        subtitle = song.artists.joinToString { it.name },
+        artworkData = song.thumbnail,
+        rank = rank,
+        isActive = isActive,
+        isPlaying = isPlaying,
+        onPlay = onPlay,
+        onMenu = onMenu,
+        modifier = modifier,
+    )
 }

@@ -99,6 +99,7 @@ import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.toBitmap
+import dev.citali.lunartune.ui.screens.settings.MotionListsKey
 import dev.citali.lunartune.ui.theme.LunarMotion
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -2129,6 +2130,7 @@ fun SwipeToSongBox(
 ) {
     val ctx = LocalContext.current
     val player = LocalPlayerConnection.current
+    val (motionLists) = rememberPreference(MotionListsKey, defaultValue = true)
     val scope = rememberCoroutineScope()
     val offset = remember { mutableStateOf(0f) }
     val threshold = 300f
@@ -2151,17 +2153,17 @@ fun SwipeToSongBox(
                             offset.value >= threshold -> {
                                 player?.playNext(listOf(mediaItem))
                                 Toast.makeText(ctx, R.string.play_next, Toast.LENGTH_SHORT).show()
-                                reset(offset, scope)
+                                reset(offset, scope, motionLists)
                             }
 
                             offset.value <= -threshold -> {
                                 player?.addToQueue(listOf(mediaItem))
                                 Toast.makeText(ctx, R.string.add_to_queue, Toast.LENGTH_SHORT).show()
-                                reset(offset, scope)
+                                reset(offset, scope, motionLists)
                             }
 
                             else -> {
-                                reset(offset, scope)
+                                reset(offset, scope, motionLists)
                             }
                         }
                     },
@@ -2222,12 +2224,13 @@ fun SwipeToSongBox(
 private fun reset(
     offset: MutableState<Float>,
     scope: CoroutineScope,
+    motionLists: Boolean,
 ) {
     scope.launch {
         animate(
             initialValue = offset.value,
             targetValue = 0f,
-            animationSpec = LunarMotion.bouncy(),
+            animationSpec = if (motionLists) LunarMotion.bouncy() else tween(220),
         ) { value, _ -> offset.value = value }
     }
 }

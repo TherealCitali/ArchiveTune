@@ -54,8 +54,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import dev.citali.lunartune.ui.screens.settings.MotionSheetsKey
 import dev.citali.lunartune.ui.theme.LunarMotion
 import dev.citali.lunartune.ui.utils.top
+import dev.citali.lunartune.utils.rememberPreference
 
 val LocalBottomSheetPageState = compositionLocalOf { BottomSheetPageState() }
 
@@ -85,6 +87,7 @@ fun BottomSheetPage(
     contentWindowInsets: WindowInsets = WindowInsets.navigationBars,
 ) {
     val focusManager = LocalFocusManager.current
+    val (motionSheets) = rememberPreference(MotionSheetsKey, defaultValue = true)
     val coroutineScope = rememberCoroutineScope()
     var dragOffset by remember { mutableFloatStateOf(0f) }
 
@@ -114,12 +117,12 @@ fun BottomSheetPage(
         enter =
             slideInVertically(
                 initialOffsetY = { it },
-                animationSpec = LunarMotion.bouncy(),
+                animationSpec = if (motionSheets) LunarMotion.bouncy() else tween(300),
             ),
         exit =
             slideOutVertically(
                 targetOffsetY = { it },
-                animationSpec = LunarMotion.snappy(),
+                animationSpec = if (motionSheets) LunarMotion.snappy() else tween(300),
             ),
         modifier = modifier,
     ) {
