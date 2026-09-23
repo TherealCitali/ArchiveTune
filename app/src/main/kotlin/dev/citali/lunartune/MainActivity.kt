@@ -182,6 +182,8 @@ import coil3.request.allowHardware
 import coil3.toBitmap
 import com.valentinilk.shimmer.LocalShimmerTheme
 import dagger.hilt.android.AndroidEntryPoint
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import dev.citali.lunartune.ui.screens.settings.MotionNavKey
 import dev.citali.lunartune.ui.theme.LunarMotion
 import kotlinx.coroutines.Dispatchers
@@ -1046,11 +1048,14 @@ class MainActivity : FragmentActivity() {
                         NavigationBarStyleKey,
                         defaultValue = NavigationBarStyle.DEFAULT,
                     )
+                    val hazeState = rememberHazeState()
+                    val isFrostedNavBar = navigationBarStyle == NavigationBarStyle.FROSTED
                     val navigationBarHeightMultiplier by rememberPreference(
                         NavigationBarHeightKey,
                         defaultValue = NAVIGATION_BAR_HEIGHT_DEFAULT,
                     )
-                    val isFloatingNavBar = navigationBarStyle == NavigationBarStyle.FLOATING
+                    val isFloatingNavBar =
+                        navigationBarStyle == NavigationBarStyle.FLOATING || isFrostedNavBar
                     val floatingBarsBottomPadding =
                         if (isFloatingNavBar) FloatingNavigationBarBottomPadding else NavigationBarBottomPadding
                     val navBarHorizontalPadding =
@@ -2121,6 +2126,7 @@ class MainActivity : FragmentActivity() {
                                                 pureBlack = pureBlack,
                                                 isPairedWithMiniPlayer = areBottomBarsPaired,
                                                 style = navigationBarStyle,
+                                                hazeState = hazeState,
                                                 modifier =
                                                     Modifier
                                                         .align(Alignment.BottomCenter)
@@ -2311,7 +2317,14 @@ class MainActivity : FragmentActivity() {
                                         }
                                     }
                                 },
-                                modifier = Modifier.fillMaxSize(),
+                                modifier =
+                                    if (isFrostedNavBar) {
+                                        Modifier
+                                            .fillMaxSize()
+                                            .hazeSource(hazeState)
+                                    } else {
+                                        Modifier.fillMaxSize()
+                                    },
                             ) {
                                 var transitionDirection =
                                     AnimatedContentTransitionScope.SlideDirection.Left

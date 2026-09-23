@@ -967,6 +967,7 @@ val RedownloadOnRestoreKey = booleanPreferencesKey("redownloadOnRestore")
 enum class NavigationBarStyle {
     DEFAULT,
     FLOATING,
+    FROSTED,
 }
 
 val NavigationBarStyleKey = stringPreferencesKey("navigationBarStyle")

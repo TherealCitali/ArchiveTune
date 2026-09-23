@@ -12,9 +12,14 @@ package dev.citali.lunartune.ui.component
 import android.os.SystemClock
 import android.view.ViewConfiguration
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import dev.chrisbanes.haze.HazeInput
+import dev.chrisbanes.haze.HazePerformanceMode
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.blur.hazeBlur
 import dev.citali.lunartune.ui.experimental.ExperimentalNavigationDock
 import dev.citali.lunartune.ui.experimental.ExperimentalUiEnabledKey
 import dev.citali.lunartune.ui.screens.settings.MotionBarKey
@@ -110,6 +115,7 @@ fun FloatingNavigationToolbar(
     modifier: Modifier = Modifier,
     isPairedWithMiniPlayer: Boolean = false,
     style: NavigationBarStyle = NavigationBarStyle.DEFAULT,
+    hazeState: HazeState? = null,
     isSelected: (Screens) -> Boolean,
     onItemClick: (Screens, Boolean) -> Unit,
     onItemLongClick: ((Screens) -> Unit)? = null,
@@ -128,7 +134,8 @@ fun FloatingNavigationToolbar(
         )
         return
     }
-    val isFloating = style == NavigationBarStyle.FLOATING
+    val isFloating = style == NavigationBarStyle.FLOATING || style == NavigationBarStyle.FROSTED
+    val isFrosted = style == NavigationBarStyle.FROSTED
     val (navBarWidthFraction) =
         rememberPreference(NavigationBarWidthKey, defaultValue = NAVIGATION_BAR_WIDTH_DEFAULT)
     val (navBarHeightMultiplier) =
@@ -144,8 +151,9 @@ fun FloatingNavigationToolbar(
     val (hideNavigationLabels) = rememberPreference(HideNavigationBarLabelsKey, defaultValue = false)
     val resolvedBarHeight = NavigationBarHeight * navBarHeightMultiplier
     val navigationShape =
-        remember(isPairedWithMiniPlayer, isFloating, navBarCornerRadius) {
+        remember(isPairedWithMiniPlayer, isFloating, isFrosted, navBarCornerRadius) {
             when {
+                isFrosted -> RoundedCornerShape(percent = 50)
                 isFloating -> RoundedCornerShape(navBarCornerRadius.dp)
                 isPairedWithMiniPlayer ->
                     RoundedCornerShape(
@@ -222,6 +230,20 @@ fun FloatingNavigationToolbar(
         }
     }
 
+    val frostedScrimBase =
+        if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer
+    val frostedStyle =
+        remember(isFrosted, frostedScrimBase) {
+            if (isFrosted) {
+                frostedNavBarStyle(
+                    scrim = frostedScrimBase.copy(alpha = FrostedScrimAlpha),
+                    fallbackScrim = frostedScrimBase.copy(alpha = FrostedFallbackAlpha),
+                )
+            } else {
+                null
+            }
+        }
+
     Box(
         modifier =
             modifier
@@ -234,11 +256,32 @@ fun FloatingNavigationToolbar(
                 Modifier
                     .widthIn(max = if (isFloating) FloatingNavigationBarMaxWidth else NavigationBarMaxWidth)
                     .fillMaxWidth(if (isFloating) navBarWidthFraction.coerceIn(0.5f, 1f) else 1f)
-                    .height(resolvedBarHeight),
+                    .height(resolvedBarHeight)
+                    .then(
+                        if (isFrosted && hazeState != null && frostedStyle != null) {
+                            Modifier.hazeBlur(
+                                input = HazeInput.Sources(hazeState),
+                                style = frostedStyle,
+                                performanceMode = HazePerformanceMode.Performance,
+                                expandLayerBounds = true,
+                            )
+                        } else {
+                            Modifier
+                        },
+                    ),
             shape = navigationShape,
-            color = navigationContainerColor,
-            tonalElevation = NavigationBarDefaults.Elevation,
+            color = if (isFrosted) Color.Transparent else navigationContainerColor,
+            tonalElevation = if (isFrosted) 0.dp else NavigationBarDefaults.Elevation,
             shadowElevation = if (isFloating) 8.dp else NavigationBarDefaults.Elevation,
+            border =
+                if (isFrosted) {
+                    BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.primary.copy(alpha = FrostedBorderAlpha),
+                    )
+                } else {
+                    null
+                },
         ) {
             ShortNavigationBar(
                 modifier = Modifier.fillMaxSize(),

@@ -274,6 +274,9 @@ dependencies {
     implementation(libs.compose.material.icons.extended)
     implementation(libs.compose.reorderable)
 
+    implementation(libs.haze.core)
+    implementation(libs.haze.blur)
+
     implementation(libs.viewmodel)
     implementation(libs.viewmodel.compose)
     implementation(libs.lifecycle.runtime.compose)

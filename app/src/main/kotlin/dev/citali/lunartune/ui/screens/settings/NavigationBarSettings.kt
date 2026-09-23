@@ -9,6 +9,7 @@
 
 package dev.citali.lunartune.ui.screens.settings
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -56,6 +57,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import dev.chrisbanes.haze.HazeInput
+import dev.chrisbanes.haze.HazePerformanceMode
+import dev.chrisbanes.haze.blur.hazeBlur
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import dev.citali.lunartune.LocalPlayerAwareWindowInsets
 import dev.citali.lunartune.R
 import dev.citali.lunartune.constants.HideNavigationBarLabelsKey
@@ -77,10 +83,14 @@ import dev.citali.lunartune.constants.NavigationBarTransparencyKey
 import dev.citali.lunartune.constants.NavigationBarWidthKey
 import dev.citali.lunartune.ui.component.DefaultDialog
 import dev.citali.lunartune.ui.component.EnumListPreference
+import dev.citali.lunartune.ui.component.FrostedBorderAlpha
+import dev.citali.lunartune.ui.component.FrostedFallbackAlpha
+import dev.citali.lunartune.ui.component.FrostedScrimAlpha
 import dev.citali.lunartune.ui.component.IconButton
 import dev.citali.lunartune.ui.component.PreferenceEntry
 import dev.citali.lunartune.ui.component.PreferenceGroup
 import dev.citali.lunartune.ui.component.SwitchPreference
+import dev.citali.lunartune.ui.component.frostedNavBarStyle
 import dev.citali.lunartune.ui.screens.Screens
 import dev.citali.lunartune.ui.utils.backToMain
 import dev.citali.lunartune.utils.rememberEnumPreference
@@ -169,6 +179,8 @@ fun NavigationBarSettings(navController: NavController) {
                                     stringResource(R.string.navigation_bar_style_default)
                                 NavigationBarStyle.FLOATING ->
                                     stringResource(R.string.navigation_bar_style_floating)
+                                NavigationBarStyle.FROSTED ->
+                                    stringResource(R.string.navigation_bar_style_frosted)
                             }
                         },
                     )
@@ -494,10 +506,14 @@ private fun NavBarPreview(
     cornerRadius: Float,
     style: NavigationBarStyle,
 ) {
-    val isFloating = style == NavigationBarStyle.FLOATING
+    val isFloating = style == NavigationBarStyle.FLOATING || style == NavigationBarStyle.FROSTED
+    val isFrosted = style == NavigationBarStyle.FROSTED
+    val previewHazeState = rememberHazeState()
     val resolvedBarHeight = NavigationBarHeight * heightMultiplier
     val shape =
-        if (isFloating) {
+        if (isFrosted) {
+            RoundedCornerShape(percent = 50)
+        } else if (isFloating) {
             RoundedCornerShape(cornerRadius.dp)
         } else {
             RoundedCornerShape(
@@ -525,13 +541,23 @@ private fun NavBarPreview(
                 ),
         )
 
+    val previewFrostedStyle =
+        remember(isFrosted, baseColor) {
+            frostedNavBarStyle(
+                scrim = baseColor.copy(alpha = FrostedScrimAlpha),
+                fallbackScrim = baseColor.copy(alpha = FrostedFallbackAlpha),
+            )
+        }
     Box(
         modifier =
             Modifier
                 .fillMaxWidth()
                 .height(150.dp)
                 .clip(RoundedCornerShape(20.dp))
-                .background(fauxScreenBrush),
+                .background(fauxScreenBrush)
+                .then(
+                    if (isFrosted) Modifier.hazeSource(previewHazeState) else Modifier,
+                ),
         contentAlignment = Alignment.BottomCenter,
     ) {
         Surface(
@@ -542,11 +568,32 @@ private fun NavBarPreview(
                         start = if (isFloating) 16.dp else 0.dp,
                         end = if (isFloating) 16.dp else 0.dp,
                     ).fillMaxWidth(if (isFloating) widthFraction.coerceIn(0.5f, 1f) else 1f)
-                    .height(resolvedBarHeight),
+                    .height(resolvedBarHeight)
+                    .then(
+                        if (isFrosted) {
+                            Modifier.hazeBlur(
+                                input = HazeInput.Sources(previewHazeState),
+                                style = previewFrostedStyle,
+                                performanceMode = HazePerformanceMode.Performance,
+                                expandLayerBounds = true,
+                            )
+                        } else {
+                            Modifier
+                        },
+                    ),
             shape = shape,
-            color = barColor,
-            tonalElevation = NavigationBarDefaults.Elevation,
+            color = if (isFrosted) Color.Transparent else barColor,
+            tonalElevation = if (isFrosted) 0.dp else NavigationBarDefaults.Elevation,
             shadowElevation = if (isFloating) 8.dp else NavigationBarDefaults.Elevation,
+            border =
+                if (isFrosted) {
+                    BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.primary.copy(alpha = FrostedBorderAlpha),
+                    )
+                } else {
+                    null
+                },
         ) {
             Row(
                 modifier =
