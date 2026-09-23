@@ -260,6 +260,11 @@ fun ExperimentalSpeedDialSection(
         }
 
         Spacer(Modifier.height(12.dp))
+        val maxVisibleSegments = 7
+        val windowStart =
+            (pagerState.currentPage - maxVisibleSegments / 2)
+                .coerceIn(0, (tiles.size - maxVisibleSegments).coerceAtLeast(0))
+        val visibleCount = minOf(tiles.size, maxVisibleSegments)
         Row(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             modifier =
@@ -267,7 +272,8 @@ fun ExperimentalSpeedDialSection(
                     .fillMaxWidth()
                     .padding(horizontal = 44.dp),
         ) {
-            repeat(tiles.size) { index ->
+            repeat(visibleCount) { i ->
+                val index = windowStart + i
                 Box(
                     modifier =
                         Modifier
