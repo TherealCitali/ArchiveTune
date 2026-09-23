@@ -105,6 +105,7 @@ fun ExperimentalQuickPicksSection(
             val song = songs[page]
             val pageOffset = (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
             val damp = min(1f, abs(pageOffset))
+            val clamped = pageOffset.coerceIn(-1f, 1f)
             ChartCard(
                 song = song,
                 rank = page + 1,
@@ -138,6 +139,7 @@ fun ExperimentalQuickPicksSection(
                         val scale = 1f - 0.08f * damp
                         scaleX = scale
                         scaleY = scale
+                        rotationY = -6f * clamped
                         alpha = 1f - 0.35f * damp
                     },
             )

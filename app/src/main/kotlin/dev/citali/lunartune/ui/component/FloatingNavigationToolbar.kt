@@ -21,8 +21,6 @@ import dev.citali.lunartune.ui.screens.settings.MotionBarKey
 import dev.citali.lunartune.ui.theme.LunarMotion
 import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -217,7 +215,7 @@ fun FloatingNavigationToolbar(
         } else {
             indicatorX.animateTo(
                 targetValue = targetX,
-                animationSpec = if (motionBar) LunarMotion.glide() else spring(dampingRatio = 0.72f, stiffness = Spring.StiffnessMediumLow),
+                animationSpec = if (motionBar) LunarMotion.bouncy() else spring(dampingRatio = 0.72f, stiffness = Spring.StiffnessMediumLow),
             )
         }
     }
@@ -284,11 +282,11 @@ fun FloatingNavigationToolbar(
                             val iconScale = remember(screen) { Animatable(1f) }
                             LaunchedEffect(selected) {
                                 if (selected) {
-                                    iconScale.snapTo(0.85f)
+                                    iconScale.snapTo(0.8f)
                                     iconScale.animateTo(
                                         1f,
                                         if (motionBar) {
-                                            LunarMotion.bouncy()
+                                            LunarMotion.press()
                                         } else {
                                             spring(
                                                 dampingRatio = Spring.DampingRatioMediumBouncy,

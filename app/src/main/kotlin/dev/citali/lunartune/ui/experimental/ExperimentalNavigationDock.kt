@@ -13,8 +13,11 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -23,7 +26,6 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -53,10 +55,13 @@ import dev.citali.lunartune.ui.screens.Screens
 import dev.citali.lunartune.ui.theme.LunarMotion
 
 /**
- * "Orbit dock": the experimental navbar. A floating capsule where the active
- * tab blooms into a labeled pill with a jelly width-spring while inactive
- * tabs stay icon-only. Long-press actions and search double-tap behave
- * exactly like the stock bar.
+ * "Orbit dock": the experimental navbar.
+ *
+ * Structure ported from LastWave-native's MainShell FloatingNavBar/FloatingNavItem
+ * (github.com/Clash-Projects/LastWave-native): 32dp dock, 48dp pill items,
+ * spring size-morph with expand/shrink label pushes. Adapted with LunarMotion
+ * springs (tighter than their floaty 200-stiffness default), kept press bounce,
+ * long-press actions and search double-tap, plus our glass edge.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -73,14 +78,14 @@ fun ExperimentalNavigationDock(
         contentAlignment = Alignment.Center,
     ) {
         Surface(
-            shape = RoundedCornerShape(percent = 50),
+            shape = RoundedCornerShape(32.dp),
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            tonalElevation = 3.dp,
-            shadowElevation = 8.dp,
+            tonalElevation = 6.dp,
+            shadowElevation = 12.dp,
             modifier =
                 Modifier
                     .widthIn(max = 360.dp)
-                    .height(68.dp),
+                    .animateContentSize(LunarMotion.bouncy()),
         ) {
             Box(contentAlignment = Alignment.Center) {
                 // Fake glass edge: a 1dp gradient sheen, API-29 safe.
@@ -102,11 +107,8 @@ fun ExperimentalNavigationDock(
                 )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
-                    modifier =
-                        Modifier
-                            .fillMaxHeight()
-                            .padding(horizontal = 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
                 ) {
                     items.forEach { screen ->
                         DockItem(
@@ -147,6 +149,7 @@ private fun DockItem(
             } else {
                 Color.Transparent
             },
+        animationSpec = LunarMotion.smooth(),
         label = "dockPillColor",
     )
     val contentColor by animateColorAsState(
@@ -156,6 +159,7 @@ private fun DockItem(
             } else {
                 MaterialTheme.colorScheme.onSurfaceVariant
             },
+        animationSpec = LunarMotion.smooth(),
         label = "dockContentColor",
     )
     val lastClickTime = remember(screen) { mutableLongStateOf(0L) }
@@ -168,6 +172,8 @@ private fun DockItem(
         contentAlignment = Alignment.Center,
         modifier =
             modifier
+                .height(48.dp)
+                .animateContentSize(LunarMotion.bouncy())
                 .graphicsLayer {
                     scaleX = pressScale
                     scaleY = pressScale
@@ -196,10 +202,11 @@ private fun DockItem(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
             modifier =
                 Modifier
-                    .padding(horizontal = 16.dp, vertical = 10.dp)
-                    .animateContentSize(animationSpec = LunarMotion.bouncy()),
+                    .padding(horizontal = if (selected) 18.dp else 12.dp)
+                    .height(48.dp),
         ) {
             Icon(
                 painter =
@@ -212,15 +219,26 @@ private fun DockItem(
             )
             AnimatedVisibility(
                 visible = selected,
-                enter = fadeIn(),
-                exit = fadeOut(),
+                enter =
+                    fadeIn(LunarMotion.bouncy()) +
+                        expandHorizontally(
+                            animationSpec = LunarMotion.bouncy(),
+                            expandFrom = Alignment.Start,
+                        ),
+                exit =
+                    fadeOut(tween(90)) +
+                        shrinkHorizontally(
+                            animationSpec = LunarMotion.bouncy(),
+                            shrinkTowards = Alignment.Start,
+                        ),
             ) {
                 Text(
                     text = stringResource(screen.titleId),
                     style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
                     color = contentColor,
                     maxLines = 1,
+                    softWrap = false,
                     modifier = Modifier.padding(start = 8.dp),
                 )
             }

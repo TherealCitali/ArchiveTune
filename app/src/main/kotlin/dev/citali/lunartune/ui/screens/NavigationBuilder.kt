@@ -197,32 +197,32 @@ fun NavGraphBuilder.navigationBuilder(
             if (disableAnimations) {
                 fadeIn(tween(0))
             } else {
-                fadeIn(if (motionNavAnimations) tween(300) else tween(250))
+                fadeIn(if (motionNavAnimations) tween(320) else tween(250))
             }
         },
         exitTransition = {
             if (disableAnimations) {
                 fadeOut(tween(0))
             } else if (targetState.destination.route?.startsWith(OnlineSearchResultRoutePrefix) == true) {
-                fadeOut(tween(200, easing = LunarMotion.EmphasizedAccelerate))
+                fadeOut(tween(250, easing = LunarMotion.EmphasizedAccelerate))
             } else {
-                fadeOut(tween(200, easing = LunarMotion.EmphasizedAccelerate)) + slideOutHorizontally(animationSpec = tween(300, easing = LunarMotion.EmphasizedAccelerate)) { -it / 2 }
+                fadeOut(tween(250, easing = LunarMotion.EmphasizedAccelerate)) + slideOutHorizontally(animationSpec = LunarMotion.glide()) { -it }
             }
         },
         popEnterTransition = {
             if (disableAnimations) {
                 fadeIn(tween(0))
             } else if (initialState.destination.route?.startsWith(OnlineSearchResultRoutePrefix) == true) {
-                fadeIn(if (motionNavAnimations) tween(300) else tween(250))
+                fadeIn(if (motionNavAnimations) tween(320) else tween(250))
             } else {
-                fadeIn(if (motionNavAnimations) tween(300) else tween(250)) + slideInHorizontally(animationSpec = if (motionNavAnimations) LunarMotion.glide() else tween()) { -it / 2 }
+                fadeIn(if (motionNavAnimations) tween(320) else tween(250)) + slideInHorizontally(animationSpec = if (motionNavAnimations) LunarMotion.glide() else tween()) { -it }
             }
         },
         popExitTransition = {
             if (disableAnimations) {
                 fadeOut(tween(0))
             } else {
-                fadeOut(tween(200, easing = LunarMotion.EmphasizedAccelerate))
+                fadeOut(tween(250, easing = LunarMotion.EmphasizedAccelerate))
             }
         },
     ) {
