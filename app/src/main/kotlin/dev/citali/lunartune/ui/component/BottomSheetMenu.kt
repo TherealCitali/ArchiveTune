@@ -33,7 +33,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import dev.citali.lunartune.ui.screens.settings.MotionSheetsKey
 import dev.citali.lunartune.ui.theme.LunarMotion
+import dev.citali.lunartune.utils.rememberPreference
 
 val LocalMenuState = compositionLocalOf { MenuState() }
 
@@ -77,6 +79,7 @@ fun BottomSheetMenu(
     background: Color = MaterialTheme.colorScheme.surface,
 ) {
     val focusManager = LocalFocusManager.current
+    val (motionSheets) = rememberPreference(MotionSheetsKey, defaultValue = true)
 
     state.dialogContent?.invoke()
 
@@ -100,14 +103,25 @@ fun BottomSheetMenu(
             },
             modifier = modifier.fillMaxHeight(),
         ) {
-            AnimatedVisibility(
-                visible = true,
-                enter =
-                    scaleIn(
-                        initialScale = 0.97f,
-                        animationSpec = LunarMotion.bouncy(),
-                    ) + fadeIn(animationSpec = LunarMotion.smooth()),
-            ) {
+            if (motionSheets) {
+                AnimatedVisibility(
+                    visible = true,
+                    enter =
+                        scaleIn(
+                            initialScale = 0.97f,
+                            animationSpec = LunarMotion.bouncy(),
+                        ) + fadeIn(animationSpec = LunarMotion.smooth()),
+                ) {
+                    Column(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp),
+                    ) {
+                        state.content(this)
+                    }
+                }
+            } else {
                 Column(
                     modifier =
                         Modifier

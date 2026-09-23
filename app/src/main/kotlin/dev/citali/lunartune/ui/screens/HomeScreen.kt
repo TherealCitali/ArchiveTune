@@ -59,6 +59,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import dev.citali.lunartune.ui.experimental.ExperimentalCategoryChips
 import dev.citali.lunartune.ui.experimental.ExperimentalHomeBackdrop
 import dev.citali.lunartune.ui.experimental.ExperimentalQuickPicksSection
+import dev.citali.lunartune.ui.experimental.ExperimentalRemoteChartsSection
 import dev.citali.lunartune.ui.experimental.ExperimentalSectionHeader
 import dev.citali.lunartune.ui.experimental.ExperimentalSpeedDialSection
 import dev.citali.lunartune.ui.experimental.ExperimentalUiEnabledKey
@@ -433,16 +434,28 @@ private fun HomeContent(
                                 key = "home_remote_quick_picks",
                                 contentType = "quick_picks",
                             ) {
-                                RemoteQuickPicksSection(
-                                    section = remoteQuickPicks,
-                                    mediaMetadata = mediaMetadata,
-                                    isPlaying = isPlaying,
-                                    displayMode = uiState.quickPicksDisplayMode,
-                                    navController = navController,
-                                    playerConnection = playerConnection,
-                                    menuState = menuState,
-                                    haptic = haptic,
-                                )
+                                if (experimentalUi) {
+                                    ExperimentalRemoteChartsSection(
+                                        section = remoteQuickPicks,
+                                        mediaMetadata = mediaMetadata,
+                                        isPlaying = isPlaying,
+                                        navController = navController,
+                                        playerConnection = playerConnection,
+                                        menuState = menuState,
+                                        haptic = haptic,
+                                    )
+                                } else {
+                                    RemoteQuickPicksSection(
+                                        section = remoteQuickPicks,
+                                        mediaMetadata = mediaMetadata,
+                                        isPlaying = isPlaying,
+                                        displayMode = uiState.quickPicksDisplayMode,
+                                        navController = navController,
+                                        playerConnection = playerConnection,
+                                        menuState = menuState,
+                                        haptic = haptic,
+                                    )
+                                }
                             }
                         } else if (
                             uiState.quickPicksMode != QuickPicks.DONT_SHOW &&

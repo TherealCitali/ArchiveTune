@@ -9,6 +9,7 @@ package dev.citali.lunartune.ui.component
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -84,7 +85,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.util.lerp
 import dev.citali.lunartune.constants.AppBarHeight
+import dev.citali.lunartune.ui.screens.settings.MotionMicroKey
 import dev.citali.lunartune.ui.theme.LunarMotion
+import dev.citali.lunartune.utils.rememberPreference
 import kotlin.math.max
 
 @ExperimentalMaterial3Api
@@ -112,9 +115,10 @@ fun TopSearch(
     leftFocusRequester: FocusRequester? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val (motionMicro) = rememberPreference(MotionMicroKey, defaultValue = true)
     val animationProgress: Float by animateFloatAsState(
         targetValue = if (active) 1f else 0f,
-        animationSpec = LunarMotion.smooth(),
+        animationSpec = if (motionMicro) LunarMotion.smooth() else tween(durationMillis = 300),
         label = "SearchBarAnimation",
     )
 

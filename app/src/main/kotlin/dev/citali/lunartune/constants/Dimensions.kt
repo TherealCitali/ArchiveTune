@@ -58,6 +58,14 @@ val BottomSheetAnimationSpec =
         stiffness = 400f,
     )
 
+// Calm fallback used when the "Mini player bounce" motion toggle is off:
+// the original no-bounce spec.
+val BottomSheetCalmAnimationSpec =
+    spring<Dp>(
+        dampingRatio = Spring.DampingRatioNoBouncy,
+        stiffness = Spring.StiffnessMediumLow,
+    )
+
 val BottomSheetCollapseAnimationSpec =
     spring<Dp>(
         dampingRatio = 0.85f,

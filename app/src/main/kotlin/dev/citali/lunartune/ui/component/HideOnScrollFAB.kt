@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import dev.citali.lunartune.LocalAnimationsDisabled
 import dev.citali.lunartune.LocalPlayerAwareWindowInsets
 import dev.citali.lunartune.constants.EnableHapticFeedbackKey
+import dev.citali.lunartune.ui.screens.settings.MotionListsKey
 import dev.citali.lunartune.ui.theme.LunarMotion
 import dev.citali.lunartune.ui.utils.isScrollingUp
 import dev.citali.lunartune.utils.rememberPreference
@@ -49,10 +50,11 @@ fun HideOnScrollFAB(
     onClick: () -> Unit,
 ) {
     val animationsDisabled = LocalAnimationsDisabled.current
+    val (motionLists) = rememberPreference(MotionListsKey, defaultValue = true)
     AnimatedVisibility(
         visible = visible && lazyListState.isScrollingUp(),
-        enter = slideInVertically(animationSpec = if (animationsDisabled) tween(0) else LunarMotion.bouncy()) { it },
-        exit = slideOutVertically(animationSpec = if (animationsDisabled) tween(0) else LunarMotion.snappy()) { it },
+        enter = slideInVertically(animationSpec = if (animationsDisabled) tween(0) else if (motionLists) LunarMotion.bouncy() else tween(220)) { it },
+        exit = slideOutVertically(animationSpec = if (animationsDisabled) tween(0) else if (motionLists) LunarMotion.snappy() else tween(220)) { it },
         modifier =
             modifier.windowInsetsPadding(
                 LocalPlayerAwareWindowInsets.current
@@ -96,10 +98,11 @@ fun BoxScope.HideOnScrollFAB(
     onClick: () -> Unit,
 ) {
     val animationsDisabled = LocalAnimationsDisabled.current
+    val (motionLists) = rememberPreference(MotionListsKey, defaultValue = true)
     AnimatedVisibility(
         visible = visible && lazyListState.isScrollingUp(),
-        enter = slideInVertically(animationSpec = if (animationsDisabled) tween(0) else LunarMotion.bouncy()) { it },
-        exit = slideOutVertically(animationSpec = if (animationsDisabled) tween(0) else LunarMotion.snappy()) { it },
+        enter = slideInVertically(animationSpec = if (animationsDisabled) tween(0) else if (motionLists) LunarMotion.bouncy() else tween(220)) { it },
+        exit = slideOutVertically(animationSpec = if (animationsDisabled) tween(0) else if (motionLists) LunarMotion.snappy() else tween(220)) { it },
         modifier =
             Modifier
                 .align(Alignment.BottomEnd)
@@ -126,10 +129,11 @@ fun BoxScope.HideOnScrollFAB(
     onClick: () -> Unit,
 ) {
     val animationsDisabled = LocalAnimationsDisabled.current
+    val (motionLists) = rememberPreference(MotionListsKey, defaultValue = true)
     AnimatedVisibility(
         visible = visible && scrollState.isScrollingUp(),
-        enter = slideInVertically(animationSpec = if (animationsDisabled) tween(0) else LunarMotion.bouncy()) { it },
-        exit = slideOutVertically(animationSpec = if (animationsDisabled) tween(0) else LunarMotion.snappy()) { it },
+        enter = slideInVertically(animationSpec = if (animationsDisabled) tween(0) else if (motionLists) LunarMotion.bouncy() else tween(220)) { it },
+        exit = slideOutVertically(animationSpec = if (animationsDisabled) tween(0) else if (motionLists) LunarMotion.snappy() else tween(220)) { it },
         modifier =
             Modifier
                 .align(Alignment.BottomEnd)

@@ -55,6 +55,7 @@ import dev.citali.lunartune.ui.screens.settings.AodCustomizedScreen
 import dev.citali.lunartune.ui.screens.settings.AppearanceSettings
 import dev.citali.lunartune.ui.screens.settings.BackupAndRestore
 import dev.citali.lunartune.ui.screens.settings.AppLockScreen
+import dev.citali.lunartune.ui.screens.settings.MotionSettings
 import dev.citali.lunartune.ui.screens.settings.PinSetupScreen
 import dev.citali.lunartune.ui.screens.settings.ChangelogScreen
 import dev.citali.lunartune.ui.screens.settings.ChiperSettings
@@ -88,6 +89,7 @@ fun NavGraphBuilder.navigationBuilder(
     scrollBehavior: TopAppBarScrollBehavior,
     latestVersionName: () -> String,
     disableAnimations: Boolean = false,
+    motionNavAnimations: Boolean = true,
     onClearUpdateBadge: () -> Unit = {},
     homeScrollConnection: NestedScrollConnection? = null,
     searchScrollConnection: NestedScrollConnection? = null,
@@ -195,7 +197,7 @@ fun NavGraphBuilder.navigationBuilder(
             if (disableAnimations) {
                 fadeIn(tween(0))
             } else {
-                fadeIn(tween(320))
+                fadeIn(if (motionNavAnimations) tween(320) else tween(250))
             }
         },
         exitTransition = {
@@ -211,9 +213,9 @@ fun NavGraphBuilder.navigationBuilder(
             if (disableAnimations) {
                 fadeIn(tween(0))
             } else if (initialState.destination.route?.startsWith(OnlineSearchResultRoutePrefix) == true) {
-                fadeIn(tween(320))
+                fadeIn(if (motionNavAnimations) tween(320) else tween(250))
             } else {
-                fadeIn(tween(320)) + slideInHorizontally(animationSpec = LunarMotion.glide()) { -it }
+                fadeIn(if (motionNavAnimations) tween(320) else tween(250)) + slideInHorizontally(animationSpec = if (motionNavAnimations) LunarMotion.glide() else tween()) { -it }
             }
         },
         popExitTransition = {
@@ -392,6 +394,9 @@ fun NavGraphBuilder.navigationBuilder(
     }
     composable("settings/appearance/navigation_bar") {
         NavigationBarSettings(navController)
+    }
+    composable("settings/appearance/motion") {
+        MotionSettings(navController)
     }
     composable("settings/appearance/aod_customized") {
         AodCustomizedScreen(navController)

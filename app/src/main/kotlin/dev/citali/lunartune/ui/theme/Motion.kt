@@ -31,30 +31,30 @@ object LunarMotion {
 
     /**
      * Gentle bounce for entrances, icon rotations, sheet panels and swipe snap-backs.
-     * Settles in ~280ms with one soft overshoot.
+     * Settles in ~350ms with one soft overshoot.
      */
-    fun <T> bouncy() = spring<T>(dampingRatio = 0.72f, stiffness = 800f)
+    fun <T> bouncy() = spring<T>(dampingRatio = 0.75f, stiffness = 500f)
 
     /**
      * Organic settle with zero overshoot, for progress/shape-driven motion (search morph,
      * crossfades with scale) where overshooting past the target would distort layout.
      */
-    fun <T> smooth() = spring<T>(dampingRatio = 1f, stiffness = 1100f)
+    fun <T> smooth() = spring<T>(dampingRatio = 1f, stiffness = 700f)
 
     /**
      * Fast retract for exits (FAB scrolling away, banners dismissing). Barely-there give,
-     * gone in ~150ms.
+     * gone in ~200ms.
      */
-    fun <T> snappy() = spring<T>(dampingRatio = 0.95f, stiffness = 2600f)
+    fun <T> snappy() = spring<T>(dampingRatio = 0.95f, stiffness = 1500f)
 
     /**
      * Full-screen glide for nav transitions (tab blooms, drill slides). A whisper of
-     * overshoot over ~450ms so page changes read clearly without seasickness.
+     * overshoot over ~520ms so page changes read clearly without seasickness.
      */
-    fun <T> glide() = spring<T>(dampingRatio = 0.86f, stiffness = 450f)
+    fun <T> glide() = spring<T>(dampingRatio = 0.88f, stiffness = 350f)
 
     /** Tactile press bounce for [dev.citali.lunartune.ui.component.IconButton]. */
-    fun press() = spring<Float>(dampingRatio = 0.6f, stiffness = 1500f)
+    fun press() = spring<Float>(dampingRatio = 0.62f, stiffness = 900f)
 
     /** Scale target while pressed. */
     const val PressedScale = 0.85f

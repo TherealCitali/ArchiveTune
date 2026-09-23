@@ -12,6 +12,7 @@ package dev.citali.lunartune.ui.menu
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -70,6 +71,7 @@ import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import dev.citali.lunartune.ui.screens.settings.MotionMicroKey
 import dev.citali.lunartune.ui.theme.LunarMotion
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -135,13 +137,14 @@ fun SongMenu(
         .collectAsState(initial = null)
     val coroutineScope = rememberCoroutineScope()
     val syncUtils = LocalSyncUtils.current
+    val (motionMicro) = rememberPreference(MotionMicroKey, defaultValue = true)
     var refetchIconDegree by remember { mutableFloatStateOf(0f) }
 
     val cacheViewModel = hiltViewModel<CachePlaylistViewModel>()
 
     val rotationAnimation by animateFloatAsState(
         targetValue = refetchIconDegree,
-        animationSpec = LunarMotion.bouncy(),
+        animationSpec = if (motionMicro) LunarMotion.bouncy() else tween(durationMillis = 800),
         label = "",
     )
 

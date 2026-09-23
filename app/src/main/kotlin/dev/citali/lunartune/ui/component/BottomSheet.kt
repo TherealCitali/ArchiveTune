@@ -50,6 +50,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import dev.citali.lunartune.constants.BottomSheetCalmAnimationSpec
+import dev.citali.lunartune.ui.screens.settings.MotionMiniKey
+import dev.citali.lunartune.utils.rememberPreference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
@@ -135,6 +138,7 @@ class BottomSheetState(
     private val animatable: Animatable<Dp, AnimationVector1D>,
     private val onAnchorChanged: (Int) -> Unit,
     private val animationsDisabled: Boolean,
+    private val motionMiniBounce: Boolean = true,
     val collapsedBound: Dp,
     initialAnchor: Int = DISMISSED_ANCHOR,
 ) : DraggableState by draggableState {
@@ -188,11 +192,11 @@ class BottomSheetState(
     }
 
     private fun collapse() {
-        collapse(if (animationsDisabled) snap() else BottomSheetAnimationSpec)
+        collapse(if (animationsDisabled) snap() else if (motionMiniBounce) BottomSheetAnimationSpec else BottomSheetCalmAnimationSpec)
     }
 
     private fun expand() {
-        expand(if (animationsDisabled) snap() else BottomSheetAnimationSpec)
+        expand(if (animationsDisabled) snap() else if (motionMiniBounce) BottomSheetAnimationSpec else BottomSheetCalmAnimationSpec)
     }
 
     fun collapseSoft() {
@@ -206,7 +210,7 @@ class BottomSheetState(
     fun dismiss() {
         updateAnchor(DISMISSED_ANCHOR)
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            animatable.animateTo(animatable.lowerBound!!, if (animationsDisabled) snap() else BottomSheetAnimationSpec)
+            animatable.animateTo(animatable.lowerBound!!, if (animationsDisabled) snap() else if (motionMiniBounce) BottomSheetAnimationSpec else BottomSheetCalmAnimationSpec)
         }
     }
 
@@ -340,6 +344,7 @@ fun rememberBottomSheetState(
     val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()
     val animationsDisabled = LocalAnimationsDisabled.current
+    val (motionMini) = rememberPreference(MotionMiniKey, defaultValue = true)
 
     var previousAnchor by rememberSaveable {
         mutableIntStateOf(initialAnchor)
@@ -360,7 +365,7 @@ fun rememberBottomSheetState(
 
         animatable.updateBounds(dismissedBound.coerceAtMost(expandedBound), expandedBound)
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            animatable.animateTo(initialValue, if (animationsDisabled) snap() else BottomSheetAnimationSpec)
+            animatable.animateTo(initialValue, if (animationsDisabled) snap() else if (motionMini) BottomSheetAnimationSpec else BottomSheetCalmAnimationSpec)
         }
 
         BottomSheetState(
@@ -374,6 +379,7 @@ fun rememberBottomSheetState(
             coroutineScope = coroutineScope,
             animatable = animatable,
             animationsDisabled = animationsDisabled,
+            motionMiniBounce = motionMini,
             collapsedBound = collapsedBound,
             initialAnchor = previousAnchor,
         )

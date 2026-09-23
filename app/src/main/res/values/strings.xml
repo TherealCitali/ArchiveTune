@@ -1203,4 +1203,20 @@
     <string name="lyrics_background_moving_blur">Moving blur</string>
     <string name="use_gpu_blur">Use GPU blur</string>
     <string name="use_gpu_blur_desc">Blur the moving lyrics background on the GPU instead of reusing a pre-blurred image. Android 12 and above only.</string>
+    <string name="motion_settings_title">Motion &amp; animations</string>
+    <string name="motion_settings_subtitle">Per-area spring animation toggles</string>
+    <string name="motion_press">Button press bounce</string>
+    <string name="motion_press_desc">Springy press feedback on icon buttons</string>
+    <string name="motion_sheets">Sheet &amp; menu motion</string>
+    <string name="motion_sheets_desc">Bouncy sheet panels and menu open bloom</string>
+    <string name="motion_mini">Mini player bounce</string>
+    <string name="motion_mini_desc">Bounce when the mini player appears, shrinks or expands</string>
+    <string name="motion_nav">Page transitions</string>
+    <string name="motion_nav_desc">Springy tab blooms and drill slides</string>
+    <string name="motion_bar">Navigation bar glide</string>
+    <string name="motion_bar_desc">Gliding selection pill and icon pops</string>
+    <string name="motion_lists">List motion</string>
+    <string name="motion_lists_desc">FAB, banners and swipe snap-back springs</string>
+    <string name="motion_micro">Micro motion</string>
+    <string name="motion_micro_desc">Chevrons, search morph and spinner bounces</string>
 </resources>
