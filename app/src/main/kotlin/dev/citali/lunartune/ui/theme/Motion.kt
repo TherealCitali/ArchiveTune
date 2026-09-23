@@ -49,9 +49,9 @@ object LunarMotion {
 
     /**
      * Full-screen glide for nav transitions (tab blooms, drill slides). A whisper of
-     * overshoot over ~380ms so page changes read clearly without seasickness.
+     * overshoot over ~450ms so page changes read clearly without seasickness.
      */
-    fun <T> glide() = spring<T>(dampingRatio = 0.88f, stiffness = 550f)
+    fun <T> glide() = spring<T>(dampingRatio = 0.86f, stiffness = 450f)
 
     /** Tactile press bounce for [dev.citali.lunartune.ui.component.IconButton]. */
     fun press() = spring<Float>(dampingRatio = 0.6f, stiffness = 1500f)
