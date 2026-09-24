@@ -186,7 +186,8 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import dev.citali.lunartune.constants.MiniPlayerBackgroundStyle
 import dev.citali.lunartune.constants.MiniPlayerBackgroundStyleKey
-import dev.citali.lunartune.ui.screens.settings.MotionNavKey
+import dev.citali.lunartune.ui.screens.settings.TabTransitionKey
+import dev.citali.lunartune.ui.screens.settings.TabTransitionStyle
 import dev.citali.lunartune.ui.theme.LunarMotion
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -778,7 +779,10 @@ class MainActivity : FragmentActivity() {
                 DisableAnimationsKey,
                 defaultValue = defaultDisableAnimations,
             )
-            val motionNav by rememberPreference(MotionNavKey, defaultValue = false)
+            val tabTransition by rememberEnumPreference(
+                TabTransitionKey,
+                defaultValue = TabTransitionStyle.BLOOM,
+            )
             val forceHighRefreshRate by rememberPreference(
                 ForceHighRefreshRateKey,
                 defaultValue = true,
@@ -2373,7 +2377,20 @@ class MainActivity : FragmentActivity() {
                                         } else if (initialState.destination.route in topLevelScreens &&
                                             targetState.destination.route in topLevelScreens
                                         ) {
-                                            if (motionNav) {
+                                            if (tabTransition == TabTransitionStyle.SPRING_SLIDE) {
+                                                fadeIn(tween(320)) +
+                                                    slideInHorizontally(animationSpec = LunarMotion.glide()) {
+                                                        if (transitionDirection == AnimatedContentTransitionScope.SlideDirection.Left) {
+                                                            it
+                                                        } else {
+                                                            -it
+                                                        }
+                                                    } +
+                                                    scaleIn(
+                                                        animationSpec = LunarMotion.smooth(),
+                                                        initialScale = 0.92f,
+                                                    )
+                                            } else if (tabTransition == TabTransitionStyle.BLOOM) {
                                                 fadeIn(tween(320)) +
                                                     scaleIn(
                                                         animationSpec = LunarMotion.bouncy(),
@@ -2383,7 +2400,14 @@ class MainActivity : FragmentActivity() {
                                                 fadeIn(tween(250))
                                             }
                                         } else {
-                                            if (motionNav) {
+                                            if (tabTransition == TabTransitionStyle.SPRING_SLIDE) {
+                                                fadeIn(tween(320)) +
+                                                    slideInHorizontally(animationSpec = LunarMotion.glide()) { it } +
+                                                    scaleIn(
+                                                        animationSpec = LunarMotion.smooth(),
+                                                        initialScale = 0.94f,
+                                                    )
+                                            } else if (tabTransition == TabTransitionStyle.BLOOM) {
                                                 fadeIn(tween(320)) + slideInHorizontally(animationSpec = LunarMotion.glide()) { it }
                                             } else {
                                                 fadeIn(tween(250))
@@ -2396,9 +2420,33 @@ class MainActivity : FragmentActivity() {
                                         } else if (initialState.destination.route in topLevelScreens &&
                                             targetState.destination.route in topLevelScreens
                                         ) {
-                                            fadeOut(tween(150, easing = LunarMotion.EmphasizedAccelerate))
+                                            if (tabTransition == TabTransitionStyle.SPRING_SLIDE) {
+                                                fadeOut(tween(200, easing = LunarMotion.EmphasizedAccelerate)) +
+                                                    slideOutHorizontally(animationSpec = LunarMotion.glide()) {
+                                                        if (transitionDirection == AnimatedContentTransitionScope.SlideDirection.Left) {
+                                                            -it
+                                                        } else {
+                                                            it
+                                                        }
+                                                    } +
+                                                    scaleOut(
+                                                        animationSpec = LunarMotion.smooth(),
+                                                        targetScale = 0.95f,
+                                                    )
+                                            } else {
+                                                fadeOut(tween(150, easing = LunarMotion.EmphasizedAccelerate))
+                                            }
                                         } else {
-                                            fadeOut(tween(250, easing = LunarMotion.EmphasizedAccelerate)) + slideOutHorizontally(animationSpec = LunarMotion.glide()) { -it }
+                                            if (tabTransition == TabTransitionStyle.SPRING_SLIDE) {
+                                                fadeOut(tween(250, easing = LunarMotion.EmphasizedAccelerate)) +
+                                                    slideOutHorizontally(animationSpec = LunarMotion.glide()) { -it } +
+                                                    scaleOut(
+                                                        animationSpec = LunarMotion.smooth(),
+                                                        targetScale = 0.96f,
+                                                    )
+                                            } else {
+                                                fadeOut(tween(250, easing = LunarMotion.EmphasizedAccelerate)) + slideOutHorizontally(animationSpec = LunarMotion.glide()) { -it }
+                                            }
                                         }
                                     },
                                     popEnterTransition = {
@@ -2410,7 +2458,20 @@ class MainActivity : FragmentActivity() {
                                             ) &&
                                             targetState.destination.route in topLevelScreens
                                         ) {
-                                            if (motionNav) {
+                                            if (tabTransition == TabTransitionStyle.SPRING_SLIDE) {
+                                                fadeIn(tween(320)) +
+                                                    slideInHorizontally(animationSpec = LunarMotion.glide()) {
+                                                        if (transitionDirection == AnimatedContentTransitionScope.SlideDirection.Left) {
+                                                            -it
+                                                        } else {
+                                                            it
+                                                        }
+                                                    } +
+                                                    scaleIn(
+                                                        animationSpec = LunarMotion.smooth(),
+                                                        initialScale = 0.92f,
+                                                    )
+                                            } else if (tabTransition == TabTransitionStyle.BLOOM) {
                                                 fadeIn(tween(320)) +
                                                     scaleIn(
                                                         animationSpec = LunarMotion.bouncy(),
@@ -2420,7 +2481,14 @@ class MainActivity : FragmentActivity() {
                                                 fadeIn(tween(250))
                                             }
                                         } else {
-                                            if (motionNav) {
+                                            if (tabTransition == TabTransitionStyle.SPRING_SLIDE) {
+                                                fadeIn(tween(320)) +
+                                                    slideInHorizontally(animationSpec = LunarMotion.glide()) { -it } +
+                                                    scaleIn(
+                                                        animationSpec = LunarMotion.smooth(),
+                                                        initialScale = 0.94f,
+                                                    )
+                                            } else if (tabTransition == TabTransitionStyle.BLOOM) {
                                                 fadeIn(tween(320)) + slideInHorizontally(animationSpec = LunarMotion.glide()) { -it }
                                             } else {
                                                 fadeIn(tween(250))
@@ -2436,9 +2504,33 @@ class MainActivity : FragmentActivity() {
                                             ) &&
                                             targetState.destination.route in topLevelScreens
                                         ) {
-                                            fadeOut(tween(150, easing = LunarMotion.EmphasizedAccelerate))
+                                            if (tabTransition == TabTransitionStyle.SPRING_SLIDE) {
+                                                fadeOut(tween(200, easing = LunarMotion.EmphasizedAccelerate)) +
+                                                    slideOutHorizontally(animationSpec = LunarMotion.glide()) {
+                                                        if (transitionDirection == AnimatedContentTransitionScope.SlideDirection.Left) {
+                                                            it
+                                                        } else {
+                                                            -it
+                                                        }
+                                                    } +
+                                                    scaleOut(
+                                                        animationSpec = LunarMotion.smooth(),
+                                                        targetScale = 0.95f,
+                                                    )
+                                            } else {
+                                                fadeOut(tween(150, easing = LunarMotion.EmphasizedAccelerate))
+                                            }
                                         } else {
-                                            fadeOut(tween(250, easing = LunarMotion.EmphasizedAccelerate)) + slideOutHorizontally(animationSpec = LunarMotion.glide()) { it }
+                                            if (tabTransition == TabTransitionStyle.SPRING_SLIDE) {
+                                                fadeOut(tween(250, easing = LunarMotion.EmphasizedAccelerate)) +
+                                                    slideOutHorizontally(animationSpec = LunarMotion.glide()) { it } +
+                                                    scaleOut(
+                                                        animationSpec = LunarMotion.smooth(),
+                                                        targetScale = 0.96f,
+                                                    )
+                                            } else {
+                                                fadeOut(tween(250, easing = LunarMotion.EmphasizedAccelerate)) + slideOutHorizontally(animationSpec = LunarMotion.glide()) { it }
+                                            }
                                         }
                                     },
                                     modifier =
@@ -2486,7 +2578,7 @@ class MainActivity : FragmentActivity() {
                                         topAppBarScrollBehavior,
                                         { latestVersionName },
                                         disableAnimations,
-                                        motionNavAnimations = motionNav,
+                                        tabTransition = tabTransition,
                                         onClearUpdateBadge = { latestVersionName = BuildConfig.VERSION_NAME },
                                         homeScrollConnection = homeScrollBehavior.nestedScrollConnection,
                                         searchScrollConnection = searchScrollBehavior.nestedScrollConnection,

@@ -24,19 +24,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.navigation.NavController
 import dev.citali.lunartune.LocalPlayerAwareWindowInsets
 import dev.citali.lunartune.R
+import dev.citali.lunartune.ui.component.EnumListPreference
 import dev.citali.lunartune.ui.component.IconButton
 import dev.citali.lunartune.ui.component.PreferenceGroup
 import dev.citali.lunartune.ui.component.SwitchPreference
 import dev.citali.lunartune.ui.utils.backToMain
+import dev.citali.lunartune.utils.rememberEnumPreference
 import dev.citali.lunartune.utils.rememberPreference
 
 val MotionPressKey = booleanPreferencesKey("motionPress")
 val MotionSheetsKey = booleanPreferencesKey("motionSheets")
 val MotionMiniKey = booleanPreferencesKey("motionMini")
-val MotionNavKey = booleanPreferencesKey("motionNav")
+enum class TabTransitionStyle {
+    FADE,
+    BLOOM,
+    SPRING_SLIDE,
+}
+
+val TabTransitionKey = stringPreferencesKey("tabTransition")
 val MotionBarKey = booleanPreferencesKey("motionBar")
 val MotionListsKey = booleanPreferencesKey("motionLists")
 val MotionMicroKey = booleanPreferencesKey("motionMicro")
@@ -46,7 +55,8 @@ fun MotionSettings(navController: NavController) {
     val (motionPress, onMotionPressChange) = rememberPreference(MotionPressKey, defaultValue = false)
     val (motionSheets, onMotionSheetsChange) = rememberPreference(MotionSheetsKey, defaultValue = false)
     val (motionMini, onMotionMiniChange) = rememberPreference(MotionMiniKey, defaultValue = false)
-    val (motionNav, onMotionNavChange) = rememberPreference(MotionNavKey, defaultValue = false)
+    val (tabTransition, onTabTransitionChange) =
+        rememberEnumPreference(TabTransitionKey, defaultValue = TabTransitionStyle.BLOOM)
     val (motionBar, onMotionBarChange) = rememberPreference(MotionBarKey, defaultValue = false)
     val (motionLists, onMotionListsChange) = rememberPreference(MotionListsKey, defaultValue = false)
     val (motionMicro, onMotionMicroChange) = rememberPreference(MotionMicroKey, defaultValue = false)
@@ -116,12 +126,19 @@ fun MotionSettings(navController: NavController) {
                 }
 
                 item {
-                    SwitchPreference(
+                    EnumListPreference(
                         title = { Text(stringResource(R.string.motion_nav)) },
                         description = stringResource(R.string.motion_nav_desc),
                         icon = { Icon(painterResource(R.drawable.animation), null) },
-                        checked = motionNav,
-                        onCheckedChange = onMotionNavChange,
+                        selectedValue = tabTransition,
+                        onValueSelected = onTabTransitionChange,
+                        valueText = {
+                            when (it) {
+                                TabTransitionStyle.FADE -> stringResource(R.string.tab_transition_fade)
+                                TabTransitionStyle.BLOOM -> stringResource(R.string.tab_transition_bloom)
+                                TabTransitionStyle.SPRING_SLIDE -> stringResource(R.string.tab_transition_spring)
+                            }
+                        },
                     )
                 }
 
