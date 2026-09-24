@@ -1145,6 +1145,8 @@
     <string name="frosted_blur_desc">Blur radius of the frosted bar background</string>
     <string name="frosted_glow">Rim glow</string>
     <string name="frosted_glow_desc">Glow intensity of the frosted bar outline</string>
+    <string name="frosted_bg_glow">Background glow</string>
+    <string name="frosted_bg_glow_desc">Background items behind the bar glow and blur more as this rises</string>
     <string name="navigation_bar_style_outlined">Outlined</string>
     <string name="navigation_bar_settings_title">Navigation bar</string>
     <string name="navigation_bar_settings_subtitle">Style, labels, and dimensions</string>

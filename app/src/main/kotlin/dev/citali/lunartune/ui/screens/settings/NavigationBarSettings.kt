@@ -83,8 +83,11 @@ import dev.citali.lunartune.constants.NavigationBarTransparencyKey
 import dev.citali.lunartune.constants.NavigationBarWidthKey
 import dev.citali.lunartune.ui.component.DefaultDialog
 import dev.citali.lunartune.ui.component.EnumListPreference
+import dev.citali.lunartune.ui.component.FrostedBgGlowDefault
+import dev.citali.lunartune.ui.component.FrostedBgGlowKey
 import dev.citali.lunartune.ui.component.FrostedBlurDefault
 import dev.citali.lunartune.ui.component.FrostedBlurKey
+import dev.citali.lunartune.ui.component.FrostedBlurMax
 import dev.citali.lunartune.ui.component.FrostedDimDefault
 import dev.citali.lunartune.ui.component.FrostedDimKey
 import dev.citali.lunartune.ui.component.FrostedFallbackAlpha
@@ -99,6 +102,7 @@ import dev.citali.lunartune.ui.screens.Screens
 import dev.citali.lunartune.ui.utils.backToMain
 import dev.citali.lunartune.utils.rememberEnumPreference
 import dev.citali.lunartune.utils.rememberPreference
+import java.util.Locale
 import kotlin.math.roundToInt
 
 @Composable
@@ -139,6 +143,8 @@ fun NavigationBarSettings(navController: NavController) {
         rememberPreference(FrostedBlurKey, defaultValue = FrostedBlurDefault)
     val (frostedGlow, onFrostedGlowChange) =
         rememberPreference(FrostedGlowKey, defaultValue = FrostedGlowDefault)
+    val (frostedBgGlow, onFrostedBgGlowChange) =
+        rememberPreference(FrostedBgGlowKey, defaultValue = FrostedBgGlowDefault)
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -253,8 +259,8 @@ fun NavigationBarSettings(navController: NavController) {
                             iconRes = R.drawable.tune,
                             value = frostedBlur,
                             onValueChange = onFrostedBlurChange,
-                            range = 0f..30f,
-                            valueLabel = { "${it.roundToInt()} dp" },
+                            range = 0f..FrostedBlurMax,
+                            valueLabel = { String.format(Locale.US, "%.1f dp", it) },
                             default = FrostedBlurDefault,
                             preview = { tempBlur ->
                                 NavBarPreview(
@@ -291,6 +297,31 @@ fun NavigationBarSettings(navController: NavController) {
                                     cornerRadius = navigationBarCornerRadius,
                                     style = navigationBarStyle,
                                     frostedGlow = tempGlow,
+                                )
+                            },
+                        )
+                    }
+
+                    item {
+                        SliderPreferenceRow(
+                            title = stringResource(R.string.frosted_bg_glow),
+                            description = stringResource(R.string.frosted_bg_glow_desc),
+                            iconRes = R.drawable.tune,
+                            value = frostedBgGlow,
+                            onValueChange = onFrostedBgGlowChange,
+                            range = 0f..1f,
+                            valueLabel = { "${(it * 100).roundToInt()}%" },
+                            default = FrostedBgGlowDefault,
+                            preview = { tempBgGlow ->
+                                NavBarPreview(
+                                    widthFraction = navigationBarWidth,
+                                    heightMultiplier = navigationBarHeight,
+                                    opacity = navigationBarOpacity,
+                                    transparency = navigationBarTransparency,
+                                    labelSpacing = navigationBarLabelSpacing,
+                                    cornerRadius = navigationBarCornerRadius,
+                                    style = navigationBarStyle,
+                                    frostedBgGlow = tempBgGlow,
                                 )
                             },
                         )
@@ -599,13 +630,16 @@ private fun NavBarPreview(
     frostedDim: Float? = null,
     frostedBlur: Float? = null,
     frostedGlow: Float? = null,
+    frostedBgGlow: Float? = null,
 ) {
     val (storedDim) = rememberPreference(FrostedDimKey, defaultValue = FrostedDimDefault)
     val (storedBlur) = rememberPreference(FrostedBlurKey, defaultValue = FrostedBlurDefault)
     val (storedGlow) = rememberPreference(FrostedGlowKey, defaultValue = FrostedGlowDefault)
+    val (storedBgGlow) = rememberPreference(FrostedBgGlowKey, defaultValue = FrostedBgGlowDefault)
     val dim = (frostedDim ?: storedDim).coerceIn(0f, 0.9f)
-    val blur = (frostedBlur ?: storedBlur).coerceIn(0f, 30f)
+    val blur = (frostedBlur ?: storedBlur).coerceIn(0f, FrostedBlurMax)
     val glow = (frostedGlow ?: storedGlow).coerceIn(0f, 1f)
+    val bgGlow = (frostedBgGlow ?: storedBgGlow).coerceIn(0f, 1f)
     val isFloating =
         style == NavigationBarStyle.FLOATING || style == NavigationBarStyle.FROSTED ||
             style == NavigationBarStyle.OUTLINED
@@ -645,11 +679,12 @@ private fun NavBarPreview(
         )
 
     val previewFrostedStyle =
-        remember(isFrosted, baseColor, dim, blur) {
+        remember(isFrosted, baseColor, dim, blur, bgGlow) {
             frostedNavBarStyle(
                 scrim = baseColor.copy(alpha = dim),
                 fallbackScrim = baseColor.copy(alpha = FrostedFallbackAlpha),
                 blurRadiusDp = blur,
+                bgGlow = bgGlow,
             )
         }
     Box(
