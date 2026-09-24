@@ -44,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -61,7 +62,7 @@ import dev.citali.lunartune.ui.theme.LunarMotion
  * (github.com/Clash-Projects/LastWave-native): 32dp dock, 48dp pill items,
  * spring size-morph with expand/shrink label pushes. Adapted with LunarMotion
  * springs (tighter than their floaty 200-stiffness default), kept press bounce,
- * long-press actions and search double-tap, plus our glass edge.
+ * long-press actions and search double-tap, plus our glass edge and soft ambient shadow.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -81,11 +82,17 @@ fun ExperimentalNavigationDock(
             shape = RoundedCornerShape(32.dp),
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
             tonalElevation = 6.dp,
-            shadowElevation = 12.dp,
+            shadowElevation = 0.dp,
             modifier =
                 Modifier
                     .widthIn(max = 360.dp)
-                    .animateContentSize(LunarMotion.bouncy()),
+                    .animateContentSize(LunarMotion.bouncy())
+                    .shadow(
+                        elevation = 16.dp,
+                        shape = RoundedCornerShape(32.dp),
+                        ambientColor = Color.Black.copy(alpha = 0.4f),
+                        spotColor = Color.Transparent,
+                    ),
         ) {
             Box(contentAlignment = Alignment.Center) {
                 // Fake glass edge: a 1dp gradient sheen, API-29 safe.
