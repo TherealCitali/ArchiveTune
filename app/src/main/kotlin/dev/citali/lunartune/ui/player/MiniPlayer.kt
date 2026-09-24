@@ -7,6 +7,7 @@
 
 package dev.citali.lunartune.ui.player
 
+import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,6 +41,12 @@ import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.toBitmap
+import dev.chrisbanes.haze.HazeInput
+import dev.chrisbanes.haze.HazePerformanceMode
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.blur.hazeBlur
+import dev.citali.lunartune.ui.component.FrostedFallbackAlpha
+import dev.citali.lunartune.ui.component.frostedMiniPlayerStyle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import dev.citali.lunartune.LocalPlayerConnection
@@ -62,6 +69,7 @@ fun MiniPlayer(
     modifier: Modifier = Modifier,
     pureBlack: Boolean,
     isPairedWithNavigation: Boolean = false,
+    hazeState: HazeState? = null,
 ) {
     NewMiniPlayer(
         position = position,
@@ -69,6 +77,7 @@ fun MiniPlayer(
         modifier = modifier,
         pureBlack = pureBlack,
         isPairedWithNavigation = isPairedWithNavigation,
+        hazeState = hazeState,
     )
 }
 
@@ -79,6 +88,7 @@ private fun NewMiniPlayer(
     modifier: Modifier = Modifier,
     pureBlack: Boolean,
     isPairedWithNavigation: Boolean,
+    hazeState: HazeState? = null,
 ) {
     val playerConnection = LocalPlayerConnection.current ?: return
     val context = LocalContext.current
@@ -169,7 +179,15 @@ private fun NewMiniPlayer(
         }
     val effectiveBackgroundStyle =
         if (shouldUseArtworkBackground && backgroundPalette != null) {
-            miniPlayerBackgroundStyle
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S &&
+                miniPlayerBackgroundStyle == MiniPlayerBackgroundStyle.FROSTED
+            ) {
+                // No RenderEffect below 12 and RenderScript renders garbage
+                // on old GPUs — frosted glow degrades to plain glow there.
+                MiniPlayerBackgroundStyle.GLOW
+            } else {
+                miniPlayerBackgroundStyle
+            }
         } else {
             MiniPlayerBackgroundStyle.THEME
         }
@@ -215,6 +233,7 @@ private fun NewMiniPlayer(
                 style = effectiveBackgroundStyle,
                 palette = backgroundPalette,
                 modifier = Modifier.fillMaxSize(),
+                hazeState = hazeState,
             )
             NewMiniPlayerContent(
                 position = position,
@@ -283,6 +302,7 @@ private fun MiniPlayerBackground(
     style: MiniPlayerBackgroundStyle,
     palette: MiniPlayerBackgroundPalette?,
     modifier: Modifier = Modifier,
+    hazeState: HazeState? = null,
 ) {
     when (style) {
         MiniPlayerBackgroundStyle.THEME -> {
@@ -319,49 +339,126 @@ private fun MiniPlayerBackground(
         }
 
         MiniPlayerBackgroundStyle.GLOW -> {
-            val colors = requireNotNull(palette)
-            Box(
-                modifier =
-                    modifier.drawWithCache {
-                        val width = size.width
-                        val height = size.height
-                        val startGlow =
-                            Brush.radialGradient(
-                                colors = listOf(colors.first.copy(alpha = 0.82f), colors.first.copy(alpha = 0.38f), Color.Transparent),
-                                center = Offset(width * 0.12f, height * 0.42f),
-                                radius = width * 0.72f,
-                            )
-                        val endGlow =
-                            Brush.radialGradient(
-                                colors = listOf(colors.second.copy(alpha = 0.78f), colors.second.copy(alpha = 0.34f), Color.Transparent),
-                                center = Offset(width * 0.88f, height * 0.58f),
-                                radius = width * 0.72f,
-                            )
-                        val topGlow =
-                            Brush.radialGradient(
-                                colors = listOf(colors.third.copy(alpha = 0.58f), Color.Transparent),
-                                center = Offset(width * 0.52f, height * 0.05f),
-                                radius = width * 0.54f,
-                            )
-                        val bottomGlow =
-                            Brush.radialGradient(
-                                colors = listOf(colors.fourth.copy(alpha = 0.46f), Color.Transparent),
-                                center = Offset(width * 0.46f, height * 1.05f),
-                                radius = width * 0.54f,
-                            )
-
-                        onDrawBehind {
-                            drawRect(Color.Black)
-                            drawRect(startGlow)
-                            drawRect(endGlow)
-                            drawRect(topGlow)
-                            drawRect(bottomGlow)
-                            drawRect(Color.Black.copy(alpha = 0.24f))
-                        }
-                    },
+            MiniPlayerGlowLayer(
+                colors = requireNotNull(palette),
+                modifier = modifier,
             )
         }
+
+        MiniPlayerBackgroundStyle.FROSTED -> {
+            val colors = requireNotNull(palette)
+            val frostedStyle =
+                remember(hazeState) {
+                    if (hazeState != null) {
+                        frostedMiniPlayerStyle(
+                            scrim = Color.Black.copy(alpha = 0.25f),
+                            fallbackScrim = Color.Black.copy(alpha = FrostedFallbackAlpha),
+                        )
+                    } else {
+                        null
+                    }
+                }
+            Box(
+                modifier =
+                    modifier.then(
+                        if (hazeState != null && frostedStyle != null) {
+                            Modifier.hazeBlur(
+                                input = HazeInput.Sources(hazeState),
+                                style = frostedStyle,
+                                performanceMode = HazePerformanceMode.Performance,
+                            )
+                        } else {
+                            Modifier
+                        },
+                    ),
+            ) {
+                if (hazeState != null) {
+                    MiniPlayerGlowLayer(
+                        colors = colors,
+                        modifier = Modifier.fillMaxSize(),
+                        intensity = 0.75f,
+                        drawBase = false,
+                        veilAlpha = 0.32f,
+                    )
+                } else {
+                    MiniPlayerGlowLayer(
+                        colors = colors,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            }
+        }
     }
+}
+
+@Composable
+private fun MiniPlayerGlowLayer(
+    colors: MiniPlayerBackgroundPalette,
+    modifier: Modifier = Modifier,
+    intensity: Float = 1f,
+    drawBase: Boolean = true,
+    veilAlpha: Float = 0.24f,
+) {
+    Box(
+        modifier =
+            modifier.drawWithCache {
+                val width = size.width
+                val height = size.height
+                val startGlow =
+                    Brush.radialGradient(
+                        colors =
+                            listOf(
+                                colors.first.copy(alpha = 0.82f * intensity),
+                                colors.first.copy(alpha = 0.38f * intensity),
+                                Color.Transparent,
+                            ),
+                        center = Offset(width * 0.12f, height * 0.42f),
+                        radius = width * 0.72f,
+                    )
+                val endGlow =
+                    Brush.radialGradient(
+                        colors =
+                            listOf(
+                                colors.second.copy(alpha = 0.78f * intensity),
+                                colors.second.copy(alpha = 0.34f * intensity),
+                                Color.Transparent,
+                            ),
+                        center = Offset(width * 0.88f, height * 0.58f),
+                        radius = width * 0.72f,
+                    )
+                val topGlow =
+                    Brush.radialGradient(
+                        colors =
+                            listOf(
+                                colors.third.copy(alpha = 0.58f * intensity),
+                                Color.Transparent,
+                            ),
+                        center = Offset(width * 0.52f, height * 0.05f),
+                        radius = width * 0.54f,
+                    )
+                val bottomGlow =
+                    Brush.radialGradient(
+                        colors =
+                            listOf(
+                                colors.fourth.copy(alpha = 0.46f * intensity),
+                                Color.Transparent,
+                            ),
+                        center = Offset(width * 0.46f, height * 1.05f),
+                        radius = width * 0.54f,
+                    )
+
+                onDrawBehind {
+                    if (drawBase) {
+                        drawRect(Color.Black)
+                    }
+                    drawRect(startGlow)
+                    drawRect(endGlow)
+                    drawRect(topGlow)
+                    drawRect(bottomGlow)
+                    drawRect(Color.Black.copy(alpha = veilAlpha))
+                }
+            },
+    )
 }
 
 @Immutable

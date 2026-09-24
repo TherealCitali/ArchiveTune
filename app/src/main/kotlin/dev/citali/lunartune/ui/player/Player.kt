@@ -153,6 +153,7 @@ import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import coil3.request.allowHardware
 import coil3.toBitmap
+import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -322,6 +323,7 @@ fun BottomSheetPlayer(
     modifier: Modifier = Modifier,
     pureBlack: Boolean,
     isMiniPlayerPairedWithNavigation: Boolean = false,
+    hazeState: HazeState? = null,
 ) {
     val context = LocalContext.current
     val menuState = LocalMenuState.current
@@ -1117,6 +1119,7 @@ fun BottomSheetPlayer(
                 duration = duration,
                 pureBlack = pureBlack,
                 isPairedWithNavigation = isMiniPlayerPairedWithNavigation,
+                hazeState = hazeState,
             )
         },
     ) {

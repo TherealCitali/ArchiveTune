@@ -736,6 +736,7 @@ enum class MiniPlayerBackgroundStyle {
     THEME,
     GRADIENT,
     GLOW,
+    FROSTED,
 }
 
 // Keys for customized background

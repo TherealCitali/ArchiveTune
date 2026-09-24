@@ -50,3 +50,20 @@ fun frostedNavBarStyle(
         fallbackColorEffect(HazeColorEffect.tint(fallbackScrim))
         noiseFactor(0f)
     }
+
+/**
+ * Frosted-glow mini player: live blur under the artwork glow. The radius
+ * runs a little larger than the nav pill since the mini bar is wider.
+ */
+fun frostedMiniPlayerStyle(
+    scrim: Color,
+    fallbackScrim: Color,
+): HazeBlurStyle =
+    HazeBlurStyle {
+        blurEnabled(true)
+        blurRadius(14.dp)
+        backgroundColor(scrim)
+        colorEffects(emptyList())
+        fallbackColorEffect(HazeColorEffect.tint(fallbackScrim))
+        noiseFactor(0f)
+    }
