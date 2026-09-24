@@ -1050,12 +1050,13 @@ class MainActivity : FragmentActivity() {
                     )
                     val hazeState = rememberHazeState()
                     val isFrostedNavBar = navigationBarStyle == NavigationBarStyle.FROSTED
+                    val isOutlinedNavBar = navigationBarStyle == NavigationBarStyle.OUTLINED
                     val navigationBarHeightMultiplier by rememberPreference(
                         NavigationBarHeightKey,
                         defaultValue = NAVIGATION_BAR_HEIGHT_DEFAULT,
                     )
                     val isFloatingNavBar =
-                        navigationBarStyle == NavigationBarStyle.FLOATING || isFrostedNavBar
+                        navigationBarStyle == NavigationBarStyle.FLOATING || isFrostedNavBar || isOutlinedNavBar
                     val floatingBarsBottomPadding =
                         if (isFloatingNavBar) FloatingNavigationBarBottomPadding else NavigationBarBottomPadding
                     val navBarHorizontalPadding =

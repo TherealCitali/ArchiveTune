@@ -181,6 +181,8 @@ fun NavigationBarSettings(navController: NavController) {
                                     stringResource(R.string.navigation_bar_style_floating)
                                 NavigationBarStyle.FROSTED ->
                                     stringResource(R.string.navigation_bar_style_frosted)
+                                NavigationBarStyle.OUTLINED ->
+                                    stringResource(R.string.navigation_bar_style_outlined)
                             }
                         },
                     )
@@ -506,12 +508,15 @@ private fun NavBarPreview(
     cornerRadius: Float,
     style: NavigationBarStyle,
 ) {
-    val isFloating = style == NavigationBarStyle.FLOATING || style == NavigationBarStyle.FROSTED
+    val isFloating =
+        style == NavigationBarStyle.FLOATING || style == NavigationBarStyle.FROSTED ||
+            style == NavigationBarStyle.OUTLINED
+    val isOutlined = style == NavigationBarStyle.OUTLINED
     val isFrosted = style == NavigationBarStyle.FROSTED
     val previewHazeState = rememberHazeState()
     val resolvedBarHeight = NavigationBarHeight * heightMultiplier
     val shape =
-        if (isFrosted) {
+        if (isFrosted || isOutlined) {
             RoundedCornerShape(percent = 50)
         } else if (isFloating) {
             RoundedCornerShape(cornerRadius.dp)
@@ -582,11 +587,13 @@ private fun NavBarPreview(
                         },
                     ),
             shape = shape,
-            color = if (isFrosted) Color.Transparent else barColor,
-            tonalElevation = if (isFrosted) 0.dp else NavigationBarDefaults.Elevation,
+            color = if (isFrosted || isOutlined) Color.Transparent else barColor,
+            tonalElevation = if (isFrosted || isOutlined) 0.dp else NavigationBarDefaults.Elevation,
             shadowElevation = if (isFloating) 8.dp else NavigationBarDefaults.Elevation,
             border =
-                if (isFrosted) {
+                if (isOutlined) {
+                    BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                } else if (isFrosted) {
                     BorderStroke(
                         1.dp,
                         MaterialTheme.colorScheme.primary.copy(alpha = FrostedBorderAlpha),
