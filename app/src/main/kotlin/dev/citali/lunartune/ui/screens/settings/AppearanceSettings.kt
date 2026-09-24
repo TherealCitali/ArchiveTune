@@ -127,6 +127,7 @@ import dev.citali.lunartune.constants.SwipeSensitivityKey
 import dev.citali.lunartune.constants.SwipeThumbnailKey
 import dev.citali.lunartune.constants.SwipeToSongKey
 import dev.citali.lunartune.constants.ThumbnailCornerRadiusKey
+import dev.citali.lunartune.constants.WallpaperExtractionFailedKey
 import dev.citali.lunartune.constants.toLibraryFilterOrder
 import dev.citali.lunartune.constants.toLibraryFilterPreference
 import dev.citali.lunartune.constants.toPlaylistTagOrder
@@ -165,6 +166,11 @@ fun AppearanceSettings(navController: NavController) {
         rememberPreference(
             DynamicThemeKey,
             defaultValue = true,
+        )
+    val (wallpaperExtractionFailed) =
+        rememberPreference(
+            WallpaperExtractionFailedKey,
+            defaultValue = false,
         )
     val (randomThemeOnStartup, onRandomThemeOnStartupChange) =
         rememberPreference(
@@ -564,7 +570,23 @@ fun AppearanceSettings(navController: NavController) {
                     )
                 }
 
-                item(visible = !dynamicTheme || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                item(visible = dynamicTheme && Build.VERSION.SDK_INT < Build.VERSION_CODES.S && wallpaperExtractionFailed) {
+                    PreferenceEntry(
+                        title = { Text(stringResource(R.string.wallpaper_permission)) },
+                        description = stringResource(R.string.wallpaper_permission_desc),
+                        icon = { Icon(painterResource(R.drawable.storage), null) },
+                        onClick = {
+                            val intent =
+                                android.content.Intent(
+                                    android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    android.net.Uri.fromParts("package", context.packageName, null),
+                                )
+                            context.startActivity(intent)
+                        },
+                    )
+                }
+
+                item(visible = !dynamicTheme) {
                     SwitchPreference(
                         title = { Text(stringResource(R.string.random_theme_on_startup)) },
                         description = stringResource(R.string.random_theme_on_startup_desc),
