@@ -595,11 +595,22 @@ private fun NavBarPreview(
                     null
                 },
         ) {
-            Row(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(vertical = 8.dp),
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (isFrosted) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .matchParentSize()
+                                .background(
+                                    baseColor.copy(alpha = FrostedScrimAlpha),
+                                ),
+                    )
+                }
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
@@ -639,6 +650,7 @@ private fun NavBarPreview(
                             textAlign = TextAlign.Center,
                         )
                     }
+                }
                 }
             }
         }
