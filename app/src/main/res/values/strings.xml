@@ -1138,6 +1138,7 @@
     <string name="navigation_bar_style">Navigation bar style</string>
     <string name="navigation_bar_style_default">Docked</string>
     <string name="navigation_bar_style_floating">Floating</string>
+    <string name="navigation_bar_style_frosted">Frosted</string>
     <string name="navigation_bar_settings_title">Navigation bar</string>
     <string name="navigation_bar_settings_subtitle">Style, labels, and dimensions</string>
     <string name="hide_navigation_bar_labels">Hide labels in navigation bar</string>
