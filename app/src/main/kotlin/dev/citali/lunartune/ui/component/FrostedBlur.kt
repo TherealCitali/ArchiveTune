@@ -18,6 +18,14 @@ const val FrostedScrimAlpha = 0.5f
 /** Opaque-ish scrim used only if blurring is unavailable on the device. */
 const val FrostedFallbackAlpha = 0.92f
 
+/**
+ * Compose-owned veil on Android 11 and below, where there is no RenderEffect
+ * and Haze's RenderScript path draws nothing on many devices. Strong enough
+ * to read as frosted glass on its own, sheer enough to hint at the content
+ * passing underneath.
+ */
+const val FrostedLegacyScrimAlpha = 0.85f
+
 /** Primary-color rim around the frosted pill, like AniDash's outlined bar. */
 const val FrostedBorderAlpha = 0.5f
 
