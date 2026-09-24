@@ -283,8 +283,22 @@ fun FloatingNavigationToolbar(
                     null
                 },
         ) {
-            ShortNavigationBar(
-                modifier = Modifier.fillMaxSize(),
+            // Guaranteed AniDash veil: Haze draws nothing until its first blurred
+            // frame completes (or if RenderScript fails on old devices), so the
+            // scrim lives here where Compose always draws it, under the items.
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (isFrosted) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .matchParentSize()
+                                .background(
+                                    frostedScrimBase.copy(alpha = FrostedScrimAlpha),
+                                ),
+                    )
+                }
+                ShortNavigationBar(
+                    modifier = Modifier.fillMaxSize(),
                 containerColor = Color.Transparent,
                 contentColor = if (pureBlack) Color.White else MaterialTheme.colorScheme.onSurface,
                 windowInsets = WindowInsets(0, 0, 0, 0),
@@ -438,6 +452,7 @@ fun FloatingNavigationToolbar(
                             )
                         }
                     }
+                }
                 }
             }
         }
