@@ -1958,6 +1958,13 @@ fun BottomSheetPlayer(
             }
         }
 
+        if (state.isExpandedOrExpanding && !aodModeEnabled) {
+            FlutterLightVisualizer(
+                playerConnection = playerConnection,
+                isPlaying = isPlaying,
+            )
+        }
+
         val queueOnBackgroundColor = if (useBlackBackground) Color.White else MaterialTheme.colorScheme.onSurface
         val queueSurfaceColor = if (useBlackBackground) Color.Black else MaterialTheme.colorScheme.surface
 
