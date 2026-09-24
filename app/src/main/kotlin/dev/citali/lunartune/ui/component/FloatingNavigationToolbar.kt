@@ -9,6 +9,7 @@
 
 package dev.citali.lunartune.ui.component
 
+import android.os.Build
 import android.os.SystemClock
 import android.view.ViewConfiguration
 import androidx.compose.animation.Crossfade
@@ -139,6 +140,10 @@ fun FloatingNavigationToolbar(
             style == NavigationBarStyle.OUTLINED
     val isOutlined = style == NavigationBarStyle.OUTLINED
     val isFrosted = style == NavigationBarStyle.FROSTED
+    // No RenderEffect below Android 12, and Haze's RenderScript fallback
+    // renders garbage on several old GPUs — those devices get the dim veil
+    // as a static frost instead of live blur.
+    val staticFrost = isFrosted && Build.VERSION.SDK_INT < Build.VERSION_CODES.S
     val (navBarWidthFraction) =
         rememberPreference(NavigationBarWidthKey, defaultValue = NAVIGATION_BAR_WIDTH_DEFAULT)
     val (navBarHeightMultiplier) =
@@ -239,8 +244,8 @@ fun FloatingNavigationToolbar(
     val frostedScrimBase =
         if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer
     val frostedStyle =
-        remember(isFrosted, frostedScrimBase, frostedDim, frostedBlur) {
-            if (isFrosted) {
+        remember(isFrosted, staticFrost, frostedScrimBase, frostedDim, frostedBlur) {
+            if (isFrosted && !staticFrost) {
                 frostedNavBarStyle(
                     scrim = frostedScrimBase.copy(alpha = frostedDim.coerceIn(0f, 0.9f)),
                     fallbackScrim = frostedScrimBase.copy(alpha = FrostedFallbackAlpha),
@@ -265,7 +270,7 @@ fun FloatingNavigationToolbar(
                     .fillMaxWidth(if (isFloating) navBarWidthFraction.coerceIn(0.5f, 1f) else 1f)
                     .height(resolvedBarHeight)
                     .then(
-                        if (isFrosted && hazeState != null && frostedStyle != null) {
+                        if (isFrosted && !staticFrost && hazeState != null && frostedStyle != null) {
                             Modifier.hazeBlur(
                                 input = HazeInput.Sources(hazeState),
                                 style = frostedStyle,
@@ -294,6 +299,7 @@ fun FloatingNavigationToolbar(
             // Guaranteed AniDash veil: Haze draws nothing until its first blurred
             // frame completes (or if RenderScript fails on old devices), so the
             // scrim lives here where Compose always draws it, under the items.
+            // Pre-Android 12 the veil IS the frosted look (no live blur there).
             Box(modifier = Modifier.fillMaxSize()) {
                 if (isFrosted) {
                     Box(

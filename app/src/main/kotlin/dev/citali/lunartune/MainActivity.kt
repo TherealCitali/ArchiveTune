@@ -2461,7 +2461,11 @@ class MainActivity : FragmentActivity() {
                                                 // source must sit on the content — sourcing the
                                                 // Scaffold would leave the bottom-bar effect
                                                 // with empty input (invisible bar, every API).
-                                                if (isFrostedNavBar) {
+                                                // Pre-Android 12 the bar is a static frost with
+                                                // no blur consumer, so no source is attached.
+                                                if (isFrostedNavBar &&
+                                                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                                                ) {
                                                     Modifier.hazeSource(hazeState)
                                                 } else {
                                                     Modifier
