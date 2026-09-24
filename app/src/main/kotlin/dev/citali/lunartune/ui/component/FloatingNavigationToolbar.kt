@@ -134,7 +134,10 @@ fun FloatingNavigationToolbar(
         )
         return
     }
-    val isFloating = style == NavigationBarStyle.FLOATING || style == NavigationBarStyle.FROSTED
+    val isFloating =
+        style == NavigationBarStyle.FLOATING || style == NavigationBarStyle.FROSTED ||
+            style == NavigationBarStyle.OUTLINED
+    val isOutlined = style == NavigationBarStyle.OUTLINED
     val isFrosted = style == NavigationBarStyle.FROSTED
     val (navBarWidthFraction) =
         rememberPreference(NavigationBarWidthKey, defaultValue = NAVIGATION_BAR_WIDTH_DEFAULT)
@@ -151,9 +154,9 @@ fun FloatingNavigationToolbar(
     val (hideNavigationLabels) = rememberPreference(HideNavigationBarLabelsKey, defaultValue = false)
     val resolvedBarHeight = NavigationBarHeight * navBarHeightMultiplier
     val navigationShape =
-        remember(isPairedWithMiniPlayer, isFloating, isFrosted, navBarCornerRadius) {
+        remember(isPairedWithMiniPlayer, isFloating, isFrosted, isOutlined, navBarCornerRadius) {
             when {
-                isFrosted -> RoundedCornerShape(percent = 50)
+                isFrosted || isOutlined -> RoundedCornerShape(percent = 50)
                 isFloating -> RoundedCornerShape(navBarCornerRadius.dp)
                 isPairedWithMiniPlayer ->
                     RoundedCornerShape(
@@ -270,11 +273,13 @@ fun FloatingNavigationToolbar(
                         },
                     ),
             shape = navigationShape,
-            color = if (isFrosted) Color.Transparent else navigationContainerColor,
-            tonalElevation = if (isFrosted) 0.dp else NavigationBarDefaults.Elevation,
+            color = if (isFrosted || isOutlined) Color.Transparent else navigationContainerColor,
+            tonalElevation = if (isFrosted || isOutlined) 0.dp else NavigationBarDefaults.Elevation,
             shadowElevation = if (isFloating) 8.dp else NavigationBarDefaults.Elevation,
             border =
-                if (isFrosted) {
+                if (isOutlined) {
+                    BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                } else if (isFrosted) {
                     BorderStroke(
                         1.dp,
                         MaterialTheme.colorScheme.primary.copy(alpha = FrostedBorderAlpha),
