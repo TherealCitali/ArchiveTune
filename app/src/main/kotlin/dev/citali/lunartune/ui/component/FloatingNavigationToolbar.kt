@@ -233,14 +233,18 @@ fun FloatingNavigationToolbar(
         }
     }
 
+    val (frostedDim) = rememberPreference(FrostedDimKey, defaultValue = FrostedDimDefault)
+    val (frostedBlur) = rememberPreference(FrostedBlurKey, defaultValue = FrostedBlurDefault)
+    val (frostedGlow) = rememberPreference(FrostedGlowKey, defaultValue = FrostedGlowDefault)
     val frostedScrimBase =
         if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer
     val frostedStyle =
-        remember(isFrosted, frostedScrimBase) {
+        remember(isFrosted, frostedScrimBase, frostedDim, frostedBlur) {
             if (isFrosted) {
                 frostedNavBarStyle(
-                    scrim = frostedScrimBase.copy(alpha = FrostedScrimAlpha),
+                    scrim = frostedScrimBase.copy(alpha = frostedDim.coerceIn(0f, 0.9f)),
                     fallbackScrim = frostedScrimBase.copy(alpha = FrostedFallbackAlpha),
+                    blurRadiusDp = frostedBlur,
                 )
             } else {
                 null
@@ -266,7 +270,6 @@ fun FloatingNavigationToolbar(
                                 input = HazeInput.Sources(hazeState),
                                 style = frostedStyle,
                                 performanceMode = HazePerformanceMode.Performance,
-                                expandLayerBounds = true,
                             )
                         } else {
                             Modifier
@@ -282,7 +285,7 @@ fun FloatingNavigationToolbar(
                 } else if (isFrosted) {
                     BorderStroke(
                         1.dp,
-                        MaterialTheme.colorScheme.primary.copy(alpha = FrostedBorderAlpha),
+                        MaterialTheme.colorScheme.primary.copy(alpha = frostedGlow.coerceIn(0f, 1f)),
                     )
                 } else {
                     null
@@ -298,7 +301,7 @@ fun FloatingNavigationToolbar(
                             Modifier
                                 .matchParentSize()
                                 .background(
-                                    frostedScrimBase.copy(alpha = FrostedScrimAlpha),
+                                    frostedScrimBase.copy(alpha = frostedDim.coerceIn(0f, 0.9f)),
                                 ),
                     )
                 }

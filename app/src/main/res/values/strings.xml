@@ -1139,6 +1139,12 @@
     <string name="navigation_bar_style_default">Docked</string>
     <string name="navigation_bar_style_floating">Floating</string>
     <string name="navigation_bar_style_frosted">Frosted</string>
+    <string name="frosted_dim">Dim level</string>
+    <string name="frosted_dim_desc">How much the frosted bar darkens the content behind it</string>
+    <string name="frosted_blur">Blur strength</string>
+    <string name="frosted_blur_desc">Blur radius of the frosted bar background</string>
+    <string name="frosted_glow">Rim glow</string>
+    <string name="frosted_glow_desc">Glow intensity of the frosted bar outline</string>
     <string name="navigation_bar_style_outlined">Outlined</string>
     <string name="navigation_bar_settings_title">Navigation bar</string>
     <string name="navigation_bar_settings_subtitle">Style, labels, and dimensions</string>

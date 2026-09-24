@@ -83,9 +83,13 @@ import dev.citali.lunartune.constants.NavigationBarTransparencyKey
 import dev.citali.lunartune.constants.NavigationBarWidthKey
 import dev.citali.lunartune.ui.component.DefaultDialog
 import dev.citali.lunartune.ui.component.EnumListPreference
-import dev.citali.lunartune.ui.component.FrostedBorderAlpha
+import dev.citali.lunartune.ui.component.FrostedBlurDefault
+import dev.citali.lunartune.ui.component.FrostedBlurKey
+import dev.citali.lunartune.ui.component.FrostedDimDefault
+import dev.citali.lunartune.ui.component.FrostedDimKey
 import dev.citali.lunartune.ui.component.FrostedFallbackAlpha
-import dev.citali.lunartune.ui.component.FrostedScrimAlpha
+import dev.citali.lunartune.ui.component.FrostedGlowDefault
+import dev.citali.lunartune.ui.component.FrostedGlowKey
 import dev.citali.lunartune.ui.component.IconButton
 import dev.citali.lunartune.ui.component.PreferenceEntry
 import dev.citali.lunartune.ui.component.PreferenceGroup
@@ -129,6 +133,12 @@ fun NavigationBarSettings(navController: NavController) {
             NavigationBarCornerRadiusKey,
             defaultValue = NAVIGATION_BAR_CORNER_RADIUS_DEFAULT,
         )
+    val (frostedDim, onFrostedDimChange) =
+        rememberPreference(FrostedDimKey, defaultValue = FrostedDimDefault)
+    val (frostedBlur, onFrostedBlurChange) =
+        rememberPreference(FrostedBlurKey, defaultValue = FrostedBlurDefault)
+    val (frostedGlow, onFrostedGlowChange) =
+        rememberPreference(FrostedGlowKey, defaultValue = FrostedGlowDefault)
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -206,6 +216,85 @@ fun NavigationBarSettings(navController: NavController) {
                         checked = navBarLongPressActions,
                         onCheckedChange = onNavBarLongPressActionsChange,
                     )
+                }
+            }
+
+            if (navigationBarStyle == NavigationBarStyle.FROSTED) {
+                PreferenceGroup(title = stringResource(R.string.navigation_bar_style_frosted)) {
+                    item {
+                        SliderPreferenceRow(
+                            title = stringResource(R.string.frosted_dim),
+                            description = stringResource(R.string.frosted_dim_desc),
+                            iconRes = R.drawable.tune,
+                            value = frostedDim,
+                            onValueChange = onFrostedDimChange,
+                            range = 0f..0.9f,
+                            valueLabel = { "${(it * 100).roundToInt()}%" },
+                            default = FrostedDimDefault,
+                            preview = { tempDim ->
+                                NavBarPreview(
+                                    widthFraction = navigationBarWidth,
+                                    heightMultiplier = navigationBarHeight,
+                                    opacity = navigationBarOpacity,
+                                    transparency = navigationBarTransparency,
+                                    labelSpacing = navigationBarLabelSpacing,
+                                    cornerRadius = navigationBarCornerRadius,
+                                    style = navigationBarStyle,
+                                    frostedDim = tempDim,
+                                )
+                            },
+                        )
+                    }
+
+                    item {
+                        SliderPreferenceRow(
+                            title = stringResource(R.string.frosted_blur),
+                            description = stringResource(R.string.frosted_blur_desc),
+                            iconRes = R.drawable.tune,
+                            value = frostedBlur,
+                            onValueChange = onFrostedBlurChange,
+                            range = 0f..30f,
+                            valueLabel = { "${it.roundToInt()} dp" },
+                            default = FrostedBlurDefault,
+                            preview = { tempBlur ->
+                                NavBarPreview(
+                                    widthFraction = navigationBarWidth,
+                                    heightMultiplier = navigationBarHeight,
+                                    opacity = navigationBarOpacity,
+                                    transparency = navigationBarTransparency,
+                                    labelSpacing = navigationBarLabelSpacing,
+                                    cornerRadius = navigationBarCornerRadius,
+                                    style = navigationBarStyle,
+                                    frostedBlur = tempBlur,
+                                )
+                            },
+                        )
+                    }
+
+                    item {
+                        SliderPreferenceRow(
+                            title = stringResource(R.string.frosted_glow),
+                            description = stringResource(R.string.frosted_glow_desc),
+                            iconRes = R.drawable.tune,
+                            value = frostedGlow,
+                            onValueChange = onFrostedGlowChange,
+                            range = 0f..1f,
+                            valueLabel = { "${(it * 100).roundToInt()}%" },
+                            default = FrostedGlowDefault,
+                            preview = { tempGlow ->
+                                NavBarPreview(
+                                    widthFraction = navigationBarWidth,
+                                    heightMultiplier = navigationBarHeight,
+                                    opacity = navigationBarOpacity,
+                                    transparency = navigationBarTransparency,
+                                    labelSpacing = navigationBarLabelSpacing,
+                                    cornerRadius = navigationBarCornerRadius,
+                                    style = navigationBarStyle,
+                                    frostedGlow = tempGlow,
+                                )
+                            },
+                        )
+                    }
                 }
             }
 
@@ -507,7 +596,16 @@ private fun NavBarPreview(
     labelSpacing: Float,
     cornerRadius: Float,
     style: NavigationBarStyle,
+    frostedDim: Float? = null,
+    frostedBlur: Float? = null,
+    frostedGlow: Float? = null,
 ) {
+    val (storedDim) = rememberPreference(FrostedDimKey, defaultValue = FrostedDimDefault)
+    val (storedBlur) = rememberPreference(FrostedBlurKey, defaultValue = FrostedBlurDefault)
+    val (storedGlow) = rememberPreference(FrostedGlowKey, defaultValue = FrostedGlowDefault)
+    val dim = (frostedDim ?: storedDim).coerceIn(0f, 0.9f)
+    val blur = (frostedBlur ?: storedBlur).coerceIn(0f, 30f)
+    val glow = (frostedGlow ?: storedGlow).coerceIn(0f, 1f)
     val isFloating =
         style == NavigationBarStyle.FLOATING || style == NavigationBarStyle.FROSTED ||
             style == NavigationBarStyle.OUTLINED
@@ -547,10 +645,11 @@ private fun NavBarPreview(
         )
 
     val previewFrostedStyle =
-        remember(isFrosted, baseColor) {
+        remember(isFrosted, baseColor, dim, blur) {
             frostedNavBarStyle(
-                scrim = baseColor.copy(alpha = FrostedScrimAlpha),
+                scrim = baseColor.copy(alpha = dim),
                 fallbackScrim = baseColor.copy(alpha = FrostedFallbackAlpha),
+                blurRadiusDp = blur,
             )
         }
     Box(
@@ -580,7 +679,6 @@ private fun NavBarPreview(
                                 input = HazeInput.Sources(previewHazeState),
                                 style = previewFrostedStyle,
                                 performanceMode = HazePerformanceMode.Performance,
-                                expandLayerBounds = true,
                             )
                         } else {
                             Modifier
@@ -596,7 +694,7 @@ private fun NavBarPreview(
                 } else if (isFrosted) {
                     BorderStroke(
                         1.dp,
-                        MaterialTheme.colorScheme.primary.copy(alpha = FrostedBorderAlpha),
+                        MaterialTheme.colorScheme.primary.copy(alpha = glow),
                     )
                 } else {
                     null
@@ -609,7 +707,7 @@ private fun NavBarPreview(
                             Modifier
                                 .matchParentSize()
                                 .background(
-                                    baseColor.copy(alpha = FrostedScrimAlpha),
+                                    baseColor.copy(alpha = dim),
                                 ),
                     )
                 }
