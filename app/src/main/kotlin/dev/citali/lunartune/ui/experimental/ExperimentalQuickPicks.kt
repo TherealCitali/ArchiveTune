@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -48,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -74,7 +76,13 @@ import moe.rukamori.archivetune.innertube.models.WatchEndpoint
 import moe.rukamori.archivetune.innertube.pages.HomePage
 
 private const val ExperimentalChartSize = 10
-private const val ChartArtworkPx = 320
+private const val ChartArtworkPx = 640
+
+/** Horizontal padding sizing the square chart cards while neighbours peek. */
+private val SquareCardContentPadding = 64.dp
+
+/** Negative spacing tucking neighbour cards under the current one (see zIndex). */
+private val OverlapPageSpacing = (-28).dp
 
 /**
  * "Charts deck": quick picks reimagined as a Top-10 chart pager. Giant rank
@@ -100,12 +108,9 @@ fun ExperimentalQuickPicksSection(
     Column(modifier = modifier.fillMaxWidth()) {
         HorizontalPager(
             state = pagerState,
-            pageSpacing = 12.dp,
-            contentPadding = PaddingValues(horizontal = 20.dp),
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
+            pageSpacing = OverlapPageSpacing,
+            contentPadding = PaddingValues(horizontal = SquareCardContentPadding),
+            modifier = Modifier.fillMaxWidth(),
         ) { page ->
             val song = songs[page]
             val pageOffset = (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
@@ -140,13 +145,15 @@ fun ExperimentalQuickPicksSection(
                     }
                 },
                 modifier =
-                    Modifier.graphicsLayer {
-                        val scale = 1f - 0.08f * damp
-                        scaleX = scale
-                        scaleY = scale
-                        rotationY = -6f * clamped
-                        alpha = 1f - 0.35f * damp
-                    },
+                    Modifier
+                        .zIndex(1f - damp)
+                        .graphicsLayer {
+                            val scale = 1f - 0.08f * damp
+                            scaleX = scale
+                            scaleY = scale
+                            rotationY = -6f * clamped
+                            alpha = 1f - 0.35f * damp
+                        },
             )
         }
 
@@ -255,7 +262,7 @@ private fun ChartCardCore(
             } else {
                 null
             },
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().aspectRatio(1f),
     ) {
         Box(
             modifier =
@@ -391,12 +398,9 @@ fun ExperimentalRemoteChartsSection(
     Column(modifier = modifier.fillMaxWidth()) {
         HorizontalPager(
             state = pagerState,
-            pageSpacing = 12.dp,
-            contentPadding = PaddingValues(horizontal = 20.dp),
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
+            pageSpacing = OverlapPageSpacing,
+            contentPadding = PaddingValues(horizontal = SquareCardContentPadding),
+            modifier = Modifier.fillMaxWidth(),
         ) { page ->
             val song = songs[page]
             val pageOffset = (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
@@ -430,13 +434,15 @@ fun ExperimentalRemoteChartsSection(
                     }
                 },
                 modifier =
-                    Modifier.graphicsLayer {
-                        val scale = 1f - 0.08f * damp
-                        scaleX = scale
-                        scaleY = scale
-                        rotationY = -6f * clamped
-                        alpha = 1f - 0.35f * damp
-                    },
+                    Modifier
+                        .zIndex(1f - damp)
+                        .graphicsLayer {
+                            val scale = 1f - 0.08f * damp
+                            scaleX = scale
+                            scaleY = scale
+                            rotationY = -6f * clamped
+                            alpha = 1f - 0.35f * damp
+                        },
             )
         }
 
