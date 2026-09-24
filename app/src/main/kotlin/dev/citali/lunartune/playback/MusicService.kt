@@ -102,6 +102,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -6933,7 +6934,7 @@ class MusicService :
 
     private suspend fun preloadNextStream(mediaId: String) {
         try {
-            ensureActive()
+            currentCoroutineContext().ensureActive()
             val authFingerprint = YouTube.currentPlaybackAuthState().fingerprint
             playbackUrlCache[mediaId]
                 ?.takeIf {
@@ -6943,7 +6944,7 @@ class MusicService :
                     )
                 }?.let { return }
             if (isPreloadFullyCached(mediaId)) return
-            ensureActive()
+            currentCoroutineContext().ensureActive()
             val playbackData =
                 retryWithoutPlaybackLoginContext {
                     YTPlayerUtils.playerResponseForPlayback(
@@ -6954,7 +6955,7 @@ class MusicService :
                         networkMetered = false,
                     )
                 }.getOrThrow()
-            ensureActive()
+            currentCoroutineContext().ensureActive()
             persistResolvedPlaybackFormat(mediaId, playbackData)
             playbackUrlCache[mediaId] =
                 AuthScopedCacheValue(
