@@ -51,6 +51,7 @@ import dev.citali.lunartune.constants.LowDataModeKey
 import dev.citali.lunartune.constants.PauseOnDeviceMuteKey
 import dev.citali.lunartune.constants.PermanentShuffleKey
 import dev.citali.lunartune.constants.PersistentQueueKey
+import dev.citali.lunartune.constants.PreloadNextSongKey
 import dev.citali.lunartune.constants.SeekExtraSeconds
 import dev.citali.lunartune.constants.SkipSilenceKey
 import dev.citali.lunartune.constants.StopMusicOnTaskClearKey
@@ -81,6 +82,11 @@ fun PlayerSettings(navController: NavController) {
         rememberPreference(
             LowDataModeKey,
             defaultValue = true,
+        )
+    val (preloadNextSong, onPreloadNextSongChange) =
+        rememberPreference(
+            PreloadNextSongKey,
+            defaultValue = false,
         )
     val (persistentQueue, onPersistentQueueChange) =
         rememberPreference(
@@ -289,7 +295,21 @@ fun PlayerSettings(navController: NavController) {
                         description = stringResource(R.string.low_data_mode_description),
                         icon = { Icon(painterResource(R.drawable.android_cell), null) },
                         checked = lowDataMode,
-                        onCheckedChange = onLowDataModeChange,
+                        onCheckedChange = {
+                            onLowDataModeChange(it)
+                            if (it) onPreloadNextSongChange(false)
+                        },
+                    )
+                }
+
+                item {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.preload_next_song_title)) },
+                        description = stringResource(R.string.preload_next_song_warning),
+                        icon = { Icon(painterResource(R.drawable.error), null) },
+                        checked = preloadNextSong,
+                        onCheckedChange = onPreloadNextSongChange,
+                        isEnabled = !lowDataMode,
                     )
                 }
 

@@ -283,6 +283,7 @@ val AudioQualityKey = stringPreferencesKey("audioQuality")
 
 val NetworkMeteredKey = booleanPreferencesKey("networkMetered")
 val LowDataModeKey = NetworkMeteredKey
+val PreloadNextSongKey = booleanPreferencesKey("preloadNextSong")
 
 enum class AudioQuality {
     AUTO,
