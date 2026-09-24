@@ -2130,7 +2130,7 @@ fun SwipeToSongBox(
 ) {
     val ctx = LocalContext.current
     val player = LocalPlayerConnection.current
-    val (motionLists) = rememberPreference(MotionListsKey, defaultValue = true)
+    val (motionLists) = rememberPreference(MotionListsKey, defaultValue = false)
     val scope = rememberCoroutineScope()
     val offset = remember { mutableStateOf(0f) }
     val threshold = 300f

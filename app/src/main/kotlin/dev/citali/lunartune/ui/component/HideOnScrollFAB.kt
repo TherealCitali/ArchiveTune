@@ -50,7 +50,7 @@ fun HideOnScrollFAB(
     onClick: () -> Unit,
 ) {
     val animationsDisabled = LocalAnimationsDisabled.current
-    val (motionLists) = rememberPreference(MotionListsKey, defaultValue = true)
+    val (motionLists) = rememberPreference(MotionListsKey, defaultValue = false)
     AnimatedVisibility(
         visible = visible && lazyListState.isScrollingUp(),
         enter = slideInVertically(animationSpec = if (animationsDisabled) tween(0) else if (motionLists) LunarMotion.bouncy() else tween(220)) { it },
@@ -98,7 +98,7 @@ fun BoxScope.HideOnScrollFAB(
     onClick: () -> Unit,
 ) {
     val animationsDisabled = LocalAnimationsDisabled.current
-    val (motionLists) = rememberPreference(MotionListsKey, defaultValue = true)
+    val (motionLists) = rememberPreference(MotionListsKey, defaultValue = false)
     AnimatedVisibility(
         visible = visible && lazyListState.isScrollingUp(),
         enter = slideInVertically(animationSpec = if (animationsDisabled) tween(0) else if (motionLists) LunarMotion.bouncy() else tween(220)) { it },
@@ -129,7 +129,7 @@ fun BoxScope.HideOnScrollFAB(
     onClick: () -> Unit,
 ) {
     val animationsDisabled = LocalAnimationsDisabled.current
-    val (motionLists) = rememberPreference(MotionListsKey, defaultValue = true)
+    val (motionLists) = rememberPreference(MotionListsKey, defaultValue = false)
     AnimatedVisibility(
         visible = visible && scrollState.isScrollingUp(),
         enter = slideInVertically(animationSpec = if (animationsDisabled) tween(0) else if (motionLists) LunarMotion.bouncy() else tween(220)) { it },

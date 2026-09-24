@@ -115,7 +115,7 @@ fun TopSearch(
     leftFocusRequester: FocusRequester? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val (motionMicro) = rememberPreference(MotionMicroKey, defaultValue = true)
+    val (motionMicro) = rememberPreference(MotionMicroKey, defaultValue = false)
     val animationProgress: Float by animateFloatAsState(
         targetValue = if (active) 1f else 0f,
         animationSpec = if (motionMicro) LunarMotion.smooth() else tween(durationMillis = 300),

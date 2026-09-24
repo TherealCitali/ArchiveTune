@@ -87,7 +87,7 @@ fun BottomSheetPage(
     contentWindowInsets: WindowInsets = WindowInsets.navigationBars,
 ) {
     val focusManager = LocalFocusManager.current
-    val (motionSheets) = rememberPreference(MotionSheetsKey, defaultValue = true)
+    val (motionSheets) = rememberPreference(MotionSheetsKey, defaultValue = false)
     val coroutineScope = rememberCoroutineScope()
     var dragOffset by remember { mutableFloatStateOf(0f) }
 

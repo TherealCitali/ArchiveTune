@@ -43,13 +43,13 @@ val MotionMicroKey = booleanPreferencesKey("motionMicro")
 
 @Composable
 fun MotionSettings(navController: NavController) {
-    val (motionPress, onMotionPressChange) = rememberPreference(MotionPressKey, defaultValue = true)
-    val (motionSheets, onMotionSheetsChange) = rememberPreference(MotionSheetsKey, defaultValue = true)
-    val (motionMini, onMotionMiniChange) = rememberPreference(MotionMiniKey, defaultValue = true)
-    val (motionNav, onMotionNavChange) = rememberPreference(MotionNavKey, defaultValue = true)
-    val (motionBar, onMotionBarChange) = rememberPreference(MotionBarKey, defaultValue = true)
-    val (motionLists, onMotionListsChange) = rememberPreference(MotionListsKey, defaultValue = true)
-    val (motionMicro, onMotionMicroChange) = rememberPreference(MotionMicroKey, defaultValue = true)
+    val (motionPress, onMotionPressChange) = rememberPreference(MotionPressKey, defaultValue = false)
+    val (motionSheets, onMotionSheetsChange) = rememberPreference(MotionSheetsKey, defaultValue = false)
+    val (motionMini, onMotionMiniChange) = rememberPreference(MotionMiniKey, defaultValue = false)
+    val (motionNav, onMotionNavChange) = rememberPreference(MotionNavKey, defaultValue = false)
+    val (motionBar, onMotionBarChange) = rememberPreference(MotionBarKey, defaultValue = false)
+    val (motionLists, onMotionListsChange) = rememberPreference(MotionListsKey, defaultValue = false)
+    val (motionMicro, onMotionMicroChange) = rememberPreference(MotionMicroKey, defaultValue = false)
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),

@@ -79,7 +79,7 @@ fun BottomSheetMenu(
     background: Color = MaterialTheme.colorScheme.surface,
 ) {
     val focusManager = LocalFocusManager.current
-    val (motionSheets) = rememberPreference(MotionSheetsKey, defaultValue = true)
+    val (motionSheets) = rememberPreference(MotionSheetsKey, defaultValue = false)
 
     state.dialogContent?.invoke()
 

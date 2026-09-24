@@ -158,7 +158,7 @@ fun AlbumMenu(
         }
     }
 
-    val (motionMicro) = rememberPreference(MotionMicroKey, defaultValue = true)
+    val (motionMicro) = rememberPreference(MotionMicroKey, defaultValue = false)
     var refetchIconDegree by remember { mutableFloatStateOf(0f) }
 
     val rotationAnimation by animateFloatAsState(

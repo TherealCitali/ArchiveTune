@@ -122,7 +122,7 @@ fun <Int> ChoiceChipsRow(
     modifier: Modifier = Modifier,
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
 ) {
-    val (motionMicro) = rememberPreference(MotionMicroKey, defaultValue = true)
+    val (motionMicro) = rememberPreference(MotionMicroKey, defaultValue = false)
     var expandIconDegree by remember { mutableFloatStateOf(0f) }
     val rotationAnimation by animateFloatAsState(
         targetValue = expandIconDegree,

@@ -776,7 +776,7 @@ class MainActivity : FragmentActivity() {
                 DisableAnimationsKey,
                 defaultValue = defaultDisableAnimations,
             )
-            val motionNav by rememberPreference(MotionNavKey, defaultValue = true)
+            val motionNav by rememberPreference(MotionNavKey, defaultValue = false)
             val forceHighRefreshRate by rememberPreference(
                 ForceHighRefreshRateKey,
                 defaultValue = true,
