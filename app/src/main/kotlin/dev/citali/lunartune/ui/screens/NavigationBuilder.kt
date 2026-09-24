@@ -11,6 +11,8 @@ import android.net.Uri
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -78,6 +80,7 @@ import dev.citali.lunartune.ui.screens.settings.PrivacySettings
 import dev.citali.lunartune.ui.screens.settings.SettingsScreen
 import dev.citali.lunartune.ui.screens.settings.StorageSettings
 import dev.citali.lunartune.ui.screens.settings.StreamSourcesSettings
+import dev.citali.lunartune.ui.screens.settings.TabTransitionStyle
 import dev.citali.lunartune.ui.screens.settings.ThemeCreatorScreen
 import dev.citali.lunartune.ui.screens.settings.UpdateScreen
 import dev.citali.lunartune.ui.theme.LunarMotion
@@ -89,7 +92,7 @@ fun NavGraphBuilder.navigationBuilder(
     scrollBehavior: TopAppBarScrollBehavior,
     latestVersionName: () -> String,
     disableAnimations: Boolean = false,
-    motionNavAnimations: Boolean = true,
+    tabTransition: TabTransitionStyle = TabTransitionStyle.BLOOM,
     onClearUpdateBadge: () -> Unit = {},
     homeScrollConnection: NestedScrollConnection? = null,
     searchScrollConnection: NestedScrollConnection? = null,
@@ -197,7 +200,7 @@ fun NavGraphBuilder.navigationBuilder(
             if (disableAnimations) {
                 fadeIn(tween(0))
             } else {
-                fadeIn(if (motionNavAnimations) tween(320) else tween(250))
+                fadeIn(if (tabTransition == TabTransitionStyle.FADE) tween(250) else tween(320))
             }
         },
         exitTransition = {
@@ -205,6 +208,13 @@ fun NavGraphBuilder.navigationBuilder(
                 fadeOut(tween(0))
             } else if (targetState.destination.route?.startsWith(OnlineSearchResultRoutePrefix) == true) {
                 fadeOut(tween(250, easing = LunarMotion.EmphasizedAccelerate))
+            } else if (tabTransition == TabTransitionStyle.SPRING_SLIDE) {
+                fadeOut(tween(250, easing = LunarMotion.EmphasizedAccelerate)) +
+                    slideOutHorizontally(animationSpec = LunarMotion.glide()) { -it } +
+                    scaleOut(
+                        animationSpec = LunarMotion.smooth(),
+                        targetScale = 0.96f,
+                    )
             } else {
                 fadeOut(tween(250, easing = LunarMotion.EmphasizedAccelerate)) + slideOutHorizontally(animationSpec = LunarMotion.glide()) { -it }
             }
@@ -213,9 +223,16 @@ fun NavGraphBuilder.navigationBuilder(
             if (disableAnimations) {
                 fadeIn(tween(0))
             } else if (initialState.destination.route?.startsWith(OnlineSearchResultRoutePrefix) == true) {
-                fadeIn(if (motionNavAnimations) tween(320) else tween(250))
+                fadeIn(if (tabTransition == TabTransitionStyle.FADE) tween(250) else tween(320))
             } else {
-                if (motionNavAnimations) {
+                if (tabTransition == TabTransitionStyle.SPRING_SLIDE) {
+                    fadeIn(tween(320)) +
+                        slideInHorizontally(animationSpec = LunarMotion.glide()) { -it } +
+                        scaleIn(
+                            animationSpec = LunarMotion.smooth(),
+                            initialScale = 0.94f,
+                        )
+                } else if (tabTransition == TabTransitionStyle.BLOOM) {
                     fadeIn(tween(320)) + slideInHorizontally(animationSpec = LunarMotion.glide()) { -it }
                 } else {
                     fadeIn(tween(250))

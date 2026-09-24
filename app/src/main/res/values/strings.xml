@@ -1220,7 +1220,10 @@
     <string name="motion_mini">Mini player bounce</string>
     <string name="motion_mini_desc">Bounce when the mini player appears, shrinks or expands</string>
     <string name="motion_nav">Page transitions</string>
-    <string name="motion_nav_desc">Springy tab blooms and drill slides</string>
+    <string name="motion_nav_desc">Tab switch and page drill animation style</string>
+    <string name="tab_transition_fade">Fade</string>
+    <string name="tab_transition_bloom">Tab bloom</string>
+    <string name="tab_transition_spring">Spring slide</string>
     <string name="motion_bar">Navigation bar glide</string>
     <string name="motion_bar_desc">Gliding selection pill and icon pops</string>
     <string name="motion_lists">List motion</string>
