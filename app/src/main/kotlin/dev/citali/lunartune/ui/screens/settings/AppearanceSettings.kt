@@ -1189,6 +1189,9 @@ fun AppearanceSettings(navController: NavController) {
                     )
                 }
 
+            }
+
+            PreferenceGroup(title = stringResource(R.string.experimental_features)) {
                 item {
                     SwitchPreference(
                         title = { Text(stringResource(R.string.experimental_ui)) },

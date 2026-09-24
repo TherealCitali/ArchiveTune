@@ -54,7 +54,7 @@ fun ResizableIconButton(
     indication: Indication? = null,
     onClick: () -> Unit = {},
 ) {
-    val (motionPress) = rememberPreference(MotionPressKey, defaultValue = true)
+    val (motionPress) = rememberPreference(MotionPressKey, defaultValue = false)
     val resizableInteractionSource = remember { MutableInteractionSource() }
     val resizablePressed by resizableInteractionSource.collectIsPressedAsState()
     val resizableAnimationsDisabled = LocalAnimationsDisabled.current
@@ -93,7 +93,7 @@ fun IconButton(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable () -> Unit,
 ) {
-    val (motionPress) = rememberPreference(MotionPressKey, defaultValue = true)
+    val (motionPress) = rememberPreference(MotionPressKey, defaultValue = false)
     val pressed by interactionSource.collectIsPressedAsState()
     val animationsDisabled = LocalAnimationsDisabled.current
     val pressScale by animateFloatAsState(

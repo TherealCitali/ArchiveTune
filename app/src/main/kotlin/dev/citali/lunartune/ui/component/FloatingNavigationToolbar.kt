@@ -122,7 +122,7 @@ fun FloatingNavigationToolbar(
     onSearchItemDoubleClick: (() -> Unit)? = null,
 ) {
     val (experimentalUi) = rememberPreference(ExperimentalUiEnabledKey, defaultValue = false)
-    val (motionBar) = rememberPreference(MotionBarKey, defaultValue = true)
+    val (motionBar) = rememberPreference(MotionBarKey, defaultValue = false)
     if (experimentalUi) {
         ExperimentalNavigationDock(
             items = items,

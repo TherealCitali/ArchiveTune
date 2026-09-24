@@ -55,7 +55,7 @@ fun NetworkStatusBanner(
     state: NetworkBannerUiState,
     modifier: Modifier = Modifier,
 ) {
-    val (motionLists) = rememberPreference(MotionListsKey, defaultValue = true)
+    val (motionLists) = rememberPreference(MotionListsKey, defaultValue = false)
     var lastVisibleState by remember { mutableStateOf<NetworkBannerUiState>(NetworkBannerUiState.Offline) }
 
     if (state != NetworkBannerUiState.Hidden) {

@@ -344,7 +344,7 @@ fun rememberBottomSheetState(
     val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()
     val animationsDisabled = LocalAnimationsDisabled.current
-    val (motionMini) = rememberPreference(MotionMiniKey, defaultValue = true)
+    val (motionMini) = rememberPreference(MotionMiniKey, defaultValue = false)
 
     var previousAnchor by rememberSaveable {
         mutableIntStateOf(initialAnchor)

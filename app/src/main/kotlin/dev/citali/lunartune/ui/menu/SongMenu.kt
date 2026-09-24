@@ -137,7 +137,7 @@ fun SongMenu(
         .collectAsState(initial = null)
     val coroutineScope = rememberCoroutineScope()
     val syncUtils = LocalSyncUtils.current
-    val (motionMicro) = rememberPreference(MotionMicroKey, defaultValue = true)
+    val (motionMicro) = rememberPreference(MotionMicroKey, defaultValue = false)
     var refetchIconDegree by remember { mutableFloatStateOf(0f) }
 
     val cacheViewModel = hiltViewModel<CachePlaylistViewModel>()
