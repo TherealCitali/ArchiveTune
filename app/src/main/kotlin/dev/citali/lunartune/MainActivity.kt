@@ -2318,14 +2318,7 @@ class MainActivity : FragmentActivity() {
                                         }
                                     }
                                 },
-                                modifier =
-                                    if (isFrostedNavBar) {
-                                        Modifier
-                                            .fillMaxSize()
-                                            .hazeSource(hazeState)
-                                    } else {
-                                        Modifier.fillMaxSize()
-                                    },
+                                modifier = Modifier.fillMaxSize(),
                             ) {
                                 var transitionDirection =
                                     AnimatedContentTransitionScope.SlideDirection.Left
@@ -2462,6 +2455,17 @@ class MainActivity : FragmentActivity() {
                                                 // and OnlineSearchResult is gated by canScroll=false,
                                                 // so routing them through this shared arm is harmless.
                                                 topAppBarScrollBehavior.nestedScrollConnection,
+                                            ).then(
+                                                // Frosted glass source: Haze's default Behind
+                                                // selection excludes ancestor sources, so the
+                                                // source must sit on the content — sourcing the
+                                                // Scaffold would leave the bottom-bar effect
+                                                // with empty input (invisible bar, every API).
+                                                if (isFrostedNavBar) {
+                                                    Modifier.hazeSource(hazeState)
+                                                } else {
+                                                    Modifier
+                                                },
                                             ),
                                 ) {
                                     navigationBuilder(
