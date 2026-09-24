@@ -184,6 +184,8 @@ import com.valentinilk.shimmer.LocalShimmerTheme
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
+import dev.citali.lunartune.constants.MiniPlayerBackgroundStyle
+import dev.citali.lunartune.constants.MiniPlayerBackgroundStyleKey
 import dev.citali.lunartune.ui.screens.settings.MotionNavKey
 import dev.citali.lunartune.ui.theme.LunarMotion
 import kotlinx.coroutines.Dispatchers
@@ -1048,6 +1050,11 @@ class MainActivity : FragmentActivity() {
                         NavigationBarStyleKey,
                         defaultValue = NavigationBarStyle.DEFAULT,
                     )
+                    val miniPlayerBackgroundStyle by rememberEnumPreference(
+                        MiniPlayerBackgroundStyleKey,
+                        defaultValue = MiniPlayerBackgroundStyle.THEME,
+                    )
+                    val isMiniPlayerFrosted = miniPlayerBackgroundStyle == MiniPlayerBackgroundStyle.FROSTED
                     val hazeState = rememberHazeState()
                     val isFrostedNavBar = navigationBarStyle == NavigationBarStyle.FROSTED
                     val isOutlinedNavBar = navigationBarStyle == NavigationBarStyle.OUTLINED
@@ -2083,6 +2090,7 @@ class MainActivity : FragmentActivity() {
                                             navController = navController,
                                             pureBlack = pureBlack,
                                             isMiniPlayerPairedWithNavigation = areBottomBarsPaired,
+                                            hazeState = hazeState,
                                         )
 
                                         if (useRail) return@Box
@@ -2461,9 +2469,10 @@ class MainActivity : FragmentActivity() {
                                                 // source must sit on the content — sourcing the
                                                 // Scaffold would leave the bottom-bar effect
                                                 // with empty input (invisible bar, every API).
-                                                // Pre-Android 12 the bar is a static frost with
+                                                // The mini player shares this source for its frosted-glow
+                                                // background. Pre-Android 12 both are static frost with
                                                 // no blur consumer, so no source is attached.
-                                                if (isFrostedNavBar &&
+                                                if ((isFrostedNavBar || isMiniPlayerFrosted) &&
                                                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
                                                 ) {
                                                     Modifier.hazeSource(hazeState)
