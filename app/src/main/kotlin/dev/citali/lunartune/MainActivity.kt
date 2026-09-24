@@ -2358,13 +2358,21 @@ class MainActivity : FragmentActivity() {
                                         } else if (initialState.destination.route in topLevelScreens &&
                                             targetState.destination.route in topLevelScreens
                                         ) {
-                                            fadeIn(if (motionNav) tween(320) else tween(250)) +
-                                                scaleIn(
-                                                    animationSpec = if (motionNav) LunarMotion.glide() else tween(220, delayMillis = 90),
-                                                    initialScale = 0.88f,
-                                                )
+                                            if (motionNav) {
+                                                fadeIn(tween(320)) +
+                                                    scaleIn(
+                                                        animationSpec = LunarMotion.bouncy(),
+                                                        initialScale = 0.84f,
+                                                    )
+                                            } else {
+                                                fadeIn(tween(250))
+                                            }
                                         } else {
-                                            fadeIn(if (motionNav) tween(320) else tween(250)) + slideInHorizontally(animationSpec = if (motionNav) LunarMotion.glide() else tween()) { it }
+                                            if (motionNav) {
+                                                fadeIn(tween(320)) + slideInHorizontally(animationSpec = LunarMotion.glide()) { it }
+                                            } else {
+                                                fadeIn(tween(250))
+                                            }
                                         }
                                     },
                                     exitTransition = {
@@ -2387,13 +2395,21 @@ class MainActivity : FragmentActivity() {
                                             ) &&
                                             targetState.destination.route in topLevelScreens
                                         ) {
-                                            fadeIn(if (motionNav) tween(320) else tween(250)) +
-                                                scaleIn(
-                                                    animationSpec = if (motionNav) LunarMotion.glide() else tween(220, delayMillis = 90),
-                                                    initialScale = 0.88f,
-                                                )
+                                            if (motionNav) {
+                                                fadeIn(tween(320)) +
+                                                    scaleIn(
+                                                        animationSpec = LunarMotion.bouncy(),
+                                                        initialScale = 0.84f,
+                                                    )
+                                            } else {
+                                                fadeIn(tween(250))
+                                            }
                                         } else {
-                                            fadeIn(if (motionNav) tween(320) else tween(250)) + slideInHorizontally(animationSpec = if (motionNav) LunarMotion.glide() else tween()) { -it }
+                                            if (motionNav) {
+                                                fadeIn(tween(320)) + slideInHorizontally(animationSpec = LunarMotion.glide()) { -it }
+                                            } else {
+                                                fadeIn(tween(250))
+                                            }
                                         }
                                     },
                                     popExitTransition = {
