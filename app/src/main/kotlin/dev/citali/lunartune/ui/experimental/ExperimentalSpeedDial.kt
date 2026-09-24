@@ -7,6 +7,7 @@
 
 package dev.citali.lunartune.ui.experimental
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -23,6 +24,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -31,6 +36,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import coil3.request.allowHardware
 import dev.citali.lunartune.R
 import dev.citali.lunartune.db.entities.Album
 import dev.citali.lunartune.db.entities.Artist
@@ -66,6 +74,7 @@ import dev.citali.lunartune.ui.menu.AlbumMenu
 import dev.citali.lunartune.ui.menu.ArtistMenu
 import dev.citali.lunartune.ui.menu.PlaylistMenu
 import dev.citali.lunartune.ui.menu.SongMenu
+import dev.citali.lunartune.ui.theme.LunarMotion
 import dev.citali.lunartune.ui.utils.YtimgResizePolicy
 import dev.citali.lunartune.ui.utils.resize
 import kotlinx.coroutines.CoroutineScope
@@ -261,33 +270,73 @@ fun ExperimentalSpeedDialSection(
 
         Spacer(Modifier.height(12.dp))
         val maxVisibleSegments = 7
-        val windowStart =
-            (pagerState.currentPage - maxVisibleSegments / 2)
-                .coerceIn(0, (tiles.size - maxVisibleSegments).coerceAtLeast(0))
-        val visibleCount = minOf(tiles.size, maxVisibleSegments)
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 44.dp),
-        ) {
-            repeat(visibleCount) { i ->
-                val index = windowStart + i
-                Box(
-                    modifier =
-                        Modifier
-                            .weight(1f)
-                            .height(4.dp)
-                            .clip(CircleShape)
-                            .background(
-                                if (index == pagerState.currentPage) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.surfaceContainerHighest
-                                },
-                            ),
+        if (tiles.size > maxVisibleSegments) {
+            val dialStripState = rememberLazyListState()
+            LaunchedEffect(pagerState.currentPage, tiles.size) {
+                dialStripState.animateScrollToItem(
+                    (pagerState.currentPage - 2).coerceIn(0, tiles.size - 1),
                 )
+            }
+            LazyRow(
+                state = dialStripState,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                contentPadding = PaddingValues(horizontal = 44.dp),
+                userScrollEnabled = false,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                items(count = tiles.size) { index ->
+                    val active = index == pagerState.currentPage
+                    val stripWidth by animateDpAsState(
+                        targetValue = if (active) 22.dp else 6.dp,
+                        animationSpec = LunarMotion.smooth(),
+                        label = "dialStripWidth",
+                    )
+                    Box(
+                        modifier =
+                            Modifier
+                                .width(stripWidth)
+                                .height(4.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (active) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.surfaceContainerHighest
+                                    },
+                                ),
+                    )
+                }
+            }
+        } else {
+            val windowStart =
+                (pagerState.currentPage - maxVisibleSegments / 2)
+                    .coerceIn(0, (tiles.size - maxVisibleSegments).coerceAtLeast(0))
+            val visibleCount = minOf(tiles.size, maxVisibleSegments)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 44.dp),
+            ) {
+                repeat(visibleCount) { i ->
+                    val index = windowStart + i
+                    Box(
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .height(4.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (index == pagerState.currentPage) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.surfaceContainerHighest
+                                    },
+                                ),
+                    )
+                }
             }
         }
     }
@@ -366,6 +415,9 @@ private fun CoverCard(
                         ImageRequest
                             .Builder(context)
                             .data(artworkUrl)
+                            // Software bitmaps: hardware bitmaps + rotationY tilt
+                            // glitch into static on some old Adreno GPUs.
+                            .allowHardware(false)
                             .build()
                     },
                 contentDescription = null,
