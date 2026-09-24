@@ -9,6 +9,7 @@ package dev.citali.lunartune.ui.player
 
 import android.media.audiofx.Visualizer
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
