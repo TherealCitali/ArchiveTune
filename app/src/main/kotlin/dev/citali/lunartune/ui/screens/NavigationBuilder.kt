@@ -215,7 +215,11 @@ fun NavGraphBuilder.navigationBuilder(
             } else if (initialState.destination.route?.startsWith(OnlineSearchResultRoutePrefix) == true) {
                 fadeIn(if (motionNavAnimations) tween(320) else tween(250))
             } else {
-                fadeIn(if (motionNavAnimations) tween(320) else tween(250)) + slideInHorizontally(animationSpec = if (motionNavAnimations) LunarMotion.glide() else tween()) { -it }
+                if (motionNavAnimations) {
+                    fadeIn(tween(320)) + slideInHorizontally(animationSpec = LunarMotion.glide()) { -it }
+                } else {
+                    fadeIn(tween(250))
+                }
             }
         },
         popExitTransition = {

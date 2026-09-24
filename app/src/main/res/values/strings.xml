@@ -1204,7 +1204,7 @@
     <string name="lyrics_background_moving_blur">Moving blur</string>
     <string name="use_gpu_blur">Use GPU blur</string>
     <string name="use_gpu_blur_desc">Blur the moving lyrics background on the GPU instead of reusing a pre-blurred image. Android 12 and above only.</string>
-    <string name="motion_settings_title">Motion &amp; animations</string>
+    <string name="motion_settings_title">LunarMotion</string>
     <string name="motion_settings_subtitle">Per-area spring animation toggles</string>
     <string name="motion_press">Button press bounce</string>
     <string name="motion_press_desc">Springy press feedback on icon buttons</string>
