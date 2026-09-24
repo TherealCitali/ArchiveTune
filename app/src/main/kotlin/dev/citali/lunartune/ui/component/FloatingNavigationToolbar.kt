@@ -241,15 +241,17 @@ fun FloatingNavigationToolbar(
     val (frostedDim) = rememberPreference(FrostedDimKey, defaultValue = FrostedDimDefault)
     val (frostedBlur) = rememberPreference(FrostedBlurKey, defaultValue = FrostedBlurDefault)
     val (frostedGlow) = rememberPreference(FrostedGlowKey, defaultValue = FrostedGlowDefault)
+    val (frostedBgGlow) = rememberPreference(FrostedBgGlowKey, defaultValue = FrostedBgGlowDefault)
     val frostedScrimBase =
         if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer
     val frostedStyle =
-        remember(isFrosted, staticFrost, frostedScrimBase, frostedDim, frostedBlur) {
+        remember(isFrosted, staticFrost, frostedScrimBase, frostedDim, frostedBlur, frostedBgGlow) {
             if (isFrosted && !staticFrost) {
                 frostedNavBarStyle(
                     scrim = frostedScrimBase.copy(alpha = frostedDim.coerceIn(0f, 0.9f)),
                     fallbackScrim = frostedScrimBase.copy(alpha = FrostedFallbackAlpha),
                     blurRadiusDp = frostedBlur,
+                    bgGlow = frostedBgGlow,
                 )
             } else {
                 null

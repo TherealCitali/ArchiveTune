@@ -16,15 +16,28 @@ import dev.chrisbanes.haze.blur.HazeColorEffect
 /** Default dim: scrim over the live blur (0-90% adjustable in settings). */
 const val FrostedDimDefault = 0.6f
 
-/** Default blur radius in dp (0-30 adjustable in settings). */
+/** Default blur radius in dp (0-[FrostedBlurMax] adjustable in settings). */
 const val FrostedBlurDefault = 10f
+
+/** Strongest blur the slider can reach, in dp. */
+const val FrostedBlurMax = 20f
 
 /** Default primary-color rim glow around the frosted pill (0-100% adjustable). */
 const val FrostedGlowDefault = 0.5f
 
+/** Default background-item glow (0-100% adjustable, off by default). */
+const val FrostedBgGlowDefault = 0f
+
+/** Extra blur radius in dp added at full background glow. */
+const val FrostedBgGlowExtraBlur = 10f
+
+/** White tint alpha over the blurred background at full background glow. */
+const val FrostedBgGlowTint = 0.35f
+
 val FrostedDimKey = floatPreferencesKey("frostedDim")
 val FrostedBlurKey = floatPreferencesKey("frostedBlur")
 val FrostedGlowKey = floatPreferencesKey("frostedGlow")
+val FrostedBgGlowKey = floatPreferencesKey("frostedBgGlow")
 
 /** Opaque-ish scrim used only if blurring is unavailable on the device. */
 const val FrostedFallbackAlpha = 0.92f
@@ -36,20 +49,34 @@ const val FrostedFallbackAlpha = 0.92f
  *
  * blurEnabled(true) forces Haze's RenderScript path on Android 11 and below
  * (Haze's default there is a static scrim with no blur).
+ *
+ * @param bgGlow 0-1 background-item glow: adds extra blur plus a brightening
+ * tint over the content behind the bar, so background items glow as it rises.
  */
 fun frostedNavBarStyle(
     scrim: Color,
     fallbackScrim: Color,
     blurRadiusDp: Float = FrostedBlurDefault,
-): HazeBlurStyle =
-    HazeBlurStyle {
+    bgGlow: Float = FrostedBgGlowDefault,
+): HazeBlurStyle {
+    val glow = bgGlow.coerceIn(0f, 1f)
+    return HazeBlurStyle {
         blurEnabled(true)
-        blurRadius(blurRadiusDp.coerceIn(0f, 30f).dp)
+        blurRadius(
+            (blurRadiusDp.coerceIn(0f, FrostedBlurMax) + glow * FrostedBgGlowExtraBlur).dp,
+        )
         backgroundColor(scrim)
-        colorEffects(emptyList())
+        colorEffects(
+            if (glow > 0f) {
+                listOf(HazeColorEffect.tint(Color.White.copy(alpha = glow * FrostedBgGlowTint)))
+            } else {
+                emptyList()
+            },
+        )
         fallbackColorEffect(HazeColorEffect.tint(fallbackScrim))
         noiseFactor(0f)
     }
+}
 
 /**
  * Frosted-glow mini player: live blur under the artwork glow. The radius
