@@ -91,6 +91,7 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.MoreExecutors
 import dagger.hilt.android.AndroidEntryPoint
+import dev.citali.lunartune.constants.PreloadNextSongKey
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -101,6 +102,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -366,6 +369,14 @@ class MusicService :
         dev.citali.lunartune.constants.MonochromeEnabledKey,
         false,
     )
+    private val preloadNextSongEnabled by preference(
+        this,
+        PreloadNextSongKey,
+        false,
+    )
+    private val nextStreamPreloadLock = Any()
+    private var nextStreamPreloadTargetId: String? = null
+    private var nextStreamPreloadJob: Job? = null
     private val monochromeInstance by preference(
         this,
         dev.citali.lunartune.constants.MonochromeInstanceKey,
@@ -1290,6 +1301,13 @@ class MusicService :
             .collectLatest(scope) {
                 localPlayer.skipSilenceEnabled = it
                 secondaryCrossfadePlayer?.skipSilenceEnabled = it
+            }
+
+        dataStore.data
+            .map { it[PreloadNextSongKey] ?: false }
+            .distinctUntilChanged()
+            .collectLatest(scope) {
+                updateNextStreamPreload()
             }
 
         dataStore.data
@@ -6850,10 +6868,137 @@ class MusicService :
         widgetUpdater.updateProgressTracking()
     }
 
+    /**
+     * Preload Mode: resolves the upcoming queue item's stream in the
+     * background so the next track starts without the player-endpoint
+     * round trip. Resolve-only (no audio bytes are fetched); failures are
+     * silent because normal resolution still runs when the track starts.
+     */
+    private fun updateNextStreamPreload() {
+        if (!preloadNextSongEnabled || isLowDataModeActive() || monochromeEnabled ||
+            player.playbackState != Player.STATE_READY
+        ) {
+            cancelNextStreamPreload()
+            return
+        }
+        val nextMediaItemIndex = player.nextMediaItemIndex
+        if (nextMediaItemIndex == C.INDEX_UNSET ||
+            nextMediaItemIndex == player.currentMediaItemIndex ||
+            nextMediaItemIndex !in 0 until player.mediaItemCount
+        ) {
+            cancelNextStreamPreload()
+            return
+        }
+        val nextMediaItem = player.getMediaItemAt(nextMediaItemIndex)
+        val nextMediaId = nextMediaItem.mediaId.trim().takeIf(String::isNotEmpty)
+        val currentMediaId = player.currentMediaItem?.mediaId?.trim()?.takeIf(String::isNotEmpty)
+        val nextUri = nextMediaItem.localConfiguration?.uri
+        if (nextMediaId == null || nextMediaId == currentMediaId || nextMediaId.isLocalMediaId() ||
+            nextUri == null || nextUri.shouldBypassYouTubeResolver()
+        ) {
+            cancelNextStreamPreload()
+            return
+        }
+        startNextStreamPreload(nextMediaId)
+    }
+
+    private fun startNextStreamPreload(mediaId: String) {
+        val jobToStart =
+            synchronized(nextStreamPreloadLock) {
+                if (nextStreamPreloadTargetId == mediaId) return
+                nextStreamPreloadJob?.cancel()
+                nextStreamPreloadTargetId = mediaId
+                scope.launch(Dispatchers.IO) { preloadNextStream(mediaId) }
+                    .also { nextStreamPreloadJob = it }
+            }
+        jobToStart.invokeOnCompletion { cause ->
+            synchronized(nextStreamPreloadLock) {
+                if (nextStreamPreloadTargetId == mediaId && nextStreamPreloadJob === jobToStart) {
+                    nextStreamPreloadJob = null
+                    if (cause != null && cause !is CancellationException) {
+                        nextStreamPreloadTargetId = null
+                    }
+                }
+            }
+        }
+    }
+
+    private fun cancelNextStreamPreload() {
+        val jobToCancel =
+            synchronized(nextStreamPreloadLock) {
+                nextStreamPreloadTargetId = null
+                nextStreamPreloadJob.also { nextStreamPreloadJob = null }
+            }
+        jobToCancel?.cancel()
+    }
+
+    private suspend fun preloadNextStream(mediaId: String) {
+        try {
+            currentCoroutineContext().ensureActive()
+            val authFingerprint = YouTube.currentPlaybackAuthState().fingerprint
+            playbackUrlCache[mediaId]
+                ?.takeIf {
+                    it.isValidFor(
+                        authFingerprint = authFingerprint,
+                        minimumRemainingMs = YTPlayerUtils.STREAM_URL_EXPIRY_SAFETY_MS,
+                    )
+                }?.let { return }
+            if (isPreloadFullyCached(mediaId)) return
+            currentCoroutineContext().ensureActive()
+            val playbackData =
+                retryWithoutPlaybackLoginContext {
+                    YTPlayerUtils.playerResponseForPlayback(
+                        mediaId,
+                        audioQuality = audioQuality,
+                        connectivityManager = connectivityManager,
+                        preferredStreamClient = preferredStreamClient,
+                        networkMetered = false,
+                    )
+                }.getOrThrow()
+            currentCoroutineContext().ensureActive()
+            persistResolvedPlaybackFormat(mediaId, playbackData)
+            playbackUrlCache[mediaId] =
+                AuthScopedCacheValue(
+                    url = playbackData.streamUrl,
+                    expiresAtMs = System.currentTimeMillis() + (playbackData.streamExpiresInSeconds * 1000L),
+                    authFingerprint = playbackData.authFingerprint,
+                )
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (throwable: Throwable) {
+            Timber.tag("MusicService").d(throwable, "Preload Mode: failed to preload %s", mediaId)
+        }
+    }
+
+    private fun isPreloadFullyCached(mediaId: String): Boolean {
+        listOf(downloadCache, playerCache).forEach { cache ->
+            val contentLength =
+                runCatching {
+                    cache.getContentMetadata(mediaId).get(ContentMetadata.KEY_CONTENT_LENGTH, -1L)
+                }.getOrNull() ?: -1L
+            if (contentLength > 0L &&
+                runCatching { cache.isCached(mediaId, 0L, contentLength) }.getOrDefault(false)
+            ) {
+                return true
+            }
+        }
+        return false
+    }
+
     override fun onEvents(
         player: Player,
         events: Player.Events,
     ) {
+        if (events.containsAny(
+                Player.EVENT_PLAYBACK_STATE_CHANGED,
+                Player.EVENT_MEDIA_ITEM_TRANSITION,
+                Player.EVENT_TIMELINE_CHANGED,
+                Player.EVENT_SHUFFLE_MODE_ENABLED_CHANGED,
+                Player.EVENT_REPEAT_MODE_CHANGED,
+            )
+        ) {
+            updateNextStreamPreload()
+        }
         val currentMediaId = player.currentMediaItem?.mediaId
         if (currentMediaId == null && currentHistoryMediaId != null) {
             beginHistorySession(null, forceNew = true)
