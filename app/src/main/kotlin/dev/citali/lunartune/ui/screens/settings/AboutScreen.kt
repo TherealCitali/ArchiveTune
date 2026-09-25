@@ -9,8 +9,10 @@
 
 package dev.citali.lunartune.ui.screens.settings
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -58,11 +60,14 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -78,9 +83,11 @@ import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import dev.citali.lunartune.LocalPlayerAwareWindowInsets
 import dev.citali.lunartune.R
+import dev.citali.lunartune.constants.SideFlutterDevUnlockedKey
 import dev.citali.lunartune.ui.component.IconButton
 import dev.citali.lunartune.ui.utils.appBarScrollBehavior
 import dev.citali.lunartune.ui.utils.backToMain
+import dev.citali.lunartune.utils.rememberPreference
 import dev.citali.lunartune.viewmodels.AboutContributorUiCollection
 import dev.citali.lunartune.viewmodels.AboutContributorsUiState
 import dev.citali.lunartune.viewmodels.AboutDependencyLicenseUiCollection
@@ -827,6 +834,9 @@ private fun AboutIdentityCard(
     }
 }
 
+/** Version-badge taps to unlock the hidden Side Flutter toggle, like developer options. */
+private const val SideFlutterUnlockTaps = 7
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun AboutIdentity(
@@ -834,6 +844,10 @@ private fun AboutIdentity(
     horizontalAlignment: Alignment.Horizontal,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
+    val (devUnlocked, onDevUnlockedChange) =
+        rememberPreference(SideFlutterDevUnlockedKey, defaultValue = false)
+    var unlockTaps by remember { mutableIntStateOf(0) }
     Column(
         modifier = modifier,
         horizontalAlignment = horizontalAlignment,
@@ -851,7 +865,24 @@ private fun AboutIdentity(
             horizontalArrangement = Arrangement.spacedBy(AboutSpacing.xs, horizontalAlignment),
             verticalArrangement = Arrangement.spacedBy(AboutSpacing.xs),
         ) {
-            AboutMetadataBadge(text = model.versionName)
+            AboutMetadataBadge(
+                text = model.versionName,
+                modifier =
+                    Modifier.clickable(interactionSource = null, indication = null) {
+                        if (devUnlocked) {
+                            Toast.makeText(context, context.getString(R.string.side_flutter_already_unlocked), Toast.LENGTH_SHORT).show()
+                        } else {
+                            unlockTaps++
+                            val remaining = SideFlutterUnlockTaps - unlockTaps
+                            if (remaining > 0) {
+                                Toast.makeText(context, context.getString(R.string.side_flutter_unlock_taps, remaining), Toast.LENGTH_SHORT).show()
+                            } else {
+                                onDevUnlockedChange(true)
+                                Toast.makeText(context, context.getString(R.string.side_flutter_unlocked), Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    },
+            )
             model.buildHash?.let { buildHash ->
                 AboutMetadataBadge(text = buildHash)
             }

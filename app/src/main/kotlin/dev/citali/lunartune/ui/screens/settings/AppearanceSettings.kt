@@ -110,6 +110,8 @@ import dev.citali.lunartune.constants.PlayerDesignStyle
 import dev.citali.lunartune.constants.PlayerDesignStyleKey
 import dev.citali.lunartune.constants.PlaylistTagOrderKey
 import dev.citali.lunartune.constants.PureBlackKey
+import dev.citali.lunartune.constants.SideFlutterDevUnlockedKey
+import dev.citali.lunartune.constants.SideFlutterEnabledKey
 import dev.citali.lunartune.constants.QuickPicksDisplayMode
 import dev.citali.lunartune.constants.QuickPicksDisplayModeKey
 import dev.citali.lunartune.constants.RandomThemeOnStartupKey
@@ -170,6 +172,12 @@ fun AppearanceSettings(navController: NavController) {
     val (wallpaperExtractionFailed) =
         rememberPreference(
             WallpaperExtractionFailedKey,
+            defaultValue = false,
+        )
+    val (sideFlutterDevUnlocked) = rememberPreference(SideFlutterDevUnlockedKey, defaultValue = false)
+    val (sideFlutterEnabled, onSideFlutterEnabledChange) =
+        rememberPreference(
+            SideFlutterEnabledKey,
             defaultValue = false,
         )
     val (randomThemeOnStartup, onRandomThemeOnStartupChange) =
@@ -583,6 +591,16 @@ fun AppearanceSettings(navController: NavController) {
                                 )
                             context.startActivity(intent)
                         },
+                    )
+                }
+
+                item(visible = sideFlutterDevUnlocked) {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.side_flutter)) },
+                        description = stringResource(R.string.side_flutter_desc),
+                        icon = { Icon(painterResource(R.drawable.waves), null) },
+                        checked = sideFlutterEnabled,
+                        onCheckedChange = onSideFlutterEnabledChange,
                     )
                 }
 

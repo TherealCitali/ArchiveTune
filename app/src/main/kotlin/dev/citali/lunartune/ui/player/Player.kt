@@ -169,6 +169,7 @@ import dev.citali.lunartune.constants.BackdropBlurAmountKey
 import dev.citali.lunartune.constants.BackdropEnabledKey
 import dev.citali.lunartune.constants.BlurRadiusKey
 import dev.citali.lunartune.constants.DarkModeKey
+import dev.citali.lunartune.constants.SideFlutterEnabledKey
 import dev.citali.lunartune.constants.DisableBlurKey
 import dev.citali.lunartune.constants.EnableHapticFeedbackKey
 import dev.citali.lunartune.constants.InnerTubeCookieKey
@@ -1958,7 +1959,8 @@ fun BottomSheetPlayer(
             }
         }
 
-        if (state.isExpandedOrExpanding && !aodModeEnabled) {
+        val (sideFlutterEnabled) = rememberPreference(SideFlutterEnabledKey, defaultValue = false)
+        if (state.isExpandedOrExpanding && !aodModeEnabled && sideFlutterEnabled) {
             FlutterLightVisualizer(
                 playerConnection = playerConnection,
                 isPlaying = isPlaying,
