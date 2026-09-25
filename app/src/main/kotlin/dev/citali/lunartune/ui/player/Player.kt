@@ -169,7 +169,6 @@ import dev.citali.lunartune.constants.BackdropBlurAmountKey
 import dev.citali.lunartune.constants.BackdropEnabledKey
 import dev.citali.lunartune.constants.BlurRadiusKey
 import dev.citali.lunartune.constants.DarkModeKey
-import dev.citali.lunartune.constants.SideFlutterEnabledKey
 import dev.citali.lunartune.constants.DisableBlurKey
 import dev.citali.lunartune.constants.EnableHapticFeedbackKey
 import dev.citali.lunartune.constants.InnerTubeCookieKey
@@ -1957,15 +1956,6 @@ fun BottomSheetPlayer(
                     }
                 }
             }
-        }
-
-        val (sideFlutterEnabled) = rememberPreference(SideFlutterEnabledKey, defaultValue = false)
-        if (state.isExpandedOrExpanding && !aodModeEnabled && sideFlutterEnabled) {
-            FlutterLightVisualizer(
-                playerConnection = playerConnection,
-                isPlaying = isPlaying,
-                edgeColors = gradientColors,
-            )
         }
 
         val queueOnBackgroundColor = if (useBlackBackground) Color.White else MaterialTheme.colorScheme.onSurface

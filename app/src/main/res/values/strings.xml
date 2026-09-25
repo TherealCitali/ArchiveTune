@@ -361,11 +361,6 @@
     <string name="app_icon_change_failed">Couldn\'t change the app icon</string>
     <string name="theme">Theme</string>
     <string name="enable_dynamic_theme">Enable dynamic theme</string>
-    <string name="side_flutter">Side Flutter</string>
-    <string name="side_flutter_desc">Experimental edge lights on the player (developer preview)</string>
-    <string name="side_flutter_unlock_taps">%1$d more taps to unlock Side Flutter</string>
-    <string name="side_flutter_unlocked">Side Flutter unlocked, toggle it in Appearance</string>
-    <string name="side_flutter_already_unlocked">Side Flutter is already unlocked</string>
     <string name="wallpaper_permission">Wallpaper color permission</string>
     <string name="wallpaper_permission_desc">Grant storage permission to extract colors from your wallpaper on older devices</string>
     <string name="random_theme_on_startup">Random theme on startup</string>
