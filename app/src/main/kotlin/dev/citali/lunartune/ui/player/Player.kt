@@ -1962,6 +1962,7 @@ fun BottomSheetPlayer(
             FlutterLightVisualizer(
                 playerConnection = playerConnection,
                 isPlaying = isPlaying,
+                edgeColors = gradientColors,
             )
         }
 
