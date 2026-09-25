@@ -9,6 +9,7 @@ package dev.citali.lunartune.ui.player
 
 import android.media.audiofx.Visualizer
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
