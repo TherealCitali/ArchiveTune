@@ -34,10 +34,13 @@ import kotlinx.coroutines.isActive
 import kotlin.math.sqrt
 
 /**
- * Minimal audio-reactive side lights for the expanded player: three soft
- * vertical light lines hug each screen edge and flutter with the music's
- * bass/mid/treble energy. Transparent overlay — never intercepts touches.
+ * Minimal audio-reactive side lights for the expanded player ("Side Flutter"):
+ * one glowing pill bar hugs each screen edge and flutters in height and
+ * brightness with the music's energy. Transparent overlay — never intercepts
+ * touches.
  *
+ * Bar colors come from the artwork gradient (left and right edges take the
+ * first and second gradient colors), falling back to the theme primary.
  * No permission needed: capture attaches to the player's own audio session.
  * Renders nothing while paused (energies decay out), when the session is
  * unavailable, or when animations are disabled.
@@ -46,6 +49,7 @@ import kotlin.math.sqrt
 fun FlutterLightVisualizer(
     playerConnection: PlayerConnection,
     isPlaying: Boolean,
+    edgeColors: List<Color>,
     modifier: Modifier = Modifier,
 ) {
     val (animationsDisabled) = rememberPreference(DisableAnimationsKey, defaultValue = false)
@@ -53,12 +57,14 @@ fun FlutterLightVisualizer(
         playerConnection = playerConnection,
         active = isPlaying && !animationsDisabled,
     )
-    if (!isPlaying && !animationsDisabled && energies.all { it < FlutterLightVisibilityFloor }) {
+    if (energies.all { it < FlutterLightVisibilityFloor }) {
         return
     }
-    val lightColor = MaterialTheme.colorScheme.primary
+    val fallback = MaterialTheme.colorScheme.primary
+    val leftColor = edgeColors.getOrElse(0) { fallback }
+    val rightColor = edgeColors.getOrElse(1) { leftColor }
     Canvas(modifier = modifier.fillMaxSize()) {
-        drawFlutterLights(energies = energies, color = lightColor)
+        drawFlutterLights(energies = energies, leftColor = leftColor, rightColor = rightColor)
     }
 }
 
@@ -198,42 +204,43 @@ private fun fftBandEnergies(fft: ByteArray): FloatArray {
 
 private fun DrawScope.drawFlutterLights(
     energies: FloatArray,
-    color: Color,
+    leftColor: Color,
+    rightColor: Color,
 ) {
     if (energies.all { it < FlutterLightVisibilityFloor }) return
+    // Symmetric mono energy: bass-weighted so beats land, mids/treble keep shimmer.
+    val energy =
+        (energies[0] * 0.5f + energies[1] * 0.3f + energies[2] * 0.2f).coerceIn(0f, 1f)
     val centerY = size.height / 2f
+    val halfHeight = size.height * (0.34f + 0.22f * energy) / 2f
+    val alpha = (0.55f + 0.40f * energy).coerceIn(0f, 0.95f)
     for (side in intArrayOf(-1, 1)) {
-        for (index in 0..2) {
-            val energy = energies[index].coerceIn(0f, 1f)
-            val edgeX = if (side < 0) 0f else size.width
-            val direction = if (side < 0) 1f else -1f
-            // Bass outermost: the widest flutter lives at the very edge.
-            val x = edgeX + direction * (10 + index * 12).dp.toPx()
-            val halfHeight = size.height * (0.16f + 0.30f * energy) / 2f
-            val top = Offset(x, centerY - halfHeight)
-            val bottom = Offset(x, centerY + halfHeight)
-            val alpha = (0.18f + 0.55f * energy).coerceIn(0f, 0.8f)
-            drawLine(
-                color = color.copy(alpha = alpha * 0.18f),
-                start = top,
-                end = bottom,
-                strokeWidth = 14.dp.toPx(),
-                cap = StrokeCap.Round,
-            )
-            drawLine(
-                color = color.copy(alpha = alpha * 0.35f),
-                start = top,
-                end = bottom,
-                strokeWidth = 7.dp.toPx(),
-                cap = StrokeCap.Round,
-            )
-            drawLine(
-                color = color.copy(alpha = alpha),
-                start = top,
-                end = bottom,
-                strokeWidth = 3.dp.toPx(),
-                cap = StrokeCap.Round,
-            )
-        }
+        val color = if (side < 0) leftColor else rightColor
+        val edgeX = if (side < 0) 0f else size.width
+        val direction = if (side < 0) 1f else -1f
+        val x = edgeX + direction * 8.dp.toPx()
+        val top = Offset(x, centerY - halfHeight)
+        val bottom = Offset(x, centerY + halfHeight)
+        drawLine(
+            color = color.copy(alpha = alpha * 0.14f),
+            start = top,
+            end = bottom,
+            strokeWidth = 40.dp.toPx(),
+            cap = StrokeCap.Round,
+        )
+        drawLine(
+            color = color.copy(alpha = alpha * 0.35f),
+            start = top,
+            end = bottom,
+            strokeWidth = 22.dp.toPx(),
+            cap = StrokeCap.Round,
+        )
+        drawLine(
+            color = color.copy(alpha = alpha),
+            start = top,
+            end = bottom,
+            strokeWidth = 10.dp.toPx(),
+            cap = StrokeCap.Round,
+        )
     }
 }
