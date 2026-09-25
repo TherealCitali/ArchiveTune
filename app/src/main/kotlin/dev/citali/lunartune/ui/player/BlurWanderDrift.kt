@@ -183,9 +183,10 @@ internal class BlurWanderDrift(
 
         /**
          * Average travel speed. Deliberately slow — this sits behind lyrics. Was 26dp/s, which
-         * read as slightly busy when you were trying to read.
+         * read as slightly busy when you were trying to read; 19dp/s then read as slightly
+         * sleepy, so 22dp/s splits the difference: ambient, but the colours visibly travel.
          */
-        private const val WanderSpeedDpPerSecond = 19f
+        private const val WanderSpeedDpPerSecond = 22f
 
         private const val MinLegDurationMs = 6_000f
         private const val MaxLegDurationMs = 22_000f
