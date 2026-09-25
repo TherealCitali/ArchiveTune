@@ -190,7 +190,7 @@ import dev.citali.lunartune.constants.WallpaperExtractionFailedKey
 import dev.citali.lunartune.ui.screens.settings.TabTransitionKey
 import dev.citali.lunartune.ui.screens.settings.TabTransitionStyle
 import dev.citali.lunartune.ui.theme.LunarMotion
-import dev.citali.lunartune.ui.theme.extractWallpaperThemeColor
+import dev.citali.lunartune.ui.theme.extractWallpaperThemeSeedPalette
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -321,7 +321,9 @@ import dev.citali.lunartune.ui.screens.settings.NavigationTab
 import dev.citali.lunartune.ui.theme.LunarTuneTheme
 import dev.citali.lunartune.ui.theme.ColorSaver
 import dev.citali.lunartune.ui.theme.DefaultThemeColor
-import dev.citali.lunartune.ui.theme.extractThemeColor
+import dev.citali.lunartune.ui.theme.ThemeSeedPalette
+import dev.citali.lunartune.ui.theme.ThemeSeedPaletteSaver
+import dev.citali.lunartune.ui.theme.extractThemeSeedPalette
 import dev.citali.lunartune.ui.utils.appBarScrollBehavior
 import dev.citali.lunartune.ui.utils.backToMain
 import dev.citali.lunartune.ui.utils.resetHeightOffset
@@ -839,6 +841,9 @@ class MainActivity : FragmentActivity() {
             var themeColor by rememberSaveable(stateSaver = ColorSaver) {
                 mutableStateOf(DefaultThemeColor)
             }
+            var dynamicSeedPalette by rememberSaveable(stateSaver = ThemeSeedPaletteSaver) {
+                mutableStateOf<ThemeSeedPalette?>(null)
+            }
 
             LaunchedEffect(legacyUseSystemFont) {
                 if (!legacyUseSystemFont) return@LaunchedEffect
@@ -852,6 +857,7 @@ class MainActivity : FragmentActivity() {
                 val playerConnection = playerConnection
                 if (!enableDynamicTheme || playerConnection == null) {
                     themeColor = if (!enableDynamicTheme) customThemeColor else DefaultThemeColor
+                    dynamicSeedPalette = null
                     return@LaunchedEffect
                 }
                 playerConnection.service.currentMediaMetadata.collectLatest { song ->
@@ -866,24 +872,28 @@ class MainActivity : FragmentActivity() {
                                             .allowHardware(false)
                                             .build(),
                                     )
-                                val extractedColor = result.image?.toBitmap()?.extractThemeColor()
+                                val extractedPalette = result.image?.toBitmap()?.extractThemeSeedPalette()
                                 withContext(Dispatchers.Main) {
-                                    themeColor = extractedColor ?: DefaultThemeColor
+                                    themeColor = extractedPalette?.primary ?: DefaultThemeColor
+                                    dynamicSeedPalette = extractedPalette
                                 }
                             } catch (e: Exception) {
                                 withContext(Dispatchers.Main) {
                                     themeColor = DefaultThemeColor
+                                    dynamicSeedPalette = null
                                 }
                             }
                         }
                     } else {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                             themeColor = DefaultThemeColor
+                            dynamicSeedPalette = null
                         } else {
-                            val wallpaperColor = extractWallpaperThemeColor(this@MainActivity)
-                            themeColor = wallpaperColor ?: customThemeColor
+                            val wallpaperPalette = extractWallpaperThemeSeedPalette(this@MainActivity)
+                            themeColor = wallpaperPalette?.primary ?: customThemeColor
+                            dynamicSeedPalette = wallpaperPalette
                             dataStore.edit { prefs ->
-                                prefs[WallpaperExtractionFailedKey] = wallpaperColor == null
+                                prefs[WallpaperExtractionFailedKey] = wallpaperPalette == null
                             }
                         }
                     }
@@ -894,7 +904,7 @@ class MainActivity : FragmentActivity() {
                 darkTheme = useDarkTheme,
                 pureBlack = pureBlack,
                 themeColor = themeColor,
-                seedPalette = if (!enableDynamicTheme) customThemeSeedPalette else null,
+                seedPalette = dynamicSeedPalette ?: if (!enableDynamicTheme) customThemeSeedPalette else null,
                 disableAnimations = disableAnimations,
                 fontPreference = fontPreference,
                 customFontUri = customFontUri,
