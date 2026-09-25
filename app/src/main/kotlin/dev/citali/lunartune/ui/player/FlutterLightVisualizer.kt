@@ -27,10 +27,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.dp
 import dev.citali.lunartune.constants.DisableAnimationsKey
@@ -44,9 +42,10 @@ import kotlin.math.sqrt
 
 /**
  * Audio-reactive edge lights for the expanded player ("Side Flutter"):
- * full-height gradient waves hug both screen edges — the artwork colors
- * travel along each strip while beats pulse its width and brightness.
- * Transparent overlay — never intercepts touches.
+ * three band-mapped waves hug both screen edges — bass, mids and highs
+ * each drive their own wave's width, length, drift and brightness, layered
+ * widest-first so the colors overlap and blend. Transparent overlay — never
+ * intercepts touches.
  *
  * Wave colors come from the artwork gradient (first three colors),
  * falling back to the theme's primary/secondary/tertiary. No permission
@@ -223,20 +222,28 @@ private fun fftBandEnergies(fft: ByteArray): FloatArray {
     }
 }
 
-/** One flow loop moves the waves two strip lengths: slow enough to read as waves. */
+/** One flow loop: the slow clock every wave's drift is derived from. */
 private const val SideFlutterFlowPeriodMs = 6000
 
-/** Flutter oscillations per flow loop: a quick shimmer over the slow travel. */
-private const val SideFlutterCycles = 9f
+/**
+ * Drift oscillations per flow loop, slowest for bass and fastest for highs — the treble wave
+ * shimmers while the bass wave sways. Integers, so the loop restart lands on the same phase.
+ */
+private val SideFlutterWaveCycles = floatArrayOf(5f, 8f, 13f)
+
+/** Base strip widths in dp, widest-first so the waves nest and overlap. */
+private val SideFlutterWaveWidthsDp = floatArrayOf(30f, 18f, 9f)
+
+/** Peak alpha per wave: the bottom-most (bass) wave is near-opaque, upper ones translucent. */
+private val SideFlutterWaveAlphas = floatArrayOf(0.95f, 0.75f, 0.7f)
 
 private const val SideFlutterTwoPi = (2.0 * PI).toFloat()
 
 /**
- * Draws one gradient wave strip per screen edge. The artwork colors sweep along each strip under
- * mirrored tiling so the flow wraps seamlessly, the two strips travel the same loop half a period
- * apart so they never show the same slice, and a fast sine flutter rides on top with an amplitude
- * that grows with the music's energy. Beats also pulse the strip wider and brighter, with a
- * white-hot core on hard hits.
+ * Draws three band-mapped waves per screen edge: wave 0 follows bass, 1 mids, 2 highs. Each
+ * wave's width, length, vertical drift and brightness answer to its own band, and the two edges
+ * drift half a period apart so they never mirror. Drawn widest-first with the bottom wave
+ * near-opaque and the upper two translucent, so the colors overlap and blend.
  */
 private fun DrawScope.drawFlutterLights(
     energies: FloatArray,
@@ -244,68 +251,26 @@ private fun DrawScope.drawFlutterLights(
     flowPhase: Float,
 ) {
     if (energies.all { it < FlutterLightVisibilityFloor }) return
-    // Bass-weighted mono energy: beats land, mids/treble keep shimmer.
-    val energy =
-        (energies[0] * 0.5f + energies[1] * 0.3f + energies[2] * 0.2f).coerceIn(0f, 1f)
-    val topY = size.height * (0.055f - 0.02f * energy)
-    val bottomY = size.height * (0.945f + 0.02f * energy)
-    val stripLength = bottomY - topY
-    val alpha = (0.55f + 0.40f * energy).coerceIn(0f, 0.95f)
-    // One full mirror period (two strip lengths) per flow cycle, and an integer flutter count, so
-    // the loop restart lands back on the same slice — no visible jump.
-    val flow = flowPhase * 2f * stripLength
-    val flutterAmp = stripLength * (0.02f + 0.05f * energy)
-    val coreWidth = (8f + 4f * energy).dp.toPx()
-    val midWidth = (18f + 8f * energy).dp.toPx()
-    val outerWidth = (34f + 12f * energy).dp.toPx()
     for (side in intArrayOf(-1, 1)) {
         val edgeX = if (side < 0) 0f else size.width
         val direction = if (side < 0) 1f else -1f
         val x = edgeX + direction * 8.dp.toPx()
         val sideOffset = if (side < 0) 0f else 0.5f
-        val flutter =
-            sin((flowPhase * SideFlutterCycles + sideOffset) * SideFlutterTwoPi) * flutterAmp
-        val travel = flow + sideOffset * 2f * stripLength + flutter
-        val gradient =
-            Brush.linearGradient(
-                colors = waveColors,
-                start = Offset(x, topY - travel),
-                end = Offset(x, topY - travel + stripLength),
-                tileMode = TileMode.Mirror,
+        for (wave in 0..2) {
+            val band = energies[wave].coerceIn(0f, 1f)
+            val drift =
+                sin((flowPhase * SideFlutterWaveCycles[wave] + wave / 3f + sideOffset) * SideFlutterTwoPi) *
+                    size.height * 0.025f * (0.3f + 0.7f * band)
+            val top = Offset(x, size.height * (0.06f + wave * 0.015f - 0.03f * band) + drift)
+            val bottom = Offset(x, size.height * (0.94f - wave * 0.015f + 0.03f * band) + drift)
+            drawLine(
+                color = waveColors[wave],
+                start = top,
+                end = bottom,
+                strokeWidth = (SideFlutterWaveWidthsDp[wave] * (0.75f + 0.6f * band)).dp.toPx(),
+                cap = StrokeCap.Round,
+                alpha = (SideFlutterWaveAlphas[wave] * (0.5f + 0.5f * band)).coerceIn(0f, 1f),
             )
-        val top = Offset(x, topY)
-        val bottom = Offset(x, bottomY)
-        drawLine(
-            brush = gradient,
-            start = top,
-            end = bottom,
-            strokeWidth = outerWidth,
-            cap = StrokeCap.Round,
-            alpha = alpha * 0.14f,
-        )
-        drawLine(
-            brush = gradient,
-            start = top,
-            end = bottom,
-            strokeWidth = midWidth,
-            cap = StrokeCap.Round,
-            alpha = alpha * 0.35f,
-        )
-        drawLine(
-            brush = gradient,
-            start = top,
-            end = bottom,
-            strokeWidth = coreWidth,
-            cap = StrokeCap.Round,
-            alpha = alpha,
-        )
-        drawLine(
-            color = Color.White,
-            start = top,
-            end = bottom,
-            strokeWidth = 3.dp.toPx(),
-            cap = StrokeCap.Round,
-            alpha = energy * energy * 0.5f,
-        )
+        }
     }
 }
